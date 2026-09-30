@@ -1,0 +1,27 @@
+{
+  "name": "taskconnect-monorepo",
+  "version": "1.0.0",
+  "description": "TaskConnect - An Airtasker-Style Task Marketplace (Free-Tier Stack)",
+  "scripts": {
+    "server": "npm --prefix server start",
+    "server:dev": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "client:build": "npm --prefix client run build",
+    "seed": "npm --prefix server run seed",
+    "setup": "npm --prefix server install && npm --prefix server run prisma:push && npm --prefix server run seed && npm --prefix client install"
+  },
+  "keywords": [
+    "airtasker",
+    "marketplace",
+    "react",
+    "vite",
+    "tailwind",
+    "express",
+    "prisma",
+    "socketio",
+    "leaflet",
+    "escrow"
+  ],
+  "author": "Student Project",
+  "license": "MIT"
+}

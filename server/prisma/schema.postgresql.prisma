@@ -1,0 +1,154 @@
+// TaskConnect Prisma Schema - PostgreSQL Variant (For Neon, Supabase, Render)
+// To use: rename this to schema.prisma and configure DATABASE_URL="postgresql://user:password@host:5432/dbname"
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String         @id @default(uuid())
+  name                 String
+  email                String         @unique
+  password             String
+  avatar               String?
+  bio                  String?
+  phone                String?
+  role                 String         @default("USER")
+  isVerified           Boolean        @default(false)
+  verificationStatus   String         @default("NONE")
+  idDocument           String?
+  verificationNotes    String?
+  walletBalance        Float          @default(0.0)
+  ratingAvg            Float          @default(0.0)
+  ratingCount          Int            @default(0)
+  isEmailVerified      Boolean        @default(true)
+  emailVerifyToken     String?
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  tasksPosted          Task[]         @relation("PostedTasks")
+  offers               Offer[]
+  messagesSent         Message[]      @relation("SentMessages")
+  messagesReceived     Message[]      @relation("ReceivedMessages")
+  reviewsGiven         Review[]       @relation("GivenReviews")
+  reviewsReceived      Review[]       @relation("ReceivedReviews")
+  notifications        Notification[]
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  icon        String
+  description String?
+  tasks       Task[]
+}
+
+model Task {
+  id              String    @id @default(uuid())
+  title           String
+  description     String
+  budget          Float
+  status          String    @default("OPEN")
+  isRemote        Boolean   @default(false)
+  location        String?
+  latitude        Float?
+  longitude       Float?
+  dueDate         DateTime?
+  images          String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  posterId        String
+  poster          User      @relation("PostedTasks", fields: [posterId], references: [id], onDelete: Cascade)
+  
+  categoryId      String
+  category        Category  @relation(fields: [categoryId], references: [id])
+
+  assignedOfferId String?
+
+  offers          Offer[]
+  messages        Message[]
+  payment         Payment?
+  review          Review?
+}
+
+model Offer {
+  id          String   @id @default(uuid())
+  amount      Float
+  message     String
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  taskerId    String
+  tasker      User     @relation(fields: [taskerId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id                    String   @id @default(uuid())
+  amount                Float
+  platformFee           Float    @default(0.0)
+  status                String   @default("HELD_IN_ESCROW")
+  stripePaymentIntentId String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  taskId                String   @unique
+  task                  Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  content    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  rating      Int
+  comment     String
+  createdAt   DateTime @default(now())
+
+  taskId      String   @unique
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  reviewerId  String
+  reviewer    User     @relation("GivenReviews", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  revieweeId  String
+  reviewee    User     @relation("ReceivedReviews", fields: [revieweeId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

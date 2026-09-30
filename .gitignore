@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and secrets
+.env
+.env.local
+.env.production
+.env.development
+*.env
+!*.env.example
+!server/.env.example
+
+# Database files
+server/prisma/dev.db
+server/prisma/dev.db-journal
+server/prisma/*.db
+server/prisma/*.db-journal
+*.sqlite
+*.sqlite3
+
+# Build outputs
+client/dist/
+dist/
+build/
+
+# Uploads and temporary user files
+server/uploads/*
+!server/uploads/.gitkeep
+
+# System and logs
+.DS_Store
+Thumbs.db
+*.log
