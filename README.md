@@ -1,6 +1,6 @@
 # TaskConnect — Community Task Marketplace
 
-[![CI Pipeline](https://github.com/placeholder/taskconnect/actions/workflows/ci.yml/badge.svg)](https://github.com)
+[![CI Pipeline](https://github.com/ranaumarbilal31/Get-It-Done/actions/workflows/ci.yml/badge.svg)](https://github.com/ranaumarbilal31/Get-It-Done/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Security Tested](https://img.shields.io/badge/Security-OWASP%20Tested%20(27%2F27)-brightgreen)](SECURITY_REPORT.md)
 [![Stack](https://img.shields.io/badge/Stack-React%20%7C%20Node%20%7C%20Postgres%20%7C%20Socket.IO-blue)](DECISIONS.md)
