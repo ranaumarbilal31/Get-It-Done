@@ -1,0 +1,79 @@
+# TaskConnect: Master Production Roadmap (PLAN.md)
+
+**Project:** TaskConnect — Airtasker-Style Community Marketplace  
+**Engineers:** Lead Engineer, Security Engineer, DevOps Engineer  
+**Status:** Phase 5 Complete (Ready for Phase 6 Deployment & Phase 7 GitHub Push)  
+
+---
+
+## Roadmap Overview & Phases
+
+```mermaid
+graph TD
+    P1[Phase 1: Pre-Flight Verification & State Audit] --> P2[Phase 2: Master Production Roadmap]
+    P2 --> P3[Phase 3: Client-Ready Product Refinement]
+    P3 --> P4[Phase 4: Security-First Hardening Blue Team]
+    P4 --> P5[Phase 5: Offensive Red-Team Attack & Verification]
+    P5 --> P6[Phase 6: Public Hosting & Live Demo Deployment]
+    P6 --> P7[Phase 7: Git Repository & GitHub Release]
+    P7 --> P8[Phase 8: Final Definition of Done]
+```
+
+---
+
+## Detailed Task Breakdown
+
+### Phase 3: Client-Ready Product Refinement (Engineering)
+- [x] **Task 3.1: Dependency Modernization & Vulnerability Remediation**
+  - Remediated high/moderate vulnerabilities (`qs`, `nodemailer`, updated build).
+- [x] **Task 3.2: Input Validation & Sanitization Layer**
+  - Configured **Zod** validation middleware across all auth, task, offer, review, and admin endpoints.
+- [x] **Task 3.3: Production Storage Adapter (Cloudinary / Supabase / Base64 Data URI)**
+  - Implemented multi-tier storage adapter (`storageService.js`) ensuring persistent images across Render container restarts.
+- [x] **Task 3.4: Automated Test Suite (Unit & Integration Tests)**
+  - Installed Vitest + Supertest; wrote 15 core API tests in `server/test/api.test.js`.
+- [x] **Task 3.5: Legal & Client Deliverables**
+  - Added `LICENSE` (MIT), `TERMS.md` (Terms of Service), and `PRIVACY.md` (Privacy Policy).
+
+---
+
+### Phase 4: Security-First Hardening (Blue Team / Defense)
+- [x] **Task 4.1: Threat Modeling & Security Policy Documentation (`SECURITY.md`)**
+  - Documented STRIDE threat model, trust boundaries, and OWASP Top 10 countermeasures.
+- [x] **Task 4.2: HTTP Security Headers & Helmet Configuration**
+  - Installed and configured `helmet` with custom CSP for OpenStreetMap and avatar sources.
+- [x] **Task 4.3: Rate Limiting & Brute-Force Defense**
+  - Configured `express-rate-limit` (15 attempts/15 min for auth; 120 req/min for API).
+- [x] **Task 4.4: CORS & Environment Lock-down**
+  - Restricted CORS to authorized client URLs.
+- [x] **Task 4.5: CI/CD Security Scanning Workflow**
+  - Created `.github/workflows/ci.yml` running lint, test, build, and security checks on push.
+
+---
+
+### Phase 5: Offensive Security Testing (Red Team / Attack)
+- [x] **Task 5.1: Attack Test Plan Formulation**
+  - Formulated penetration plan covering SQLi, XSS, IDOR, privilege escalation, and business logic flaws.
+- [x] **Task 5.2: Red-Team Attack Script Execution**
+  - Executed automated penetration test suite (`server/test/redteam.test.js`); all 12 attack vectors mitigated (27/27 tests passing).
+- [x] **Task 5.3: Security Assessment Report (`SECURITY_REPORT.md`)**
+  - Produced detailed attack-and-defense record with 0 unmitigated Critical/High findings.
+
+---
+
+### Phase 6: Free Hosting & Live Demo Deployment
+- [ ] **Task 6.1: Production Configuration & Build Preparation**
+- [ ] **Task 6.2: Cloud Infrastructure Provisioning (Vercel + Render + Neon)**
+- [ ] **Task 6.3: Live Demo Verification & Smoke Test**
+
+---
+
+### Phase 7: GitHub Repository & Release
+- [ ] **Task 7.1: Git Initialization & Secret Scrubbing**
+- [ ] **Task 7.2: Conventional Commits & Documentation Sync**
+- [ ] **Task 7.3: Push to GitHub & Tag v1.0.0**
+
+---
+
+### Phase 8: Final Definition of Done
+- [ ] **Task 8.1: Complete Verification Checklist**
