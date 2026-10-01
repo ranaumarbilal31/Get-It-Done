@@ -229,12 +229,32 @@ describe('Red Team Offensive Security Battery', () => {
       expect(res.headers['access-control-allow-origin']).toBeUndefined();
     });
 
-    it('Permits authorized production origin', async () => {
+    it('Permits authorized production origin (steel)', async () => {
+      const res = await request(app)
+        .get('/api/health')
+        .set('Origin', 'https://get-it-done-steel.vercel.app');
+
+      expect(res.status).toBe(200);
+      expect(res.headers['access-control-allow-origin']).toBe('https://get-it-done-steel.vercel.app');
+    });
+
+    it('Permits authorized legacy/staging origin (phalanx1)', async () => {
       const res = await request(app)
         .get('/api/health')
         .set('Origin', 'https://get-it-done-phalanx1.vercel.app');
 
+      expect(res.status).toBe(200);
       expect(res.headers['access-control-allow-origin']).toBe('https://get-it-done-phalanx1.vercel.app');
+    });
+
+    it('Disallows untrusted origin without triggering HTTP 500 server crash', async () => {
+      const res = await request(app)
+        .get('/api/tasks?limit=1')
+        .set('Origin', 'https://example.com');
+
+      // Crucial: Must NOT throw 500
+      expect(res.status).not.toBe(500);
+      expect(res.headers['access-control-allow-origin']).toBeUndefined();
     });
   });
 
@@ -260,13 +280,77 @@ describe('Red Team Offensive Security Battery', () => {
       piiTaskId = task.id;
     });
 
-    it('Masks street address and fuzzes coordinates for unauthenticated viewers', async () => {
+    it('Masks street address, fuzzes coordinates, and strips assignedOfferId for public viewers', async () => {
       const res = await request(app).get(`/api/tasks/${piiTaskId}`);
       expect(res.status).toBe(200);
       expect(res.body.task.location).not.toContain('742');
       expect(res.body.task.location).toBe('Evergreen Terrace, Springfield, OR');
       expect(res.body.task.latitude).toBe(44.05);
       expect(res.body.task.longitude).toBe(-123.02);
+      expect(res.body.task.assignedOfferId).toBeUndefined();
+      expect(res.body.task.categoryId).toBeUndefined();
+      expect(res.body.task.payment).toBeUndefined();
+    });
+  });
+
+  // TEST 9: Unbounded Pagination & Parameter Tampering
+  describe('ATTACK VECTOR 9: Unbounded Pagination & Query Filter Validation', () => {
+    it('Rejects limit=0 with 400 Bad Request', async () => {
+      const res = await request(app).get('/api/tasks?limit=0');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_LIMIT');
+    });
+
+    it('Rejects negative limit with 400 Bad Request', async () => {
+      const res = await request(app).get('/api/tasks?limit=-1');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_LIMIT');
+    });
+
+    it('Rejects excessively large limit (> 100) to prevent resource exhaustion', async () => {
+      const res = await request(app).get('/api/tasks?limit=999999');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_LIMIT');
+    });
+
+    it('Rejects non-integer or zero page parameter', async () => {
+      const resZero = await request(app).get('/api/tasks?page=0');
+      expect(resZero.status).toBe(400);
+      expect(resZero.body.code).toBe('INVALID_PAGINATION');
+
+      const resAlpha = await request(app).get('/api/tasks?page=abc');
+      expect(resAlpha.status).toBe(400);
+      expect(resAlpha.body.code).toBe('INVALID_PAGINATION');
+    });
+
+    it('Rejects invalid status filter with 400 and INVALID_STATUS code', async () => {
+      const res = await request(app).get('/api/tasks?status=NOT_A_STATUS');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_STATUS');
+    });
+
+    it('Rejects invalid budget range where min > max', async () => {
+      const res = await request(app).get('/api/tasks?minBudget=500&maxBudget=100');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_BUDGET_RANGE');
+    });
+  });
+
+  // TEST 10: API 404 Route Consistency
+  describe('ATTACK VECTOR 10: Consistent API JSON 404 Handler', () => {
+    it('Returns application/json 404 for non-existent /api routes', async () => {
+      const res = await request(app).get('/api/users/12345');
+      expect(res.status).toBe(404);
+      expect(res.headers['content-type']).toContain('application/json');
+      expect(res.body.code).toBe('NOT_FOUND');
+      expect(res.body.message).toContain('does not exist');
+    });
+
+    it('Returns application/json 404 for arbitrary missing nested endpoints', async () => {
+      const res = await request(app).post('/api/unknown/service/call');
+      expect(res.status).toBe(404);
+      expect(res.headers['content-type']).toContain('application/json');
+      expect(res.body.code).toBe('NOT_FOUND');
     });
   });
 });

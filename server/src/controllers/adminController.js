@@ -64,8 +64,30 @@ const getUsers = async (req, res, next) => {
     if (role) where.role = role;
     if (verificationStatus) where.verificationStatus = verificationStatus;
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const take = parseInt(limit, 10);
+    let parsedPage = 1;
+    if (page !== undefined && page !== '') {
+      parsedPage = Number(page);
+      if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+        return res.status(400).json({
+          code: 'INVALID_PAGINATION',
+          message: 'Query parameter "page" must be a positive integer greater than or equal to 1.',
+        });
+      }
+    }
+
+    let parsedLimit = 20;
+    if (limit !== undefined && limit !== '') {
+      parsedLimit = Number(limit);
+      if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 100) {
+        return res.status(400).json({
+          code: 'INVALID_LIMIT',
+          message: 'Query parameter "limit" must be an integer between 1 and 100.',
+        });
+      }
+    }
+
+    const skip = (parsedPage - 1) * parsedLimit;
+    const take = parsedLimit;
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({

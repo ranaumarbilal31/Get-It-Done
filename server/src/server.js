@@ -96,6 +96,7 @@ app.use('/api/auth/register', authLimiter);
 
 // 3. Cross-Origin Resource Sharing (CORS) - Strict Allowlist
 const baseAllowedOrigins = [
+  'https://get-it-done-steel.vercel.app',
   'https://get-it-done-phalanx1.vercel.app',
   'https://get-it-done-git-main-phalanx1.vercel.app',
   'https://get-it-done.vercel.app',
@@ -104,30 +105,40 @@ const baseAllowedOrigins = [
   'http://localhost:3000',
 ];
 
-if (process.env.CLIENT_URL && process.env.CLIENT_URL !== '*') {
-  process.env.CLIENT_URL.split(',').forEach((url) => {
-    const trimmed = url.trim();
-    if (trimmed && !baseAllowedOrigins.includes(trimmed)) {
-      baseAllowedOrigins.push(trimmed);
-    }
-  });
-}
+const envOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.ALLOWED_ORIGINS,
+  process.env.PUBLIC_SITE_URL,
+];
+
+envOrigins.forEach((envVal) => {
+  if (envVal && envVal !== '*') {
+    envVal.split(',').forEach((url) => {
+      const trimmed = url.trim();
+      if (trimmed && !baseAllowedOrigins.includes(trimmed)) {
+        baseAllowedOrigins.push(trimmed);
+      }
+    });
+  }
+});
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true; // server-to-server, mobile, curl, Supertest
   if (baseAllowedOrigins.includes(origin)) return true;
-  // Allow preview deployments matching pattern https://get-it-done-*-phalanx1.vercel.app
-  if (/^https:\/\/get-it-done-[a-z0-9-]+-phalanx1\.vercel\.app$/.test(origin)) return true;
+  // Allow all project Vercel deployments (production, branch, preview)
+  if (/^https:\/\/get-it-done[a-z0-9-]*\.vercel\.app$/.test(origin)) return true;
   return false;
 };
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Return boolean cleanly to prevent 500 unhandled errors on disallowed origins
       if (isOriginAllowed(origin)) {
         return callback(null, true);
       }
-      return callback(new Error(`CORS policy violation: Access from origin ${origin} is prohibited.`));
+      return callback(null, false);
     },
     credentials: true,
   })
@@ -160,6 +171,15 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
+
+// Unmatched API Route JSON 404 Handler
+app.all('/api/*', (req, res) => {
+  res.status(404).json({
+    code: 'NOT_FOUND',
+    error: 'Not Found',
+    message: `API endpoint ${req.method} ${req.originalUrl} does not exist.`,
+  });
+});
 
 // Global Error Handler
 app.use(errorHandler);

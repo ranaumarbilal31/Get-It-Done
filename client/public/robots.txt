@@ -16,4 +16,4 @@ Disallow: /profile/*
 Disallow: /dashboard
 Disallow: /dashboard/*
 
-Sitemap: https://get-it-done-phalanx1.vercel.app/sitemap.xml
+Sitemap: https://get-it-done-steel.vercel.app/sitemap.xml

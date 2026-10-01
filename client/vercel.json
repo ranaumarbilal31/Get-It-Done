@@ -21,12 +21,16 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://taskconnect-api.onrender.com https://*.onrender.com http://localhost:* ws://localhost:* https://*.tile.openstreetmap.org; frame-ancestors 'none';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://taskconnect-api.onrender.com https://*.onrender.com https://*.tile.openstreetmap.org; frame-ancestors 'none';"
         }
       ]
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://taskconnect-api.onrender.com/api/$1"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

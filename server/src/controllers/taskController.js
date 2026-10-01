@@ -40,6 +40,28 @@ const sanitizeTaskForViewer = (task, viewerId, viewerRole) => {
     sanitized.location = maskAddress(sanitized.location);
   }
 
+  // Strip internal foreign keys and metadata from public view
+  delete sanitized.assignedOfferId;
+  delete sanitized.categoryId;
+  delete sanitized.payment;
+
+  // Format dueDate to date-only to avoid leaking exact microsecond timing
+  if (sanitized.dueDate instanceof Date) {
+    sanitized.dueDate = sanitized.dueDate.toISOString().split('T')[0];
+  }
+
+  // Strip sensitive poster profile data
+  if (sanitized.poster) {
+    sanitized.poster = {
+      id: sanitized.poster.id,
+      name: sanitized.poster.name,
+      avatar: sanitized.poster.avatar,
+      isVerified: sanitized.poster.isVerified,
+      ratingAvg: sanitized.poster.ratingAvg,
+      ratingCount: sanitized.poster.ratingCount,
+    };
+  }
+
   return sanitized;
 };
 
@@ -58,10 +80,44 @@ const getTasks = async (req, res, next) => {
       limit = 20,
     } = req.query;
 
+    // 1. Strict Pagination Bounds Validation
+    let parsedPage = 1;
+    if (page !== undefined && page !== '') {
+      parsedPage = Number(page);
+      if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+        return res.status(400).json({
+          code: 'INVALID_PAGINATION',
+          message: 'Query parameter "page" must be a positive integer greater than or equal to 1.',
+        });
+      }
+    }
+
+    let parsedLimit = 20;
+    if (limit !== undefined && limit !== '') {
+      parsedLimit = Number(limit);
+      if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 100) {
+        return res.status(400).json({
+          code: 'INVALID_LIMIT',
+          message: 'Query parameter "limit" must be an integer between 1 and 100.',
+        });
+      }
+    }
+
     const where = {};
 
-    if (status && status !== 'ALL') {
-      where.status = status;
+    // 2. Strict Filter Validations
+    const validStatuses = ['ALL', 'OPEN', 'ASSIGNED', 'COMPLETED', 'CANCELLED'];
+    if (status !== undefined && status !== '') {
+      const normalizedStatus = String(status).trim().toUpperCase();
+      if (!validStatuses.includes(normalizedStatus)) {
+        return res.status(400).json({
+          code: 'INVALID_STATUS',
+          message: `Invalid status filter "${status}". Allowed values: ${validStatuses.join(', ')}`,
+        });
+      }
+      if (normalizedStatus !== 'ALL') {
+        where.status = normalizedStatus;
+      }
     }
 
     if (category && category !== 'all') {
@@ -75,10 +131,52 @@ const getTasks = async (req, res, next) => {
       where.isRemote = isRemote === 'true';
     }
 
-    if (minBudget || maxBudget) {
-      where.budget = {};
-      if (minBudget) where.budget.gte = parseFloat(minBudget);
-      if (maxBudget) where.budget.lte = parseFloat(maxBudget);
+    if (minBudget !== undefined && minBudget !== '') {
+      const parsedMin = Number(minBudget);
+      if (isNaN(parsedMin) || parsedMin < 0) {
+        return res.status(400).json({
+          code: 'INVALID_BUDGET',
+          message: 'Query parameter "minBudget" must be a non-negative number.',
+        });
+      }
+      where.budget = where.budget || {};
+      where.budget.gte = parsedMin;
+    }
+
+    if (maxBudget !== undefined && maxBudget !== '') {
+      const parsedMax = Number(maxBudget);
+      if (isNaN(parsedMax) || parsedMax < 0) {
+        return res.status(400).json({
+          code: 'INVALID_BUDGET',
+          message: 'Query parameter "maxBudget" must be a non-negative number.',
+        });
+      }
+      where.budget = where.budget || {};
+      where.budget.lte = parsedMax;
+    }
+
+    if (where.budget?.gte !== undefined && where.budget?.lte !== undefined && where.budget.gte > where.budget.lte) {
+      return res.status(400).json({
+        code: 'INVALID_BUDGET_RANGE',
+        message: 'minBudget cannot exceed maxBudget.',
+      });
+    }
+
+    // 3. Strict Sort & Order Validation
+    const validSortFields = ['createdAt', 'budget', 'dueDate', 'title'];
+    if (sortBy && !validSortFields.includes(sortBy)) {
+      return res.status(400).json({
+        code: 'INVALID_SORT_BY',
+        message: `Invalid sortBy "${sortBy}". Allowed values: ${validSortFields.join(', ')}`,
+      });
+    }
+
+    const normalizedOrder = String(order || 'desc').toLowerCase();
+    if (!['asc', 'desc'].includes(normalizedOrder)) {
+      return res.status(400).json({
+        code: 'INVALID_ORDER',
+        message: 'Query parameter "order" must be "asc" or "desc".',
+      });
     }
 
     if (search) {
@@ -89,8 +187,8 @@ const getTasks = async (req, res, next) => {
       ];
     }
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const take = parseInt(limit, 10);
+    const skip = (parsedPage - 1) * parsedLimit;
+    const take = parsedLimit;
 
     const [tasks, total] = await Promise.all([
       prisma.task.findMany({
@@ -112,7 +210,7 @@ const getTasks = async (req, res, next) => {
           },
         },
         orderBy: {
-          [sortBy]: order === 'asc' ? 'asc' : 'desc',
+          [sortBy]: normalizedOrder === 'asc' ? 'asc' : 'desc',
         },
         skip,
         take,
@@ -122,12 +220,14 @@ const getTasks = async (req, res, next) => {
 
     const sanitizedTasks = tasks.map((t) => sanitizeTaskForViewer(t, req.user?.id, req.user?.role));
 
+    const pages = total === 0 ? 1 : Math.ceil(total / take);
+
     res.json({
       tasks: sanitizedTasks,
       pagination: {
         total,
-        page: parseInt(page, 10),
-        pages: Math.ceil(total / take),
+        page: parsedPage,
+        pages,
         limit: take,
       },
     });
