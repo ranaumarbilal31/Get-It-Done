@@ -52,6 +52,14 @@ const register = async (req, res, next) => {
 
     const token = generateToken(user.id);
 
+    // Set secure HttpOnly cookie
+    res.cookie('taskconnect_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     // Send welcome email (fire-and-forget)
     sendWelcomeEmail(user).catch(console.error);
 
@@ -83,6 +91,14 @@ const login = async (req, res, next) => {
     }
 
     const token = generateToken(user.id);
+
+    // Set secure HttpOnly cookie
+    res.cookie('taskconnect_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     const userProfile = {
       id: user.id,
@@ -221,9 +237,19 @@ const submitVerification = async (req, res, next) => {
   }
 };
 
+const logout = async (req, res) => {
+  res.clearCookie('taskconnect_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+  res.json({ message: 'Logged out successfully' });
+};
+
 module.exports = {
   register,
   login,
+  logout,
   getMe,
   updateProfile,
   submitVerification,

@@ -45,12 +45,12 @@ export default function FaqPage() {
     {
       category: 'General & Security',
       q: 'Is my personal and payment data safe?',
-      a: 'Yes. All data in transit is encrypted using modern TLS 1.3, and sensitive records are stored with AES-256 encryption. Payment card data is processed through certified banking gateways and is never stored on our servers.',
+      a: 'Yes. All network traffic is encrypted via TLS, and sensitive database records are protected with restricted access controls. Payment card processing is handled through certified payment gateways and card numbers are never stored on our servers.',
     },
     {
       category: 'General & Security',
       q: 'How do I contact customer support?',
-      a: 'Our dedicated customer care team is available 24/7. You can submit an inquiry through our Contact Us page or email us directly at ranaumarbilal31@gmail.com.',
+      a: 'Our support team is ready to assist you. You can submit an inquiry through our Contact Us page or email us directly at ranaumarbilal31@gmail.com with prompt response times.',
     },
   ];
 

@@ -204,10 +204,34 @@ const toggleUserRole = async (req, res, next) => {
   }
 };
 
+const getDetailedHealth = async (req, res, next) => {
+  try {
+    let dbStatus = 'healthy';
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (err) {
+      dbStatus = 'unreachable';
+    }
+
+    res.json({
+      status: 'ok',
+      database: dbStatus,
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.3.0',
+      nodeVersion: process.version,
+      memoryUsage: process.memoryUsage(),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getStats,
   getUsers,
   getPendingVerifications,
   updateVerificationStatus,
   toggleUserRole,
+  getDetailedHealth,
 };

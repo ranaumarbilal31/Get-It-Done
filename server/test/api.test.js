@@ -30,11 +30,12 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
 
   // 1. Health & Security Headers
   describe('System Health & Security Headers', () => {
-    it('GET /api/health should return 200 OK and healthy DB status', async () => {
+    it('GET /api/health should return minimal 200 OK without leaking database or uptime diagnostics', async () => {
       const res = await request(app).get('/api/health');
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
-      expect(res.body.database).toBe('healthy');
+      expect(res.body.database).toBeUndefined();
+      expect(res.body.uptime).toBeUndefined();
       expect(res.headers['x-content-type-options']).toBe('nosniff');
       expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
     });
@@ -86,6 +87,15 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
       expect(res.status).toBe(200);
       expect(res.body.user.email).toBe('sarah@example.com');
     });
+
+    it('POST /api/auth/logout clears taskconnect_token cookie', async () => {
+      const res = await request(app).post('/api/auth/logout');
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('Logged out successfully');
+      const setCookie = res.headers['set-cookie'];
+      expect(setCookie).toBeDefined();
+      expect(setCookie[0]).toContain('taskconnect_token=;');
+    });
   });
 
   // 3. Task & Bidding Lifecycle
@@ -116,6 +126,22 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
       expect(res.status).toBe(201);
       expect(res.body.task.title).toContain('Floating Shelves');
       testTaskId = res.body.task.id;
+    });
+
+    it('GET /api/tasks/:id fuzzes coordinates for public unassigned viewers', async () => {
+      const res = await request(app).get(`/api/tasks/${testTaskId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.task.latitude).toBe(40.72);
+      expect(res.body.task.longitude).toBe(-74);
+    });
+
+    it('GET /api/tasks/:id reveals exact coordinates for the task poster', async () => {
+      const res = await request(app)
+        .get(`/api/tasks/${testTaskId}`)
+        .set('Authorization', `Bearer ${posterToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.task.latitude).toBe(40.723);
+      expect(res.body.task.longitude).toBe(-74.003);
     });
 
     it('POST /api/offers/task/:id allows tasker to submit a quote', async () => {
@@ -182,6 +208,24 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
       expect(res.status).toBe(200);
       expect(res.body.stats.totalUsers).toBeGreaterThan(0);
       expect(res.body.stats.totalTasks).toBeGreaterThan(0);
+    });
+
+    it('GET /api/admin/health returns 403 Forbidden for non-admin users', async () => {
+      const res = await request(app)
+        .get('/api/admin/health')
+        .set('Authorization', `Bearer ${posterToken}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('GET /api/admin/health returns 200 OK with detailed diagnostics for Admin', async () => {
+      const res = await request(app)
+        .get('/api/admin/health')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe('ok');
+      expect(res.body.database).toBe('healthy');
+      expect(res.body.uptime).toBeDefined();
+      expect(res.body.version).toBeDefined();
     });
   });
 

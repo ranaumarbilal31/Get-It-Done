@@ -5,7 +5,9 @@ const authenticate = async (req, res, next) => {
   try {
     let token = null;
 
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (req.cookies && req.cookies.taskconnect_token) {
+      token = req.cookies.taskconnect_token;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }
 
@@ -52,7 +54,9 @@ const authenticate = async (req, res, next) => {
 const optionalAuth = async (req, res, next) => {
   try {
     let token = null;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (req.cookies && req.cookies.taskconnect_token) {
+      token = req.cookies.taskconnect_token;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }
     if (token) {

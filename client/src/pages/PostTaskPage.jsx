@@ -11,10 +11,13 @@ import {
   Sparkles,
   AlertCircle,
   CheckCircle2,
+  Lock,
+  X,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function PostTaskPage() {
-  const { user } = useAuth();
+  const { user, login, register } = useAuth();
   const navigate = useNavigate();
 
   const [categories, setCategories] = useState([]);
@@ -31,28 +34,72 @@ export default function PostTaskPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Protect route
+  // Inline Auth Modal State
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
+  const [authName, setAuthName] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+
+  // Restore draft from sessionStorage on mount
   useEffect(() => {
-    if (!user) {
-      navigate('/login?redirect=/post-task');
+    try {
+      const saved = sessionStorage.getItem('tc_task_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.title) setTitle(parsed.title);
+        if (parsed.description) setDescription(parsed.description);
+        if (parsed.budget) setBudget(parsed.budget);
+        if (parsed.categoryId) setCategoryId(parsed.categoryId);
+        if (parsed.isRemote !== undefined) setIsRemote(parsed.isRemote);
+        if (parsed.locationName) setLocationName(parsed.locationName);
+        if (parsed.latitude) setLatitude(parsed.latitude);
+        if (parsed.longitude) setLongitude(parsed.longitude);
+        if (parsed.dueDate) setDueDate(parsed.dueDate);
+      }
+    } catch (e) {
+      console.warn('Failed to parse draft from sessionStorage', e);
     }
-  }, [user, navigate]);
+  }, []);
+
+  // Auto-save draft changes to sessionStorage
+  useEffect(() => {
+    const draft = {
+      title,
+      description,
+      budget,
+      categoryId,
+      isRemote,
+      locationName,
+      latitude,
+      longitude,
+      dueDate,
+    };
+    try {
+      sessionStorage.setItem('tc_task_draft', JSON.stringify(draft));
+    } catch (e) {
+      // ignore quota errors
+    }
+  }, [title, description, budget, categoryId, isRemote, locationName, latitude, longitude, dueDate]);
 
   // Load categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await api.get('/categories');
-        setCategories(res.data.categories || []);
-        if (res.data.categories?.length > 0) {
-          setCategoryId(res.data.categories[0].id);
+        const cats = res.data.categories || [];
+        setCategories(cats);
+        if (cats.length > 0 && !categoryId) {
+          setCategoryId(cats[0].id);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load categories', err);
       }
     };
     fetchCategories();
-  }, []);
+  }, [categoryId]);
 
   const handleLocationPicked = (lat, lng) => {
     setLatitude(lat);
@@ -62,16 +109,9 @@ export default function PostTaskPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (!title || !description || !budget || !categoryId) {
-      setError('Please fill in all required fields (title, description, budget, category).');
-      return;
-    }
-
+  const executePublish = async () => {
     setSubmitting(true);
+    setError('');
 
     try {
       const formData = new FormData();
@@ -97,10 +137,53 @@ export default function PostTaskPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      // Clear draft on successful post
+      sessionStorage.removeItem('tc_task_draft');
       navigate(`/tasks/${res.data.task.id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create task.');
       setSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!title || !description || !budget || !categoryId) {
+      setError('Please fill in all required fields (title, description, budget, category).');
+      return;
+    }
+
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    await executePublish();
+  };
+
+  const handleModalAuth = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+
+    try {
+      if (authMode === 'login') {
+        await login(authEmail, authPassword);
+      } else {
+        if (!authName) {
+          setAuthError('Please enter your full name');
+          setAuthLoading(false);
+          return;
+        }
+        await register(authName, authEmail, authPassword);
+      }
+      setShowAuthModal(false);
+      await executePublish();
+    } catch (err) {
+      setAuthError(err.response?.data?.message || err.message || 'Authentication failed. Please verify credentials.');
+      setAuthLoading(false);
     }
   };
 
@@ -109,16 +192,34 @@ export default function PostTaskPage() {
       <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-8">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Post a Free Marketplace Request</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-brand-600" />
+            <span>Escrow-Protected Marketplace Listing</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Tell us what you need done
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Taskers will see your listing and submit competitive quotes.
+            Verified local taskers will review your listing and submit competitive quotes.
           </p>
         </div>
+
+        {!user && (
+          <div className="p-4 bg-blue-50/80 border border-blue-200/70 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 text-xs text-blue-900">
+              <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>
+                <strong>Draft Mode:</strong> Your task is auto-saved locally. Fill out your details now and sign in when ready to publish.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAuthModal(true)}
+              className="self-start sm:self-auto px-3.5 py-1.5 text-xs font-bold text-blue-700 bg-white border border-blue-200 rounded-xl hover:bg-blue-50 shadow-sm transition"
+            >
+              Sign In Now
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-semibold flex items-center gap-2">
@@ -139,7 +240,7 @@ export default function PostTaskPage() {
               placeholder="e.g. Move 2-seater sofa to 2nd floor apartment"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 focus:bg-white"
+              className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 focus:bg-white transition"
             />
           </div>
 
@@ -177,7 +278,7 @@ export default function PostTaskPage() {
                   placeholder="150"
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
-                  className="w-full pl-9 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 focus:bg-white"
+                  className="w-full pl-9 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 focus:bg-white transition"
                 />
               </div>
             </div>
@@ -230,6 +331,9 @@ export default function PostTaskPage() {
                   onChange={(e) => setLocationName(e.target.value)}
                   className="w-full px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500"
                 />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Exact house numbers are kept confidential until you accept an offer.
+                </p>
               </div>
               <MapPicker
                 initialLat={latitude}
@@ -286,20 +390,143 @@ export default function PostTaskPage() {
             <button
               type="button"
               onClick={() => navigate('/tasks')}
-              className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+              className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-3 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-2xl shadow-lg transition"
+              className="px-6 py-3 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-2xl shadow-lg transition flex items-center gap-2"
             >
-              {submitting ? 'Publishing Task...' : 'Post Task for Free'}
+              {submitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Publishing Task...</span>
+                </>
+              ) : (
+                <span>Publish Task Listing</span>
+              )}
             </button>
           </div>
         </form>
       </div>
+
+      {/* Inline Auth Modal for Guests */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-3">
+                <Lock className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">
+                {authMode === 'login' ? 'Sign in to Publish' : 'Create Account to Publish'}
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Your task draft is securely preserved. Once signed in, it will be posted immediately.
+              </p>
+            </div>
+
+            {/* Mode Switch Tabs */}
+            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-2xl mb-6">
+              <button
+                type="button"
+                onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                className={`py-2 text-xs font-bold rounded-xl transition ${
+                  authMode === 'login'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode('register'); setAuthError(''); }}
+                className={`py-2 text-xs font-bold rounded-xl transition ${
+                  authMode === 'register'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            {authError && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleModalAuth} className="space-y-4">
+              {authMode === 'register' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Alex Morgan"
+                    value={authName}
+                    onChange={(e) => setAuthName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 focus:bg-white"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="name@example.com"
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 focus:bg-white"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2"
+              >
+                {authLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Authenticating...</span>
+                  </>
+                ) : (
+                  <span>{authMode === 'login' ? 'Sign In & Post Task' : 'Register & Post Task'}</span>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

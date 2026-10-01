@@ -72,10 +72,10 @@ export default function PrivacyPage() {
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <div className="flex items-center gap-2 font-bold text-slate-900 mb-1">
                   <Database className="w-4 h-4 text-brand-600" />
-                  AES-256 Storage
+                  Encrypted Cloud Storage
                 </div>
                 <p className="text-xs text-slate-500">
-                  Identity documents, database records, and transaction logs are protected with AES-256 bit encryption at rest in our cloud vault.
+                  Identity documents, database records, and transaction logs are protected with cloud storage encryption and strict role-based access controls.
                 </p>
               </div>
             </div>

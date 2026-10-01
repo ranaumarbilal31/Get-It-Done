@@ -2,6 +2,47 @@ const prisma = require('../config/prisma');
 const { captureEscrowPayment } = require('../services/paymentService');
 const { uploadToStorage } = require('../services/storageService');
 
+const maskAddress = (address) => {
+  if (!address || typeof address !== 'string') return address;
+  // Strip street numbers to protect homeowner/poster privacy on public listings
+  const masked = address.replace(/^\s*(?:(?:Unit|Apt|Suite|Lot|#)\s*[\w-]+\s*,?\s*)?\d+[-\d\/]*\s+/i, '');
+  return masked.trim() || address;
+};
+
+const sanitizeTaskForViewer = (task, viewerId, viewerRole) => {
+  if (!task) return task;
+
+  // Exact coordinates and addresses are granted only to poster, admin, and accepted tasker
+  const isPoster = viewerId && task.posterId === viewerId;
+  const isAdmin = viewerRole === 'ADMIN';
+
+  let isAssignedTasker = false;
+  if (viewerId && (task.status === 'ASSIGNED' || task.status === 'COMPLETED')) {
+    if (task.offers && Array.isArray(task.offers)) {
+      isAssignedTasker = task.offers.some(
+        (o) => (o.status === 'ACCEPTED' || o.id === task.assignedOfferId) && o.taskerId === viewerId
+      );
+    }
+  }
+
+  if (isPoster || isAdmin || isAssignedTasker) {
+    return task;
+  }
+
+  const sanitized = { ...task };
+  if (sanitized.latitude !== null && sanitized.latitude !== undefined) {
+    sanitized.latitude = Number(Number(sanitized.latitude).toFixed(2));
+  }
+  if (sanitized.longitude !== null && sanitized.longitude !== undefined) {
+    sanitized.longitude = Number(Number(sanitized.longitude).toFixed(2));
+  }
+  if (sanitized.location) {
+    sanitized.location = maskAddress(sanitized.location);
+  }
+
+  return sanitized;
+};
+
 const getTasks = async (req, res, next) => {
   try {
     const {
@@ -79,8 +120,10 @@ const getTasks = async (req, res, next) => {
       prisma.task.count({ where }),
     ]);
 
+    const sanitizedTasks = tasks.map((t) => sanitizeTaskForViewer(t, req.user?.id, req.user?.role));
+
     res.json({
-      tasks,
+      tasks: sanitizedTasks,
       pagination: {
         total,
         page: parseInt(page, 10),
@@ -144,7 +187,9 @@ const getTaskById = async (req, res, next) => {
       return res.status(404).json({ message: 'Task not found.' });
     }
 
-    res.json({ task });
+    const sanitizedTask = sanitizeTaskForViewer(task, req.user?.id, req.user?.role);
+
+    res.json({ task: sanitizedTask });
   } catch (error) {
     next(error);
   }

@@ -118,7 +118,7 @@ export default function TermsPage() {
               8. Contact Legal & Compliance
             </h2>
             <p className="text-slate-600">
-              For legal notices, terms inquiries, or formal arbitration requests, please direct communications to:
+              For legal notices, terms inquiries, or formal dispute communications, please direct communications to:
             </p>
             <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700">
               <p><strong>Legal & Corporate Affairs:</strong> TaskConnect Technologies Inc.</p>

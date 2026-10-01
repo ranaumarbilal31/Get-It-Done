@@ -446,9 +446,9 @@ export default function ProfilePage() {
             </div>
 
             <div className="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200 text-emerald-900 space-y-1">
-              <p className="font-bold">Official Identity & Trust Verification</p>
+              <p className="font-bold">Identity & Trust Verification</p>
               <p className="text-[11px] text-emerald-800">
-                To protect our community, every Tasker document is verified against government compliance registries. Your documents are stored with AES-256 encryption.
+                To protect our community, every submitted document undergoes administrative photo-ID review. Files are stored securely with restricted access controls.
               </p>
             </div>
 

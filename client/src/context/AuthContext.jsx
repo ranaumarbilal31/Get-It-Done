@@ -50,10 +50,16 @@ export const AuthProvider = ({ children }) => {
     return newUser;
   };
 
-  const logout = () => {
-    localStorage.removeItem('taskconnect_token');
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.warn('Server logout notice:', err);
+    } finally {
+      localStorage.removeItem('taskconnect_token');
+      setToken(null);
+      setUser(null);
+    }
   };
 
   const updateProfile = async (formData) => {

@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
 const prisma = require('./config/prisma');
 const errorHandler = require('./middleware/errorHandler');
@@ -93,55 +94,60 @@ app.use('/api', apiLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
-// 3. Cross-Origin Resource Sharing (CORS)
-const allowedOrigins = [
+// 3. Cross-Origin Resource Sharing (CORS) - Strict Allowlist
+const baseAllowedOrigins = [
+  'https://get-it-done-phalanx1.vercel.app',
+  'https://get-it-done-git-main-phalanx1.vercel.app',
+  'https://get-it-done.vercel.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:3000',
-  process.env.CLIENT_URL,
-].filter(Boolean);
+];
+
+if (process.env.CLIENT_URL && process.env.CLIENT_URL !== '*') {
+  process.env.CLIENT_URL.split(',').forEach((url) => {
+    const trimmed = url.trim();
+    if (trimmed && !baseAllowedOrigins.includes(trimmed)) {
+      baseAllowedOrigins.push(trimmed);
+    }
+  });
+}
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // server-to-server, mobile, curl, Supertest
+  if (baseAllowedOrigins.includes(origin)) return true;
+  // Allow preview deployments matching pattern https://get-it-done-*-phalanx1.vercel.app
+  if (/^https:\/\/get-it-done-[a-z0-9-]+-phalanx1\.vercel\.app$/.test(origin)) return true;
+  return false;
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like curl, mobile, server-to-server)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.some((allowed) => origin === allowed || allowed === '*')) {
+      if (isOriginAllowed(origin)) {
         return callback(null, true);
       }
-      if (process.env.NODE_ENV !== 'production') {
-        return callback(null, true);
-      }
-      return callback(new Error(`CORS blocked request from origin: ${origin}`));
+      return callback(new Error(`CORS policy violation: Access from origin ${origin} is prohibited.`));
     },
     credentials: true,
   })
 );
 
+app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static local uploads (development fallback)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Health Check Endpoint (Detailed System Monitoring)
+// Minimal Public Liveness Probe (Scrubbed of DB internals and versions)
 app.get('/api/health', async (req, res) => {
-  let dbStatus = 'healthy';
   try {
     await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ status: 'ok' });
   } catch (err) {
-    dbStatus = 'degraded';
+    res.status(503).json({ status: 'degraded' });
   }
-
-  res.json({
-    status: dbStatus === 'healthy' ? 'ok' : 'degraded',
-    service: 'TaskConnect API',
-    uptime: Math.round(process.uptime()),
-    database: dbStatus,
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    version: '1.0.0',
-  });
 });
 
 // Mount API Routes

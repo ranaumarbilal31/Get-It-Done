@@ -25,9 +25,9 @@ export default function Footer() {
               <Lock className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white">Bank-Grade 256-Bit Security</h4>
+              <h4 className="text-sm font-bold text-white">Modern Platform Security</h4>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                All client communications, identity verification records, and transaction logs are protected with TLS 1.3 and AES-256.
+                All platform communications, authentication tokens, and transaction logs are protected with transport encryption and access controls.
               </p>
             </div>
           </div>
@@ -111,7 +111,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link to="/post-task" className="text-brand-400 hover:text-brand-300 font-semibold transition">
-                  Post a Task Free →
+                  Post a Task Listing →
                 </Link>
               </li>
             </ul>

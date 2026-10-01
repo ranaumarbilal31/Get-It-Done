@@ -217,4 +217,57 @@ describe('Red Team Offensive Security Battery', () => {
       expect(res.body.message).toContain('at least $5');
     });
   });
+
+  // TEST 7: CORS Origin Spoofing
+  describe('ATTACK VECTOR 7: Arbitrary CORS Origin Spoofing', () => {
+    it('Blocks arbitrary untrusted origin from credential reflection', async () => {
+      const res = await request(app)
+        .get('/api/health')
+        .set('Origin', 'https://malicious-attacker.com');
+
+      // Untrusted origins must not receive Access-Control-Allow-Origin
+      expect(res.headers['access-control-allow-origin']).toBeUndefined();
+    });
+
+    it('Permits authorized production origin', async () => {
+      const res = await request(app)
+        .get('/api/health')
+        .set('Origin', 'https://get-it-done-phalanx1.vercel.app');
+
+      expect(res.headers['access-control-allow-origin']).toBe('https://get-it-done-phalanx1.vercel.app');
+    });
+  });
+
+  // TEST 8: PII / Task Coordinate & Address Exposure
+  describe('ATTACK VECTOR 8: Task Location & PII Privacy Leak', () => {
+    let piiTaskId = '';
+
+    beforeAll(async () => {
+      const categories = await prisma.category.findMany();
+      const task = await prisma.task.create({
+        data: {
+          title: 'Private Home Repair',
+          description: 'Fixing electrical panel in basement',
+          budget: 120,
+          status: 'OPEN',
+          location: '742 Evergreen Terrace, Springfield, OR',
+          latitude: 44.046234,
+          longitude: -123.022091,
+          posterId: (await prisma.user.findFirst({ where: { email: 'sarah@example.com' } })).id,
+          categoryId: categories[0].id,
+        },
+      });
+      piiTaskId = task.id;
+    });
+
+    it('Masks street address and fuzzes coordinates for unauthenticated viewers', async () => {
+      const res = await request(app).get(`/api/tasks/${piiTaskId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.task.location).not.toContain('742');
+      expect(res.body.task.location).toBe('Evergreen Terrace, Springfield, OR');
+      expect(res.body.task.latitude).toBe(44.05);
+      expect(res.body.task.longitude).toBe(-123.02);
+    });
+  });
 });
+

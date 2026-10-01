@@ -211,7 +211,7 @@ export default function HomePage() {
             How TaskConnect Works
           </h2>
           <p className="text-sm sm:text-base text-slate-400 mt-3 max-w-xl mx-auto">
-            From listing a job to final payment release, our platform ensures a smooth, risk-free experience for both parties.
+            From listing a job to final payment release, our platform ensures a smooth, secure experience for both parties.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 text-left">
@@ -221,7 +221,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Post Your Task</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Tell us what you need done, set your budget, select date and location on the interactive map, and post for free.
+                Tell us what you need done, set your budget, select date and location on the interactive map, and publish your listing.
               </p>
             </div>
 

@@ -40,13 +40,13 @@ export default function TrustSafetyPage() {
             <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
               <UserCheck className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900">Government ID Verification (KYC)</h3>
+            <h3 className="text-xl font-bold text-slate-900">Photo ID Verification</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Taskers can upload official government-issued photo identification (Driver's License, Passport). Our compliance officers inspect documents before awarding the green <strong>Verified Tasker Badge</strong>.
+              Taskers can submit official government-issued photo identification (Driver's License, Passport). Platform administrators review submissions before awarding the green <strong>Verified Tasker Badge</strong>.
             </p>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span>Certified identity verification records encrypted with AES-256</span>
+              <span>Identity review records and verified user profiles with access controls</span>
             </div>
           </div>
 

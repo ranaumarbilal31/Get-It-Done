@@ -1,0 +1,19 @@
+# TaskConnect Robots Exclusion Protocol
+User-agent: *
+Allow: /
+Allow: /tasks
+Allow: /categories
+Allow: /about
+Allow: /trust-safety
+Allow: /faq
+Allow: /contact
+Allow: /terms
+Allow: /privacy
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /profile
+Disallow: /profile/*
+Disallow: /dashboard
+Disallow: /dashboard/*
+
+Sitemap: https://get-it-done-phalanx1.vercel.app/sitemap.xml

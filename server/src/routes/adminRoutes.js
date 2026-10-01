@@ -6,6 +6,7 @@ const { validate, adminSchemas } = require('../middleware/validate');
 
 router.use(authenticate, requireAdmin);
 
+router.get('/health', adminController.getDetailedHealth);
 router.get('/stats', adminController.getStats);
 router.get('/users', adminController.getUsers);
 router.get('/verifications/pending', adminController.getPendingVerifications);
