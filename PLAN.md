@@ -73,13 +73,13 @@ graph TD
 ---
 
 ### Phase 6: Free Hosting & Live Demo Deployment
-- [ ] **Task 6.1: Cloud Database Provisioning on Neon.tech**
-  - Create free Postgres project and configure `DATABASE_URL`.
-- [ ] **Task 6.2: Deploy Backend Web Service on Render.com**
-  - Connect GitHub repo, configure build/start commands and environment variables.
+- [x] **Task 6.1: Cloud Database Provisioning on Neon.tech**
+  - Provisioned free PostgreSQL 18.6 database in AWS Ohio (`us-east-2`); applied schema migration and seeded 5 demo accounts, 6 categories, 4 marketplace tasks, bids, escrow, and reviews.
+- [x] **Task 6.2: Deploy Backend Web Service on Render.com**
+  - Deployed live Web Service at [https://taskconnect-api.onrender.com](https://taskconnect-api.onrender.com) with WebSockets, JWT auth, and active database connection verified via `/api/health`.
 - [ ] **Task 6.3: Deploy Frontend SPA on Vercel.com**
-  - Connect GitHub repo, configure Vite build and `VITE_API_URL`.
-- [ ] **Task 6.4: Smoke-test live production URL**
+  - Connect GitHub repo to Vercel, configure Vite root directory (`client`), and set `VITE_API_URL=https://taskconnect-api.onrender.com`.
+- [ ] **Task 6.4: Smoke-test live production full-stack user flows**
 
 ---
 

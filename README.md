@@ -1,10 +1,14 @@
 # TaskConnect — Community Task Marketplace
 
 [![CI Pipeline](https://github.com/ranaumarbilal31/Get-It-Done/actions/workflows/ci.yml/badge.svg)](https://github.com/ranaumarbilal31/Get-It-Done/actions)
+[![API Status](https://img.shields.io/badge/API-Live%20on%20Render-brightgreen)](https://taskconnect-api.onrender.com/api/health)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Security Tested](https://img.shields.io/badge/Security-OWASP%20Tested%20(27%2F27)-brightgreen)](SECURITY_REPORT.md)
 [![Stack](https://img.shields.io/badge/Stack-React%20%7C%20Node%20%7C%20Postgres%20%7C%20Socket.IO-blue)](DECISIONS.md)
 [![Budget](https://img.shields.io/badge/Budget-%240%20Free%20Tier-teal)](#free-tier-deployment-guide)
+
+> 🌐 **Live Production Backend API:** [https://taskconnect-api.onrender.com](https://taskconnect-api.onrender.com)  
+> 🏥 **Live Health Status:** [https://taskconnect-api.onrender.com/api/health](https://taskconnect-api.onrender.com/api/health)
 
 **TaskConnect** is a production-grade, two-sided task marketplace modeled after **Airtasker** and **TaskRabbit**. Built for a student budget of **$0**, it demonstrates that real-world, high-performance web applications featuring real-time WebSockets, geolocation maps, escrow payment simulations, and administrative identity verification can be engineered entirely using free, open-source software and developer-tier cloud services.
 
