@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// Get backend URL from environment or default to relative path in dev
+const rawApiUrl = import.meta.env.VITE_API_URL || '';
+const cleanApiUrl = rawApiUrl.replace(/\/+$/, '');
+const baseURL = cleanApiUrl ? `${cleanApiUrl}/api` : '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

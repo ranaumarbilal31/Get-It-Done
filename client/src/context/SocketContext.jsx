@@ -10,8 +10,14 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // In dev, Socket connects to backend port 5000 directly or via Vite proxy
-    const socketServerUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '/';
+    // Resolve socket server URL from env, or localhost in dev, or Render in prod
+    const rawUrl = import.meta.env.VITE_API_URL || '';
+    const socketServerUrl = rawUrl
+      ? rawUrl.replace(/\/+$/, '')
+      : window.location.hostname === 'localhost'
+      ? 'http://localhost:5000'
+      : 'https://taskconnect-api.onrender.com';
+
     const newSocket = io(socketServerUrl, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
