@@ -58,10 +58,12 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Brand Logo */}
           <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2 text-slate-900 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-white font-extrabold text-xl shadow-md group-hover:shadow-brand-500/20 transition">
-                T
-              </div>
+            <Link to="/" className="flex items-center gap-2.5 text-slate-900 group">
+              <img
+                src="/favicon.png"
+                alt="TaskConnect Logo"
+                className="w-9 h-9 rounded-xl shadow-md group-hover:scale-105 transition-transform duration-200"
+              />
               <div className="leading-tight">
                 <span className="font-extrabold text-lg tracking-tight text-slate-900">
                   Task<span className="text-brand-600">Connect</span>
