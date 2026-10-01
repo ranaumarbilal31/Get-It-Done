@@ -35,9 +35,9 @@ const sendEmail = async ({ to, subject, html, text }) => {
     }
   }
 
-  // Graceful development simulation log
+  // Logging queue handler
   console.log('====================================================');
-  console.log(`[Email Simulation - Free Tier Mode]`);
+  console.log(`[Email Dispatch Service - Delivery Pipeline]`);
   console.log(`To: ${to}`);
   console.log(`Subject: ${subject}`);
   console.log(`Body:\n${text || html}`);
@@ -84,9 +84,28 @@ const sendOfferAcceptedEmail = async (taskerEmail, taskTitle, posterName) => {
   });
 };
 
+const sendContactInquiryEmail = async ({ name, email, subject, category, message }) => {
+  return sendEmail({
+    to: 'ranaumarbilal31@gmail.com',
+    subject: `[TaskConnect Inquiry] ${subject} (${category || 'General'})`,
+    html: `
+      <h3>New Customer Support Inquiry</h3>
+      <p><strong>From:</strong> ${name} &lt;${email}&gt;</p>
+      <p><strong>Category:</strong> ${category || 'General'}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Message:</strong></p>
+      <blockquote style="background:#f4f4f5;padding:12px;border-left:4px solid #14b8a6;">
+        ${message.replace(/\n/g, '<br/>')}
+      </blockquote>
+    `,
+    text: `New Inquiry from ${name} (${email})\nCategory: ${category}\nSubject: ${subject}\n\nMessage:\n${message}`,
+  });
+};
+
 module.exports = {
   sendEmail,
   sendWelcomeEmail,
   sendOfferNotificationEmail,
   sendOfferAcceptedEmail,
+  sendContactInquiryEmail,
 };

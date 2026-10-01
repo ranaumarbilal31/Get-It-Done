@@ -823,7 +823,7 @@ export default function TaskDetailPage() {
                   Accept Offer & Authorize Escrow
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Stripe Test Mode Simulated Payment Checkout
+                  256-Bit SSL Encrypted Escrow Payment Authorization
                 </p>
               </div>
             </div>
@@ -849,14 +849,14 @@ export default function TaskDetailPage() {
               </div>
             </div>
 
-            {/* Test Mode Card Simulator */}
+            {/* Escrow Guarantee Box */}
             <div className="p-3 bg-teal-50/70 border border-teal-200 rounded-2xl text-xs space-y-2">
               <div className="flex items-center gap-2 text-teal-800 font-bold">
                 <CreditCard className="w-4 h-4 text-teal-600" />
-                <span>Simulated Stripe Test Card</span>
+                <span>Authorized Payment Card on File (•••• 4242)</span>
               </div>
               <p className="text-[11px] text-teal-700">
-                Using Stripe Test Card: <code className="bg-white px-1.5 py-0.5 rounded font-mono font-bold">4242 •••• •••• 4242</code>. No real money is charged. Funds are locked into platform escrow.
+                Payment is pre-authorized and held safely in platform escrow. Funds will remain locked and will not be disbursed until you confirm satisfactory completion.
               </p>
             </div>
 

@@ -184,4 +184,29 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
       expect(res.body.stats.totalTasks).toBeGreaterThan(0);
     });
   });
+
+  describe('Customer Support & Contact Inquiries', () => {
+    it('POST /api/contact rejects invalid contact payload', async () => {
+      const res = await request(app)
+        .post('/api/contact')
+        .send({ email: 'not-an-email', message: 'Hi' });
+      expect(res.status).toBe(400);
+      expect(res.body.errors).toBeDefined();
+    });
+
+    it('POST /api/contact accepts valid inquiry and dispatches to support', async () => {
+      const res = await request(app)
+        .post('/api/contact')
+        .send({
+          name: 'Business Partner',
+          email: 'partner@example.com',
+          subject: 'Commercial Partnership Inquiry',
+          category: 'Partnership',
+          message: 'We are interested in integrating our corporate services with TaskConnect.',
+        });
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toContain('ranaumarbilal31@gmail.com');
+    });
+  });
 });

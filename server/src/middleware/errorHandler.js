@@ -16,10 +16,15 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+  const statusCode = res.statusCode >= 400 && res.statusCode < 600 ? res.statusCode : 500;
+  const isProduction = process.env.NODE_ENV === 'production';
+  const safeMessage = (isProduction && statusCode === 500)
+    ? 'An unexpected system error occurred. Please try again or contact support.'
+    : (err.message || 'An internal server error occurred.');
+
   res.status(statusCode).json({
-    message: err.message || 'An internal server error occurred',
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    message: safeMessage,
+    ...(isProduction ? {} : { stack: err.stack }),
   });
 };
 

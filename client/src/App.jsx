@@ -14,6 +14,12 @@ import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ContactPage from './pages/ContactPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import AboutPage from './pages/AboutPage';
+import TrustSafetyPage from './pages/TrustSafetyPage';
+import FaqPage from './pages/FaqPage';
 
 export default function App() {
   return (
@@ -34,6 +40,12 @@ export default function App() {
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/trust-safety" element={<TrustSafetyPage />} />
+                  <Route path="/faq" element={<FaqPage />} />
                 </Routes>
               </main>
               <Footer />

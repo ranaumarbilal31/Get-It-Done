@@ -20,9 +20,17 @@ const messageRoutes = require('./routes/messageRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
 const server = http.createServer(app);
+
+// Enterprise HTTP Security Headers & Permissions Policy
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=(), payment=(self)');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
 
 // 1. HTTP Security Headers with Helmet
 app.use(
@@ -145,6 +153,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

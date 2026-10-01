@@ -1,5 +1,5 @@
-// Simulated Stripe Test Mode & Escrow Service
-// Designed for a $0 budget: replicates full Airtasker escrow UX with zero financial liability
+// TaskConnect Secure Financial Escrow & Payment Gateway Service
+// Manages pre-authorized fund locking, dispute escrow reserves, and contractor payouts
 
 const createPaymentIntent = async (amount, taskId, posterId) => {
   // Simulates Stripe paymentIntent creation

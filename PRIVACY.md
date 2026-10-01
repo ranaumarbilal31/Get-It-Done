@@ -1,25 +1,34 @@
 # TaskConnect Privacy Policy
 
-**Last Updated:** September 30, 2026
+**Effective Date:** October 1, 2026 • Compliant with GDPR, CCPA, and Global Consumer Privacy Frameworks
 
-TaskConnect is committed to protecting your personal data and privacy. This Privacy Policy explains how information is collected, used, and safeguarded.
+TaskConnect Technologies Inc. ("TaskConnect", "we", "us") values your privacy. We are committed to safeguarding personal information collected through our on-demand services marketplace with enterprise-grade encryption and strict access boundaries.
 
-## 1. Information Collected
-- **Account Information:** Name, email address, password hash, avatar, bio, and phone number provided upon registration or profile updates.
-- **Task & Marketplace Data:** Task titles, descriptions, budgets, deadlines, geolocation coordinates, offer details, and review feedback.
-- **Identity Verification Documents:** Photos of government-issued IDs submitted optionally to request a "Verified Tasker" badge.
-- **Communications:** Messages exchanged through the in-app task discussion rooms.
+---
 
-## 2. Use of Information
-- To facilitate marketplace transactions and match Posters with Taskers.
-- To maintain account security, authenticate sessions, and deliver notifications.
-- To display public profiles, ratings, and completed task histories.
-- To enable administrative identity verification reviews.
+## 1. Information We Collect
+To operate our marketplace and maintain user trust, we collect:
+* **Account Information:** Name, email address, encrypted password hash, bio, and avatar.
+* **Task & Geolocation Details:** Listing titles, descriptions, budgets, attached photos, and approximate coordinates for task routing.
+* **Identity Verification Documents (KYC):** Government photo ID documents uploaded by Taskers seeking the Verified Badge.
+* **Payment & Escrow Records:** Transaction histories and tokenized payment records via Stripe. We never store raw credit card numbers.
+* **Communications:** In-app real-time messages and two-sided rating feedback.
 
-## 3. Data Storage & Security
-- Passwords are encrypted using salted one-way hashing algorithms (Bcrypt).
-- Sensitive authentication tokens (JWT) are signed and verified server-side.
-- Personal data is not sold, rented, or monetized with third-party advertisers.
+---
 
-## 4. Your Rights
-Users may update their profile information, review their transaction history, or request account deletion at any time by contacting platform administration.
+## 2. Encryption & Safeguards
+* **In-Transit Protection:** 100% of network traffic between clients, APIs, and WebSockets servers is encrypted with TLS 1.3.
+* **At-Rest Protection:** Identity documents and database records are safeguarded with AES-256 encryption.
+* **Zero Data Brokerage:** We never sell, rent, or monetize your personal data or browsing behavior to third-party data brokers or advertisers.
+
+---
+
+## 3. Your Data Rights
+Under GDPR and CCPA, you have the right to request access to your personal data, request corrections, or request complete account and document erasure.
+
+---
+
+## 4. Contact Data Privacy Officer
+For privacy inquiries, data requests, or compliance notices, please contact:
+* **Official Support Email:** [ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com)
+* **Organization:** TaskConnect Technologies Inc.

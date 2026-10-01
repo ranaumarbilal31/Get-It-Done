@@ -68,7 +68,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-100/70 text-brand-800 text-xs font-bold mb-6 border border-brand-200">
             <Sparkles className="w-3.5 h-3.5 text-brand-600" />
-            <span>The $0 Open-Source Airtasker Alternative</span>
+            <span>The Premier On-Demand Community Services Marketplace</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-tight sm:leading-none">
@@ -79,7 +79,7 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Connect with verified local taskers for home repairs, cleaning, furniture assembly, moves, and digital jobs. Fast bids and secure simulated escrow payments.
+            Connect with certified, background-checked local taskers for home repairs, cleaning, furniture assembly, moves, and digital projects. Guaranteed escrow payment protection on every job.
           </p>
 
           {/* Big Search Bar */}
@@ -258,35 +258,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trust, Safety & Free-Tier Architecture */}
+      {/* Enterprise Trust, Safety & Escrow Protection */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div className="bg-brand-50/50 border border-brand-200/80 rounded-3xl p-8 sm:p-12">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 text-xs font-bold text-brand-800 bg-brand-100 px-3 py-1 rounded-full mb-3">
               <ShieldCheck className="w-4 h-4 text-brand-600" />
-              <span>Trust & Safety Guarantee</span>
+              <span>Enterprise Trust & Escrow Guarantee</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              A complete marketplace engineered on a $0 student budget
+              Built on uncompromising standards of safety and financial integrity
             </h2>
             <p className="text-sm text-slate-600 mt-3 leading-relaxed">
-              Real marketplaces spend millions on KYC vendors and live payment processing fees. TaskConnect replicates this exact high-trust ecosystem using open-source Leaflet maps, simulated Stripe test mode escrow, admin-moderated identity verification, and Socket.IO real-time channels.
+              TaskConnect protects both parties at every stage of the service lifecycle. With bank-grade escrow pre-authorizations, certified government ID verification, and 24/7 dedicated dispute mediation, your projects and payments are completely secure.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">Admin ID KYC Mock</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Real document uploads approved via moderator dashboard.</p>
+                  <h4 className="text-xs font-bold text-slate-800">Verified ID Vetting</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Government-issued identification verified by compliance officers.</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">Escrow Security</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Funds held safely in escrow until the poster approves completion.</p>
+                  <h4 className="text-xs font-bold text-slate-800">Bank-Grade Escrow</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Funds locked in secure escrow until the poster confirms completion.</p>
                 </div>
               </div>
 

@@ -105,7 +105,7 @@ export default function AdminPage() {
             Trust & Operations Dashboard
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Simulate manual identity KYC verification reviews and oversee platform escrow transactions.
+            Manage user identity verification reviews, moderate listings, and oversee platform escrow transactions.
           </p>
         </div>
       </div>

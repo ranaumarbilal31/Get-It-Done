@@ -97,6 +97,16 @@ const adminSchemas = {
   }),
 };
 
+const contactSchemas = {
+  submitInquiry: z.object({
+    name: z.string().trim().min(2, 'Name must be at least 2 characters').max(80, 'Name cannot exceed 80 characters'),
+    email: z.string().trim().email('Please enter a valid email address').toLowerCase(),
+    subject: z.string().trim().min(3, 'Subject must be at least 3 characters').max(150, 'Subject cannot exceed 150 characters'),
+    category: z.string().trim().max(50).optional(),
+    message: z.string().trim().min(10, 'Message must be at least 10 characters').max(3000, 'Message cannot exceed 3000 characters'),
+  }),
+};
+
 module.exports = {
   validate,
   authSchemas,
@@ -104,4 +114,5 @@ module.exports = {
   offerSchemas,
   reviewSchemas,
   adminSchemas,
+  contactSchemas,
 };
