@@ -26,7 +26,41 @@ export default function AdminPage() {
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionSuccess, setActionSuccess] = useState('');
-  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [docModalOpen, setDocModalOpen] = useState(false);
+  const [docPreviewUrl, setDocPreviewUrl] = useState(null);
+  const [docLoading, setDocLoading] = useState(false);
+  const [docError, setDocError] = useState('');
+
+  const handleOpenDocModal = async (docPath) => {
+    setDocModalOpen(true);
+    setDocLoading(true);
+    setDocError('');
+    if (docPreviewUrl && docPreviewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(docPreviewUrl);
+      setDocPreviewUrl(null);
+    }
+    try {
+      if (docPath.startsWith('http://') || docPath.startsWith('https://')) {
+        setDocPreviewUrl(docPath);
+      } else {
+        const res = await api.get(docPath, { responseType: 'blob' });
+        const blobUrl = URL.createObjectURL(res.data);
+        setDocPreviewUrl(blobUrl);
+      }
+    } catch (err) {
+      setDocError('Unable to load document preview. Only authorized administrators can access identity documents.');
+    } finally {
+      setDocLoading(false);
+    }
+  };
+
+  const handleCloseDocModal = () => {
+    setDocModalOpen(false);
+    if (docPreviewUrl && docPreviewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(docPreviewUrl);
+    }
+    setDocPreviewUrl(null);
+  };
 
   // Protect Admin route
   useEffect(() => {
@@ -215,7 +249,7 @@ export default function AdminPage() {
                 <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                   {pUser.idDocument && (
                     <button
-                      onClick={() => setSelectedDoc(pUser.idDocument)}
+                      onClick={() => handleOpenDocModal(pUser.idDocument)}
                       className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1 transition"
                     >
                       <Eye className="w-3.5 h-3.5" /> View Uploaded ID
@@ -252,7 +286,7 @@ export default function AdminPage() {
                 <th className="p-3 rounded-l-xl">User</th>
                 <th className="p-3">Role</th>
                 <th className="p-3">Trust Status</th>
-                <th className="p-3">Wallet</th>
+                <th className="p-3">Activity</th>
                 <th className="p-3">Rating</th>
                 <th className="p-3 rounded-r-xl text-right">Actions</th>
               </tr>
@@ -287,8 +321,8 @@ export default function AdminPage() {
                       <span className="text-[11px] text-slate-400 font-medium">Unverified</span>
                     )}
                   </td>
-                  <td className="p-3 font-semibold text-slate-900">
-                    ${(u.walletBalance || 0).toFixed(2)}
+                  <td className="p-3 font-semibold text-slate-700">
+                    {u._count?.tasksPosted || 0} posted • {u._count?.offers || 0} offers
                   </td>
                   <td className="p-3">
                     {u.ratingAvg > 0 ? `${u.ratingAvg} ★ (${u.ratingCount})` : 'No reviews'}
@@ -309,20 +343,32 @@ export default function AdminPage() {
       </div>
 
       {/* ID Document Preview Modal */}
-      {selectedDoc && (
+      {docModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-900 text-sm">Submitted ID Document Preview</h3>
-              <button onClick={() => setSelectedDoc(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+              <button onClick={handleCloseDocModal} className="text-slate-400 hover:text-slate-600">✕</button>
             </div>
-            <div className="rounded-2xl overflow-hidden border border-slate-200 max-h-96 flex items-center justify-center bg-slate-100">
-              <img src={selectedDoc} alt="User ID Document" className="w-full h-auto object-contain" />
+            <div className="rounded-2xl overflow-hidden border border-slate-200 min-h-56 max-h-96 flex items-center justify-center bg-slate-100 p-2">
+              {docLoading ? (
+                <div className="text-center py-10">
+                  <div className="w-8 h-8 border-3 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                  <p className="text-xs text-slate-500 font-medium">Authorizing and retrieving document...</p>
+                </div>
+              ) : docError ? (
+                <div className="text-center p-6 text-xs text-rose-600 font-medium">
+                  <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto mb-2" />
+                  {docError}
+                </div>
+              ) : docPreviewUrl ? (
+                <img src={docPreviewUrl} alt="User ID Document" className="w-full h-auto max-h-80 object-contain rounded-xl" />
+              ) : null}
             </div>
             <div className="text-right">
               <button
-                onClick={() => setSelectedDoc(null)}
-                className="px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl"
+                onClick={handleCloseDocModal}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition"
               >
                 Close Preview
               </button>

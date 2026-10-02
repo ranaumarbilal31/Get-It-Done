@@ -95,7 +95,7 @@ async function main() {
       name: 'Sarah Jenkins',
       email: 'sarah@example.com',
       password: passwordHash,
-      role: 'USER',
+      role: 'POSTER',
       isVerified: true,
       verificationStatus: 'APPROVED',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
@@ -149,6 +149,19 @@ async function main() {
       verificationNotes: 'Submitted Driver License (Front & Back) for Tasker Verification Badge',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
       bio: 'Passionate gardener and landscape designer looking to take on local lawn care tasks.',
+    },
+  });
+
+  const applicantDavid = await prisma.user.create({
+    data: {
+      name: 'David Miller',
+      email: 'david@example.com',
+      password: passwordHash,
+      role: 'USER',
+      isVerified: false,
+      verificationStatus: 'NONE',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      bio: 'New Tasker applicant eager to submit verification documents.',
     },
   });
 

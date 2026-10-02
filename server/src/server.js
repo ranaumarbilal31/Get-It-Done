@@ -239,7 +239,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 
 // Unmatched API Route JSON 404 Handler
-app.all('/api/*', (req, res) => {
+app.all(['/api', '/api/*'], (req, res) => {
   res.status(404).json({
     code: 'NOT_FOUND',
     error: 'Not Found',

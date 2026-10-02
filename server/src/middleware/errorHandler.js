@@ -5,14 +5,22 @@ const errorHandler = (err, req, res, next) => {
   if (err.code === 'P2002') {
     const field = err.meta?.target ? err.meta.target : 'field';
     return res.status(400).json({
+      code: 'RECORD_EXISTS',
       message: `A record with this ${field} already exists.`,
     });
   }
 
-  // Multer errors
-  if (err.name === 'MulterError') {
+  // Multer errors or custom file upload errors
+  if (
+    err.name === 'MulterError' ||
+    err.code === 'INVALID_FILE_TYPE' ||
+    err.code === 'FILE_TOO_LARGE' ||
+    err.status === 400 ||
+    (err.message && err.message.includes('Only image files'))
+  ) {
     return res.status(400).json({
-      message: `File upload error: ${err.message}`,
+      code: err.code || 'INVALID_FILE_TYPE',
+      message: err.message || 'File upload error occurred.',
     });
   }
 

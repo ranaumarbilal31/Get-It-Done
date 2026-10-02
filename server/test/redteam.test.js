@@ -400,5 +400,151 @@ describe('Red Team Offensive Security Battery', () => {
       expect(res.body.code).toBe('INVALID_SORT_BY');
     });
   });
+
+  // TEST 12: KYC Role Ineligibility Guard & Safe Multer File Upload Defense (E-01 & E-02)
+  describe('ATTACK VECTOR 12: KYC Role Ineligibility Guard & Safe File Upload Defense (E-01 & E-02)', () => {
+    let unverifiedToken = '';
+    let pendingToken = '';
+
+    beforeAll(async () => {
+      const davidRes = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'david@example.com', password: 'Password123!' });
+      unverifiedToken = davidRes.body.token;
+
+      const jessicaRes = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'jessica@example.com', password: 'Password123!' });
+      pendingToken = jessicaRes.body.token;
+    });
+
+    it('Rejects POST /api/auth/verify-id for POSTER account with 403 ROLE_INELIGIBLE before file parsing (E-02)', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-id')
+        .set('Authorization', `Bearer ${posterToken}`)
+        .attach('idDocument', Buffer.from('fake plaintext id content'), 'fake_id.txt');
+
+      expect(res.status).toBe(403);
+      expect(res.status).not.toBe(500);
+      expect(res.body.code).toBe('ROLE_INELIGIBLE');
+      expect(res.body.message).toContain('ineligible for Tasker KYC');
+    });
+
+    it('Rejects POST /api/auth/verify-id for ADMIN account with 403 ROLE_INELIGIBLE before file parsing (E-02)', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-id')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .attach('idDocument', Buffer.from('fake plaintext id content'), 'fake_id.txt');
+
+      expect(res.status).toBe(403);
+      expect(res.status).not.toBe(500);
+      expect(res.body.code).toBe('ROLE_INELIGIBLE');
+    });
+
+    it('Rejects POST /api/auth/verify-id for already-verified Tasker with 400 ALREADY_VERIFIED (E-02)', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-id')
+        .set('Authorization', `Bearer ${taskerToken}`)
+        .attach('idDocument', Buffer.from('fake plaintext id content'), 'fake_id.txt');
+
+      expect(res.status).toBe(400);
+      expect(res.status).not.toBe(500);
+      expect(res.body.code).toBe('ALREADY_VERIFIED');
+    });
+
+    it('Rejects POST /api/auth/verify-id for pending KYC user with 400 VERIFICATION_PENDING (E-02)', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-id')
+        .set('Authorization', `Bearer ${pendingToken}`)
+        .attach('idDocument', Buffer.from('fake plaintext id content'), 'fake_id.txt');
+
+      expect(res.status).toBe(400);
+      expect(res.status).not.toBe(500);
+      expect(res.body.code).toBe('VERIFICATION_PENDING');
+    });
+
+    it('Returns HTTP 400 INVALID_FILE_TYPE when eligible applicant uploads harmless invalid file (.txt) (E-01)', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-id')
+        .set('Authorization', `Bearer ${unverifiedToken}`)
+        .attach('idDocument', Buffer.from('This is a plain text file, not an image.'), 'document.txt');
+
+      expect(res.status).toBe(400);
+      expect(res.status).not.toBe(500);
+      expect(res.body.code).toBe('INVALID_FILE_TYPE');
+      expect(res.body.message).toContain('Only image files');
+    });
+
+    it('Accepts valid document upload (.png / .jpg / .pdf) for unverified applicant and sets PENDING state', async () => {
+      const pngBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+      const res = await request(app)
+        .post('/api/auth/verify-id')
+        .set('Authorization', `Bearer ${unverifiedToken}`)
+        .attach('idDocument', pngBuffer, 'valid_id.png')
+        .field('notes', 'State Driver License Front');
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.verificationStatus).toBe('PENDING');
+    });
+  });
+
+  // TEST 13: Admin PII Protection & KYC Document Isolation (E-04)
+  describe('ATTACK VECTOR 13: Admin PII Protection & KYC Document Isolation (E-04)', () => {
+    it('GET /api/admin/users does NOT expose idDocument, verificationNotes, or walletBalance in bulk listings', async () => {
+      const res = await request(app)
+        .get('/api/admin/users?limit=50')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.users)).toBe(true);
+      expect(res.body.users.length).toBeGreaterThan(0);
+
+      for (const u of res.body.users) {
+        expect(u.idDocument).toBeUndefined();
+        expect(u.verificationNotes).toBeUndefined();
+        expect(u.walletBalance).toBeUndefined();
+      }
+    });
+
+    it('GET /api/admin/verifications/pending points document to authorized inspection endpoint', async () => {
+      const res = await request(app)
+        .get('/api/admin/verifications/pending')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.pendingUsers)).toBe(true);
+
+      for (const p of res.body.pendingUsers) {
+        if (p.idDocument) {
+          expect(p.idDocument).toMatch(/^\/api\/admin\/verifications\/[a-zA-Z0-9-]+\/document$/);
+        }
+      }
+    });
+
+    it('Rejects non-admin access to document inspection endpoint with 403 Forbidden', async () => {
+      const res = await request(app)
+        .get('/api/admin/verifications/fake-user-id/document')
+        .set('Authorization', `Bearer ${taskerToken}`);
+
+      expect(res.status).toBe(403);
+    });
+  });
+
+  // TEST 14: Root API 404 Route Defense (E-05)
+  describe('ATTACK VECTOR 14: Root API 404 Route Defense (E-05)', () => {
+    it('GET /api returns application/json HTTP 404 (not HTML 200)', async () => {
+      const res = await request(app).get('/api');
+      expect(res.status).toBe(404);
+      expect(res.headers['content-type']).toContain('application/json');
+      expect(res.body.code).toBe('NOT_FOUND');
+    });
+
+    it('GET /api/does-not-exist returns application/json HTTP 404 (not HTML 200)', async () => {
+      const res = await request(app).get('/api/does-not-exist');
+      expect(res.status).toBe(404);
+      expect(res.headers['content-type']).toContain('application/json');
+      expect(res.body.code).toBe('NOT_FOUND');
+    });
+  });
 });
 

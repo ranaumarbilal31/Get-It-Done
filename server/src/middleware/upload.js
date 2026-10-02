@@ -20,13 +20,17 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|webp|gif|pdf/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
+  const extValid = allowedTypes.test(ext);
+  const mimetypeValid = allowedTypes.test(file.mimetype);
 
-  if (extname && mimetype) {
+  if (extValid && mimetypeValid) {
     return cb(null, true);
   }
-  cb(new Error('Only image files (jpg, png, webp) and PDF documents are allowed!'));
+  const error = new Error('Only image files (jpg, png, webp) and PDF documents are allowed!');
+  error.code = 'INVALID_FILE_TYPE';
+  error.status = 400;
+  cb(error);
 };
 
 const upload = multer({
@@ -34,5 +38,38 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter,
 });
+
+/**
+ * Safe upload middleware wrapper that handles Multer errors cleanly
+ * and prevents unhandled 500 errors.
+ */
+const handleUploadSingle = (fieldName) => {
+  const single = upload.single(fieldName);
+  return (req, res, next) => {
+    single(req, res, (err) => {
+      if (err) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({
+            code: 'FILE_TOO_LARGE',
+            message: 'File size exceeds maximum allowed limit of 10MB.',
+          });
+        }
+        if (err.name === 'MulterError') {
+          return res.status(400).json({
+            code: 'UPLOAD_ERROR',
+            message: `File upload error: ${err.message}`,
+          });
+        }
+        return res.status(400).json({
+          code: err.code || 'INVALID_FILE_TYPE',
+          message: err.message || 'Only image files (jpg, png, webp) and PDF documents are allowed!',
+        });
+      }
+      next();
+    });
+  };
+};
+
+upload.handleUploadSingle = handleUploadSingle;
 
 module.exports = upload;

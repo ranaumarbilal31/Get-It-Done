@@ -82,8 +82,49 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+/**
+ * KYC Submission Eligibility Guard:
+ * Ensures authorization and eligibility checks occur BEFORE any file upload processing.
+ * - Posters and Admins are rejected with HTTP 403 (ROLE_INELIGIBLE)
+ * - Already verified users are rejected with HTTP 400 (ALREADY_VERIFIED)
+ * - Users with pending submissions are rejected with HTTP 400 (VERIFICATION_PENDING)
+ */
+const requireKYCEligible = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      code: 'UNAUTHORIZED',
+      message: 'Authentication required. No session found.',
+    });
+  }
+
+  const role = (req.user.role || '').toUpperCase();
+  if (role === 'POSTER' || role === 'ADMIN') {
+    return res.status(403).json({
+      code: 'ROLE_INELIGIBLE',
+      message: 'This account role is ineligible for Tasker KYC identity verification.',
+    });
+  }
+
+  if (req.user.isVerified || req.user.verificationStatus === 'APPROVED') {
+    return res.status(400).json({
+      code: 'ALREADY_VERIFIED',
+      message: 'Your identity has already been verified and approved.',
+    });
+  }
+
+  if (req.user.verificationStatus === 'PENDING') {
+    return res.status(400).json({
+      code: 'VERIFICATION_PENDING',
+      message: 'You already have an identity verification submission pending review.',
+    });
+  }
+
+  next();
+};
+
 module.exports = {
   authenticate,
   optionalAuth,
   requireAdmin,
+  requireKYCEligible,
 };

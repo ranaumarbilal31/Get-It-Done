@@ -29,7 +29,7 @@
   "rewrites": [
     {
       "source": "/api",
-      "destination": "https://taskconnect-api.onrender.com/api/health"
+      "destination": "https://taskconnect-api.onrender.com/api"
     },
     {
       "source": "/api/:match*",

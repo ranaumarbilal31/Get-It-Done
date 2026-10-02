@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const prisma = require('../config/prisma');
 
 const getStats = async (req, res, next) => {
@@ -100,9 +102,6 @@ const getUsers = async (req, res, next) => {
           avatar: true,
           isVerified: true,
           verificationStatus: true,
-          idDocument: true,
-          verificationNotes: true,
-          walletBalance: true,
           ratingAvg: true,
           ratingCount: true,
           createdAt: true,
@@ -124,7 +123,7 @@ const getUsers = async (req, res, next) => {
       users,
       pagination: {
         total,
-        page: parseInt(page, 10),
+        page: parsedPage,
         pages: Math.ceil(total / take),
         limit: take,
       },
@@ -143,14 +142,54 @@ const getPendingVerifications = async (req, res, next) => {
         name: true,
         email: true,
         avatar: true,
-        idDocument: true,
+        verificationStatus: true,
         verificationNotes: true,
         createdAt: true,
+        idDocument: true,
       },
       orderBy: { createdAt: 'asc' },
     });
 
-    res.json({ pendingUsers });
+    const sanitizedUsers = pendingUsers.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      avatar: u.avatar,
+      verificationStatus: u.verificationStatus,
+      verificationNotes: u.verificationNotes,
+      createdAt: u.createdAt,
+      // Provide authorized document route instead of leaking raw storage links
+      idDocument: u.idDocument ? `/api/admin/verifications/${u.id}/document` : null,
+    }));
+
+    res.json({ pendingUsers: sanitizedUsers });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getVerificationDocument = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, idDocument: true },
+    });
+
+    if (!user || !user.idDocument) {
+      return res.status(404).json({ code: 'NOT_FOUND', message: 'No verification document found for this user.' });
+    }
+
+    if (user.idDocument.startsWith('http://') || user.idDocument.startsWith('https://')) {
+      return res.redirect(user.idDocument);
+    }
+
+    const filePath = path.resolve(user.idDocument);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ code: 'NOT_FOUND', message: 'Document file not found on disk.' });
+    }
+
+    res.sendFile(filePath);
   } catch (error) {
     next(error);
   }
@@ -253,6 +292,7 @@ module.exports = {
   getStats,
   getUsers,
   getPendingVerifications,
+  getVerificationDocument,
   updateVerificationStatus,
   toggleUserRole,
   getDetailedHealth,
