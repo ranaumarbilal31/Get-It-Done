@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import request from 'supertest';
+import bcrypt from 'bcryptjs';
 import { app } from '../src/server.js';
 import prisma from '../src/config/prisma.js';
 
@@ -407,6 +408,20 @@ describe('Red Team Offensive Security Battery', () => {
     let pendingToken = '';
 
     beforeAll(async () => {
+      const passwordHash = await bcrypt.hash('Password123!', 10);
+      await prisma.user.upsert({
+        where: { email: 'david@example.com' },
+        update: { isVerified: false, verificationStatus: 'NONE', idDocument: null, role: 'USER' },
+        create: {
+          name: 'David Miller',
+          email: 'david@example.com',
+          password: passwordHash,
+          role: 'USER',
+          isVerified: false,
+          verificationStatus: 'NONE',
+        },
+      });
+
       const davidRes = await request(app)
         .post('/api/auth/login')
         .send({ email: 'david@example.com', password: 'Password123!' });
@@ -416,6 +431,17 @@ describe('Red Team Offensive Security Battery', () => {
         .post('/api/auth/login')
         .send({ email: 'jessica@example.com', password: 'Password123!' });
       pendingToken = jessicaRes.body.token;
+    });
+
+    beforeEach(async () => {
+      await prisma.user.updateMany({
+        where: { email: 'david@example.com' },
+        data: { isVerified: false, verificationStatus: 'NONE', idDocument: null },
+      });
+      await prisma.user.updateMany({
+        where: { email: 'jessica@example.com' },
+        data: { isVerified: false, verificationStatus: 'PENDING' },
+      });
     });
 
     it('Rejects POST /api/auth/verify-id for POSTER account with 403 ROLE_INELIGIBLE before file parsing (E-02)', async () => {
