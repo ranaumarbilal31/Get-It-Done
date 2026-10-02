@@ -108,7 +108,13 @@ const getTasks = async (req, res, next) => {
     // 2. Strict Filter Validations
     const validStatuses = ['ALL', 'OPEN', 'ASSIGNED', 'COMPLETED', 'CANCELLED'];
     if (status !== undefined && status !== '') {
-      const normalizedStatus = String(status).trim().toUpperCase();
+      if (typeof status !== 'string') {
+        return res.status(400).json({
+          code: 'INVALID_STATUS',
+          message: 'Query parameter "status" must be a single string.',
+        });
+      }
+      const normalizedStatus = status.trim().toUpperCase();
       if (!validStatuses.includes(normalizedStatus)) {
         return res.status(400).json({
           code: 'INVALID_STATUS',
@@ -120,14 +126,28 @@ const getTasks = async (req, res, next) => {
       }
     }
 
-    if (category && category !== 'all') {
-      where.OR = [
-        { categoryId: category },
-        { category: { slug: category } },
-      ];
+    if (category !== undefined && category !== '') {
+      if (typeof category !== 'string') {
+        return res.status(400).json({
+          code: 'INVALID_CATEGORY',
+          message: 'Query parameter "category" must be a single string.',
+        });
+      }
+      if (category !== 'all') {
+        where.OR = [
+          { categoryId: category },
+          { category: { slug: category } },
+        ];
+      }
     }
 
     if (isRemote !== undefined && isRemote !== '') {
+      if (typeof isRemote !== 'string' && typeof isRemote !== 'boolean') {
+        return res.status(400).json({
+          code: 'INVALID_REMOTE',
+          message: 'Query parameter "isRemote" must be a boolean string.',
+        });
+      }
       where.isRemote = isRemote === 'true';
     }
 
@@ -163,14 +183,30 @@ const getTasks = async (req, res, next) => {
     }
 
     // 3. Strict Sort & Order Validation
-    const validSortFields = ['createdAt', 'budget', 'dueDate', 'title'];
-    if (sortBy && !validSortFields.includes(sortBy)) {
-      return res.status(400).json({
-        code: 'INVALID_SORT_BY',
-        message: `Invalid sortBy "${sortBy}". Allowed values: ${validSortFields.join(', ')}`,
-      });
+    if (sortBy !== undefined && sortBy !== '') {
+      if (typeof sortBy !== 'string') {
+        return res.status(400).json({
+          code: 'INVALID_SORT_BY',
+          message: 'Query parameter "sortBy" must be a string.',
+        });
+      }
+      const validSortFields = ['createdAt', 'budget', 'dueDate', 'title'];
+      if (!validSortFields.includes(sortBy)) {
+        return res.status(400).json({
+          code: 'INVALID_SORT_BY',
+          message: `Invalid sortBy "${sortBy}". Allowed values: ${validSortFields.join(', ')}`,
+        });
+      }
     }
 
+    if (order !== undefined && order !== '') {
+      if (typeof order !== 'string') {
+        return res.status(400).json({
+          code: 'INVALID_ORDER',
+          message: 'Query parameter "order" must be a string.',
+        });
+      }
+    }
     const normalizedOrder = String(order || 'desc').toLowerCase();
     if (!['asc', 'desc'].includes(normalizedOrder)) {
       return res.status(400).json({
@@ -179,7 +215,19 @@ const getTasks = async (req, res, next) => {
       });
     }
 
-    if (search) {
+    if (search !== undefined && search !== '') {
+      if (typeof search !== 'string') {
+        return res.status(400).json({
+          code: 'INVALID_SEARCH',
+          message: 'Query parameter "search" must be a single string.',
+        });
+      }
+      if (search.includes('\0') || search.includes('\u0000') || search.includes('%00')) {
+        return res.status(400).json({
+          code: 'INVALID_INPUT',
+          message: 'Input contains invalid characters (null byte).',
+        });
+      }
       where.OR = [
         { title: { contains: search } },
         { description: { contains: search } },

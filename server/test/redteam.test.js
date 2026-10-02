@@ -353,5 +353,52 @@ describe('Red Team Offensive Security Battery', () => {
       expect(res.body.code).toBe('NOT_FOUND');
     });
   });
+
+  // TEST 11: Type Confusion, Array Parameter Injection & Null-Byte Defense
+  describe('ATTACK VECTOR 11: Type Confusion, Array Parameter & Null-Byte Defense', () => {
+    it('Rejects array-style category parameter (category[]=x) with 400 Bad Request without HTTP 500', async () => {
+      const res = await request(app).get('/api/tasks?category[]=x');
+      expect(res.status).toBe(400);
+      expect(res.status).not.toBe(500);
+      expect(res.body.code).toBe('INVALID_CATEGORY');
+    });
+
+    it('Rejects NUL byte in search parameter (search=%00) with 400 Bad Request without HTTP 500', async () => {
+      const res = await request(app).get('/api/tasks?search=%00');
+      expect(res.status).toBe(400);
+      expect(res.status).not.toBe(500);
+      expect(res.body.code).toBe('INVALID_INPUT');
+    });
+
+    it('Rejects prototype pollution attempt in sort parameter (sort=__proto__) with 400 Bad Request', async () => {
+      const res = await request(app).get('/api/tasks?sort=__proto__');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('SUSPICIOUS_INPUT');
+    });
+
+    it('Rejects prototype pollution attempt in query key (__proto__[polluted]=true) with 400 Bad Request', async () => {
+      const res = await request(app).get('/api/tasks?__proto__[polluted]=true');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('SUSPICIOUS_INPUT');
+    });
+
+    it('Rejects array-style search parameter (search[]=x) with 400 Bad Request', async () => {
+      const res = await request(app).get('/api/tasks?search[]=x');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_SEARCH');
+    });
+
+    it('Rejects array-style status parameter (status[]=OPEN) with 400 Bad Request', async () => {
+      const res = await request(app).get('/api/tasks?status[]=OPEN');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_STATUS');
+    });
+
+    it('Rejects array-style sortBy parameter (sortBy[]=title) with 400 Bad Request', async () => {
+      const res = await request(app).get('/api/tasks?sortBy[]=title');
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe('INVALID_SORT_BY');
+    });
+  });
 });
 

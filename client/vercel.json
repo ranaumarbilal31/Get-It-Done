@@ -28,11 +28,15 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://taskconnect-api.onrender.com/api/$1"
+      "source": "/api",
+      "destination": "https://taskconnect-api.onrender.com/api/health"
     },
     {
-      "source": "/(.*)",
+      "source": "/api/:match*",
+      "destination": "https://taskconnect-api.onrender.com/api/:match*"
+    },
+    {
+      "source": "/((?!api(?:/|$)|(?:\\..*)|(?:.*\\..*)).*)",
       "destination": "/index.html"
     }
   ]

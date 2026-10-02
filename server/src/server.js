@@ -148,6 +148,72 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Input Security Guard: Block NUL bytes and Prototype Pollution
+app.use((req, res, next) => {
+  const fullUrl = req.originalUrl || req.url || '';
+
+  // Check for NUL bytes in the raw URL
+  if (fullUrl.includes('%00') || fullUrl.includes('\0') || fullUrl.includes('\u0000')) {
+    return res.status(400).json({
+      code: 'INVALID_INPUT',
+      message: 'Input contains invalid characters (null byte).',
+    });
+  }
+
+  // Check for Prototype Pollution attempts in URL string (keys or values)
+  if (fullUrl.includes('__proto__') || fullUrl.includes('constructor') || fullUrl.includes('prototype')) {
+    return res.status(400).json({
+      code: 'SUSPICIOUS_INPUT',
+      message: 'Suspicious input parameter detected.',
+    });
+  }
+
+  // Recursive checker for objects
+  const hasSecurityViolation = (obj) => {
+    if (!obj || typeof obj !== 'object') return null;
+
+    for (const key of Object.keys(obj)) {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        return {
+          code: 'SUSPICIOUS_INPUT',
+          message: 'Suspicious input parameter detected.',
+        };
+      }
+
+      const val = obj[key];
+      if (typeof val === 'string') {
+        if (val.includes('\0') || val.includes('\u0000') || val.includes('%00')) {
+          return {
+            code: 'INVALID_INPUT',
+            message: 'Input contains invalid characters (null byte).',
+          };
+        }
+        if (val === '__proto__' || val.includes('__proto__')) {
+          return {
+            code: 'SUSPICIOUS_INPUT',
+            message: 'Suspicious input parameter detected.',
+          };
+        }
+      } else if (typeof val === 'object') {
+        const violation = hasSecurityViolation(val);
+        if (violation) return violation;
+      }
+    }
+    return null;
+  };
+
+  const queryViolation = hasSecurityViolation(req.query);
+  if (queryViolation) return res.status(400).json(queryViolation);
+
+  const bodyViolation = hasSecurityViolation(req.body);
+  if (bodyViolation) return res.status(400).json(bodyViolation);
+
+  const paramsViolation = hasSecurityViolation(req.params);
+  if (paramsViolation) return res.status(400).json(paramsViolation);
+
+  next();
+});
+
 // Static local uploads (development fallback)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
