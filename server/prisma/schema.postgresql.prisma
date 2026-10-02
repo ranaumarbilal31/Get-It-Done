@@ -1,4 +1,4 @@
-// TaskConnect Prisma Schema - PostgreSQL Variant (For Neon, Supabase, Render)
+// Get It Done Prisma Schema - PostgreSQL Variant (For Neon, Supabase, Render)
 // To use: rename this to schema.prisma and configure DATABASE_URL="postgresql://user:password@host:5432/dbname"
 
 generator client {

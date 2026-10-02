@@ -15,7 +15,7 @@ const api = axios.create({
 // Request interceptor: attach Bearer token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('taskconnect_token');
+    const token = localStorage.getItem('getitdone_token') || localStorage.getItem('taskconnect_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

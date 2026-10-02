@@ -16,7 +16,7 @@ export default function AboutPage() {
             Redefining How Local Services Get Done
           </h1>
           <p className="mt-4 text-lg text-slate-600 leading-relaxed">
-            TaskConnect was founded on a simple principle: getting quality help for your home, office, or digital business should be fast, transparent, and completely safe.
+            Get It Done was founded on a simple principle: getting quality help for your home, office, or digital business should be fast, transparent, and completely safe.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ export default function AboutPage() {
 
         {/* Call to Action */}
         <div className="text-center bg-white rounded-2xl p-10 border border-slate-200/80 shadow-sm max-w-2xl mx-auto space-y-4">
-          <h2 className="text-2xl font-bold text-slate-900">Ready to Experience TaskConnect?</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Ready to Experience Get It Done?</h2>
           <p className="text-sm text-slate-600">
             Join thousands of posters getting tasks completed, or become an approved tasker and start earning today.
           </p>

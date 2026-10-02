@@ -30,11 +30,13 @@ export default function RegisterPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-16 space-y-6">
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white font-black text-2xl mx-auto shadow-md">
-          T
-        </div>
+        <img
+          src="/favicon.png"
+          alt="Get It Done Logo"
+          className="w-12 h-12 rounded-2xl mx-auto shadow-md"
+        />
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Join TaskConnect
+          Join Get It Done
         </h1>
         <p className="text-xs text-slate-500">
           Sign up to post tasks, submit quotes, or earn money in your local neighborhood.

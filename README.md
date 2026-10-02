@@ -1,4 +1,4 @@
-# 🛠️ TaskConnect — On-Demand Services Marketplace
+# 🛠️ Get It Done — On-Demand Services Marketplace
 
 <div align="center">
 
@@ -6,7 +6,7 @@
 [![API Status](https://img.shields.io/badge/API-Live%20on%20Render-brightgreen?logo=render)](https://taskconnect-api.onrender.com/api/health)
 [![Database](https://img.shields.io/badge/Database-Neon%20Postgres%2018-00E599?logo=postgresql)](https://neon.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Security Tested](https://img.shields.io/badge/Security-OWASP%20Hardened%20(29%2F29)-brightgreen?logo=shield)](SECURITY_REPORT.md)
+[![Security Tested](https://img.shields.io/badge/Security-OWASP%20Hardened%20(65%2F65)-brightgreen?logo=shield)](SECURITY_REPORT.md)
 [![Deployment](https://img.shields.io/badge/Deployment-Production%20Cloud-blue?logo=vercel)](#-cloud-architecture--infrastructure)
 
 **An enterprise-grade, two-sided marketplace for local services and on-demand tasks.**  
@@ -20,7 +20,7 @@ Engineered with real-time bi-directional WebSockets, OpenStreetMap coordinate ma
 
 ## 📌 Product Overview
 
-**TaskConnect** is a commercial-ready, full-stack peer-to-peer service marketplace. Designed for seamless trust and execution, it connects everyday clients (*Posters*) with verified, skilled service providers (*Taskers*) across home services, repairs, moving, and digital projects.
+**Get It Done** is a commercial-ready, full-stack peer-to-peer service marketplace. Designed for seamless trust and execution, it connects everyday clients (*Posters*) with verified, skilled service providers (*Taskers*) across home services, repairs, moving, and digital projects.
 
 The platform provides end-to-end operational coverage: coordinate-based task publishing, dynamic bidding, 256-bit encrypted escrow fund locking, instant bi-directional chat, two-sided 5-star reputation metrics, and administrative document verification.
 
@@ -100,7 +100,7 @@ For instant platform evaluation, the login screen (`/login`) includes **1-Click 
 
 | Role | Demo Email | Password | Primary Capabilities |
 | :--- | :--- | :--- | :--- |
-| 👑 **Administrator** | `admin@taskconnect.com` | `Password123!` | Moderates KYC identity queues, manages platform settings at `/admin`. |
+| 👑 **Administrator** | `admin@getitdone.com` | `Password123!` | Moderates KYC identity queues, manages platform settings at `/admin`. |
 | 📝 **Poster** | `sarah@example.com` | `Password123!` | Publishes tasks, reviews bids, pre-authorizes escrow, confirms completion. |
 | 🔨 **Verified Tasker** | `alex@example.com` | `Password123!` | Handyman specialist with Verified Badge and earned wallet funds. |
 | 🧹 **Verified Tasker** | `elena@example.com` | `Password123!` | Cleaning expert with 5.0 star rating and 20+ verified client reviews. |
@@ -110,7 +110,7 @@ For instant platform evaluation, the login screen (`/login`) includes **1-Click 
 
 ## 🔒 Security Posture & Defense-in-Depth
 
-TaskConnect is engineered according to the **STRIDE threat model** and defends against the OWASP Top 10 vulnerabilities:
+Get It Done is engineered according to the **STRIDE threat model** and defends against the OWASP Top 10 vulnerabilities:
 
 * **HTTP Security Headers:** Configured via **Helmet** with custom Content Security Policy (CSP), `X-Content-Type-Options: nosniff`, and `Permissions-Policy`.
 * **Anti-Spam & DoS Defense:** Multi-tier rate limiting using **express-rate-limit** (15 auth attempts / 15 min; 120 API requests / min; 5 contact inquiries / 15 min).
@@ -118,7 +118,7 @@ TaskConnect is engineered according to the **STRIDE threat model** and defends a
 * **Access Control & IDOR Guard:** Explicit server-side ownership checks preventing unauthorized access to tasks, bids, and financial records.
 * **Sanitized Error Handling:** Production error responses strip all internal database schema names and stack traces.
 
-### 🧪 Automated Test Suite (29/29 Tests Passing)
+### 🧪 Automated Test Suite (65/65 Tests Passing)
 
 ```bash
 $ npm test
@@ -210,7 +210,7 @@ $ npm test
 
 * **Customer Care & Trust Inquiries:** [ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com)
 * **Average Response SLA:** Under 2 hours (24/7 coverage)
-* **Corporate Inquiries:** TaskConnect Technologies Inc.
+* **Corporate Inquiries:** Get It Done Technologies Inc.
 
 ---
 
@@ -227,5 +227,5 @@ $ npm test
 ---
 
 <div align="center">
-© 2026 TaskConnect Technologies Inc. All rights reserved.
+© 2026 Get It Done Technologies Inc. All rights reserved.
 </div>

@@ -1,4 +1,4 @@
-// TaskConnect Secure Financial Escrow & Payment Gateway Service
+// Get It Done Secure Financial Escrow & Payment Gateway Service
 // Manages pre-authorized fund locking, dispute escrow reserves, and contractor payouts
 
 const createPaymentIntent = async (amount, taskId, posterId) => {

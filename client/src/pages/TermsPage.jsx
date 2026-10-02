@@ -26,7 +26,7 @@ export default function TermsPage() {
               1. Introduction & Acceptance of Terms
             </h2>
             <p>
-              Welcome to <strong>TaskConnect</strong> ("TaskConnect," "Platform," "we," "our," or "us"). These Terms of Service constitute a legally binding agreement between you and TaskConnect Technologies Inc. governing your access to and use of the TaskConnect website, mobile applications, APIs, and associated services.
+              Welcome to <strong>Get It Done</strong> ("Get It Done," "Platform," "we," "our," or "us"). These Terms of Service constitute a legally binding agreement between you and Get It Done Technologies Inc. governing your access to and use of the Get It Done website, mobile applications, APIs, and associated services.
             </p>
             <p>
               By creating an account, browsing listings, publishing a task, or submitting an offer, you explicitly represent that you are at least 18 years of age and legally competent to enter into binding contracts. If you do not agree to these Terms, you must immediately discontinue use of the platform.
@@ -38,10 +38,10 @@ export default function TermsPage() {
               2. Marketplace Model & Independent Contractor Relationship
             </h2>
             <p>
-              TaskConnect operates as an <strong>on-demand, two-sided technology marketplace</strong> connecting independent individuals seeking assistance with projects ("Posters") and certified independent contractors or service providers ("Taskers").
+              Get It Done operates as an <strong>on-demand, two-sided technology marketplace</strong> connecting independent individuals seeking assistance with projects ("Posters") and certified independent contractors or service providers ("Taskers").
             </p>
             <ul className="list-disc pl-5 space-y-1 mt-2 text-slate-600">
-              <li>Taskers are independent contractors, not employees, partners, agents, or joint venturers of TaskConnect.</li>
+              <li>Taskers are independent contractors, not employees, partners, agents, or joint venturers of Get It Done.</li>
               <li>Taskers retain full autonomy to determine their work schedules, pricing proposals, methods, tools, and execution of services.</li>
               <li>A direct contractual agreement is created solely between the Poster and the Tasker upon the formal acceptance of an offer on the Platform.</li>
             </ul>
@@ -64,7 +64,7 @@ export default function TermsPage() {
               4. Payment Protection, Escrow Engine & Platform Fees
             </h2>
             <p>
-              To protect both parties against fraud and non-payment, TaskConnect incorporates an automated <strong>Escrow Payment Guarantee</strong>:
+              To protect both parties against fraud and non-payment, Get It Done incorporates an automated <strong>Escrow Payment Guarantee</strong>:
             </p>
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2 mt-3">
               <p className="font-semibold text-slate-900">How Escrow Protection Operates:</p>
@@ -72,7 +72,7 @@ export default function TermsPage() {
                 <li><strong>Pre-Authorization:</strong> When a Poster accepts an offer, the agreed task budget is pre-authorized via encrypted payment gateway and locked securely in platform escrow.</li>
                 <li><strong>Safe Execution:</strong> Funds remain securely held during the performance of the task. The Tasker is protected against non-payment.</li>
                 <li><strong>Release Upon Approval:</strong> Once the Poster inspects and confirms satisfactory completion, the escrow funds are released directly to the Tasker’s digital wallet.</li>
-                <li><strong>Service Fee:</strong> TaskConnect retains a standard marketplace commission fee (10%) from the gross payout to cover payment gateway infrastructure, hosting, real-time messaging, and fraud prevention.</li>
+                <li><strong>Service Fee:</strong> Get It Done retains a standard marketplace commission fee (10%) from the gross payout to cover payment gateway infrastructure, hosting, real-time messaging, and fraud prevention.</li>
               </ol>
             </div>
           </section>
@@ -85,7 +85,7 @@ export default function TermsPage() {
               Either party may request cancellation before work commences. If both parties agree to cancel, or if a Tasker fails to arrive or perform, escrow funds will be fully refunded to the Poster's original payment method.
             </p>
             <p>
-              In the rare event of an unresolvable dispute regarding task quality or completion, either party may escalate to <strong>TaskConnect Dispute Resolution</strong>. Our dedicated mediation officers will review chat logs, uploaded task photos, and contractual terms to issue a binding, impartial settlement.
+              In the rare event of an unresolvable dispute regarding task quality or completion, either party may escalate to <strong>Get It Done Dispute Resolution</strong>. Our dedicated mediation officers will review chat logs, uploaded task photos, and contractual terms to issue a binding, impartial settlement.
             </p>
           </section>
 
@@ -109,7 +109,7 @@ export default function TermsPage() {
               7. Limitation of Liability
             </h2>
             <p>
-              To the maximum extent permitted by applicable law, TaskConnect Technologies Inc. shall not be liable for any indirect, incidental, punitive, or consequential damages resulting from any user's conduct, property damage, or services performed by independent Taskers.
+              To the maximum extent permitted by applicable law, Get It Done Technologies Inc. shall not be liable for any indirect, incidental, punitive, or consequential damages resulting from any user's conduct, property damage, or services performed by independent Taskers.
             </p>
           </section>
 
@@ -121,7 +121,7 @@ export default function TermsPage() {
               For legal notices, terms inquiries, or formal dispute communications, please direct communications to:
             </p>
             <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700">
-              <p><strong>Legal & Corporate Affairs:</strong> TaskConnect Technologies Inc.</p>
+              <p><strong>Legal & Corporate Affairs:</strong> Get It Done Technologies Inc.</p>
               <p className="mt-1">
                 <strong>Official Contact Email:</strong>{' '}
                 <a href="mailto:ranaumarbilal31@gmail.com" className="text-brand-600 font-semibold hover:underline">

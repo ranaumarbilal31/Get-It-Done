@@ -1,6 +1,6 @@
-# TaskConnect: Master Production Roadmap (PLAN.md)
+# Get It Done: Master Production Roadmap (PLAN.md)
 
-**Project:** TaskConnect — Airtasker-Style Community Marketplace  
+**Project:** Get It Done — Professional On-Demand Community Services Marketplace  
 **Engineers:** Lead Engineer, Security Engineer, DevOps Engineer  
 **Repository:** https://github.com/ranaumarbilal31/Get-It-Done  
 **Status:** Phase 7 Complete (Repository Live on GitHub at v1.0.0)  

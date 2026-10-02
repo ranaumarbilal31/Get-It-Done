@@ -36,14 +36,16 @@ export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-16 space-y-6">
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white font-black text-2xl mx-auto shadow-md">
-          T
-        </div>
+        <img
+          src="/favicon.png"
+          alt="Get It Done Logo"
+          className="w-12 h-12 rounded-2xl mx-auto shadow-md"
+        />
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
           Welcome back
         </h1>
         <p className="text-xs text-slate-500">
-          Sign in to your TaskConnect account to manage tasks and offers.
+          Sign in to your Get It Done account to manage tasks and offers.
         </p>
       </div>
 
@@ -63,7 +65,7 @@ export default function LoginPage() {
         <div className="grid grid-cols-3 gap-2 pt-1">
           <button
             type="button"
-            onClick={() => handleDemoFill('admin@taskconnect.com')}
+            onClick={() => handleDemoFill('admin@getitdone.com')}
             className="px-2 py-1.5 bg-white hover:bg-teal-100/70 border border-teal-200 rounded-xl font-semibold text-[11px] text-teal-800 transition"
           >
             Admin

@@ -3,7 +3,7 @@ import request from 'supertest';
 import { app } from '../src/server.js';
 import prisma from '../src/config/prisma.js';
 
-describe('TaskConnect Comprehensive API Test Suite', () => {
+describe('Get It Done Comprehensive API Test Suite', () => {
   let adminToken = '';
   let posterToken = '';
   let taskerToken = '';
@@ -14,7 +14,7 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
     // Authenticate seeded users
     const adminRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@taskconnect.com', password: 'Password123!' });
+      .send({ email: 'admin@getitdone.com', password: 'Password123!' });
     adminToken = adminRes.body.token;
 
     const posterRes = await request(app)
@@ -88,13 +88,14 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
       expect(res.body.user.email).toBe('sarah@example.com');
     });
 
-    it('POST /api/auth/logout clears taskconnect_token cookie', async () => {
+    it('POST /api/auth/logout clears getitdone_token and taskconnect_token cookies', async () => {
       const res = await request(app).post('/api/auth/logout');
       expect(res.status).toBe(200);
       expect(res.body.message).toContain('Logged out successfully');
       const setCookie = res.headers['set-cookie'];
       expect(setCookie).toBeDefined();
-      expect(setCookie[0]).toContain('taskconnect_token=;');
+      expect(setCookie.some((c) => c.includes('getitdone_token=;'))).toBe(true);
+      expect(setCookie.some((c) => c.includes('taskconnect_token=;'))).toBe(true);
     });
   });
 
@@ -246,7 +247,7 @@ describe('TaskConnect Comprehensive API Test Suite', () => {
           email: 'partner@example.com',
           subject: 'Commercial Partnership Inquiry',
           category: 'Partnership',
-          message: 'We are interested in integrating our corporate services with TaskConnect.',
+          message: 'We are interested in integrating our corporate services with Get It Done.',
         });
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);

@@ -1,7 +1,7 @@
 {
-  "name": "taskconnect-server",
+  "name": "get-it-done-server",
   "version": "1.0.0",
-  "description": "TaskConnect API server with Express, Prisma, and Socket.IO",
+  "description": "Get It Done API server with Express, Prisma, and Socket.IO",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

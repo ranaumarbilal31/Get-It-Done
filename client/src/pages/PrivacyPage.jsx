@@ -26,7 +26,7 @@ export default function PrivacyPage() {
               1. Overview & Commitment to Privacy
             </h2>
             <p>
-              TaskConnect Technologies Inc. ("TaskConnect", "we", "us") values your privacy. We are committed to safeguarding personal information collected through our on-demand services marketplace with enterprise-grade encryption and strict access boundaries.
+              Get It Done Technologies Inc. ("Get It Done", "we", "us") values your privacy. We are committed to safeguarding personal information collected through our on-demand services marketplace with enterprise-grade encryption and strict access boundaries.
             </p>
           </section>
 
@@ -112,7 +112,7 @@ export default function PrivacyPage() {
               6. Contact Our Data Protection Team
             </h2>
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700">
-              <p><strong>Data Protection Officer:</strong> TaskConnect Privacy & Compliance</p>
+              <p><strong>Data Protection Officer:</strong> Get It Done Privacy & Compliance</p>
               <p className="mt-1">
                 <strong>Inquiries & Deletion Requests:</strong>{' '}
                 <a href="mailto:ranaumarbilal31@gmail.com" className="text-brand-600 font-semibold hover:underline">

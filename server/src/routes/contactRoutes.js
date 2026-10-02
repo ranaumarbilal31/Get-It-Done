@@ -23,7 +23,7 @@ router.post('/', contactLimiter, validate(contactSchemas.submitInquiry), async (
 
     res.status(200).json({
       success: true,
-      message: 'Thank you for contacting TaskConnect. Your inquiry has been routed to our support team (ranaumarbilal31@gmail.com), and we will reply within 2-4 hours.',
+      message: 'Thank you for contacting Get It Done. Your inquiry has been routed to our support team (ranaumarbilal31@gmail.com), and we will reply within 2-4 hours.',
     });
   } catch (error) {
     next(error);

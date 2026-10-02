@@ -1,7 +1,7 @@
 {
-  "name": "taskconnect-monorepo",
+  "name": "get-it-done-monorepo",
   "version": "1.0.0",
-  "description": "TaskConnect - Enterprise On-Demand Community Services & Task Marketplace",
+  "description": "Get It Done - Enterprise On-Demand Community Services & Task Marketplace",
   "scripts": {
     "build": "cd client && npm install && npm run build",
     "server": "npm --prefix server start",
@@ -23,6 +23,6 @@
     "leaflet",
     "escrow"
   ],
-  "author": "TaskConnect Technologies",
+  "author": "Get It Done Technologies",
   "license": "MIT"
 }

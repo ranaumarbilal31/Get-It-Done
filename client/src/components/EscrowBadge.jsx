@@ -13,7 +13,7 @@ export default function EscrowBadge({ amount }) {
             <strong>${amount}</strong> Held in Secure Platform Escrow
           </>
         ) : (
-          'Protected by TaskConnect Payment Escrow'
+          'Protected by Get It Done Payment Escrow'
         )}
       </span>
     </div>

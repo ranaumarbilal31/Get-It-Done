@@ -7,7 +7,7 @@ const { uploadToStorage } = require('../services/storageService');
 const generateToken = (userId) => {
   return jwt.sign(
     { userId },
-    process.env.JWT_SECRET || 'taskconnect_dev_secret_key_change_in_production_998877',
+    process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877',
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 };
@@ -52,13 +52,15 @@ const register = async (req, res, next) => {
 
     const token = generateToken(user.id);
 
-    // Set secure HttpOnly cookie
-    res.cookie('taskconnect_token', token, {
+    // Set secure HttpOnly cookies
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    };
+    res.cookie('getitdone_token', token, cookieOptions);
+    res.cookie('taskconnect_token', token, cookieOptions);
 
     // Send welcome email (fire-and-forget)
     sendWelcomeEmail(user).catch(console.error);
@@ -77,9 +79,17 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
+
+    if (!user) {
+      if (email.toLowerCase() === 'admin@getitdone.com') {
+        user = await prisma.user.findUnique({ where: { email: 'admin@taskconnect.com' } });
+      } else if (email.toLowerCase() === 'admin@taskconnect.com') {
+        user = await prisma.user.findUnique({ where: { email: 'admin@getitdone.com' } });
+      }
+    }
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password credentials.' });
@@ -92,13 +102,15 @@ const login = async (req, res, next) => {
 
     const token = generateToken(user.id);
 
-    // Set secure HttpOnly cookie
-    res.cookie('taskconnect_token', token, {
+    // Set secure HttpOnly cookies
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    };
+    res.cookie('getitdone_token', token, cookieOptions);
+    res.cookie('taskconnect_token', token, cookieOptions);
 
     const userProfile = {
       id: user.id,
@@ -238,11 +250,13 @@ const submitVerification = async (req, res, next) => {
 };
 
 const logout = async (req, res) => {
-  res.clearCookie('taskconnect_token', {
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-  });
+  };
+  res.clearCookie('getitdone_token', cookieOptions);
+  res.clearCookie('taskconnect_token', cookieOptions);
   res.json({ message: 'Logged out successfully' });
 };
 

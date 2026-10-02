@@ -15,7 +15,7 @@ describe('Red Team Offensive Security Battery', () => {
     // 1. Authenticate users
     const adminRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@taskconnect.com', password: 'Password123!' });
+      .send({ email: 'admin@getitdone.com', password: 'Password123!' });
     adminToken = adminRes.body.token;
 
     const posterRes = await request(app)

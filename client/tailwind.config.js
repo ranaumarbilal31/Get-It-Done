@@ -13,7 +13,7 @@ export default {
           200: '#99f6df',
           300: '#5eead4',
           400: '#2dd4bf',
-          500: '#14b8a6', // TaskConnect signature emerald-teal
+          500: '#14b8a6', // Get It Done signature emerald-teal
           600: '#0d9488',
           700: '#0f766e',
           800: '#115e59',

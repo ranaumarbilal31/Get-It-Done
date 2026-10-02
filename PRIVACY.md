@@ -1,8 +1,8 @@
-# TaskConnect Privacy Policy
+# Get It Done Privacy Policy
 
 **Effective Date:** October 1, 2026 • Compliant with GDPR, CCPA, and Global Consumer Privacy Frameworks
 
-TaskConnect Technologies Inc. ("TaskConnect", "we", "us") values your privacy. We are committed to safeguarding personal information collected through our on-demand services marketplace with enterprise-grade encryption and strict access boundaries.
+Get It Done Technologies Inc. ("Get It Done", "we", "us") values your privacy. We are committed to safeguarding personal information collected through our on-demand services marketplace with enterprise-grade encryption and strict access boundaries.
 
 ---
 
@@ -31,4 +31,4 @@ Under GDPR and CCPA, you have the right to request access to your personal data,
 ## 4. Contact Data Privacy Officer
 For privacy inquiries, data requests, or compliance notices, please contact:
 * **Official Support Email:** [ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com)
-* **Organization:** TaskConnect Technologies Inc.
+* **Organization:** Get It Done Technologies Inc.

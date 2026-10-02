@@ -264,7 +264,7 @@ app.set('io', io);
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'test') {
   server.listen(PORT, () => {
-    console.log(`🚀 TaskConnect Server running on port ${PORT}`);
+    console.log(`🚀 Get It Done Server running on port ${PORT}`);
     console.log(`📡 WebSocket server ready`);
     console.log(`📁 Local uploads directory: ${path.join(__dirname, '../uploads')}`);
   });

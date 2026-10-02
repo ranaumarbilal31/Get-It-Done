@@ -1,4 +1,4 @@
-# TaskConnect Robots Exclusion Protocol
+# Get It Done Robots Exclusion Protocol
 User-agent: *
 Allow: /
 Allow: /tasks

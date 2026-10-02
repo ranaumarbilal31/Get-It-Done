@@ -1,6 +1,6 @@
 # Architecture & Platform Decisions (ADR)
 
-**Project:** TaskConnect  
+**Project:** Get It Done  
 **Date:** September 30, 2026  
 **Status:** Accepted  
 

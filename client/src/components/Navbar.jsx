@@ -61,12 +61,12 @@ export default function Navbar() {
             <Link to="/" className="flex items-center gap-2.5 text-slate-900 group">
               <img
                 src="/favicon.png"
-                alt="TaskConnect Logo"
+                alt="Get It Done Logo"
                 className="w-9 h-9 rounded-xl shadow-md group-hover:scale-105 transition-transform duration-200"
               />
               <div className="leading-tight">
                 <span className="font-extrabold text-lg tracking-tight text-slate-900">
-                  Task<span className="text-brand-600">Connect</span>
+                  Get <span className="text-brand-600">It Done</span>
                 </span>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-semibold">
                   Community Marketplace

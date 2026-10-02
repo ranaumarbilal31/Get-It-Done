@@ -1,4 +1,4 @@
-# TaskConnect Security Policy & Threat Model
+# Get It Done Security Policy & Threat Model
 
 **Document Version:** 1.0.0  
 **Effective Date:** September 30, 2026  
@@ -8,7 +8,7 @@
 
 ## 1. Vulnerability Disclosure Policy
 
-If you discover a security vulnerability within TaskConnect, please disclose it responsibly by contacting the maintainers directly or opening a confidential security advisory on GitHub. Please do **not** disclose security vulnerabilities publicly until they have been reviewed and addressed.
+If you discover a security vulnerability within Get It Done, please disclose it responsibly by contacting the maintainers directly or opening a confidential security advisory on GitHub. Please do **not** disclose security vulnerabilities publicly until they have been reviewed and addressed.
 
 ---
 
@@ -41,7 +41,7 @@ If you discover a security vulnerability within TaskConnect, please disclose it 
 
 ### STRIDE Assessment Matrix
 
-| Threat Category | Potential Attack Vector | TaskConnect Defensive Countermeasure |
+| Threat Category | Potential Attack Vector | Get It Done Defensive Countermeasure |
 |---|---|---|
 | **Spoofing** | Forged JWT token or fake identity claims. | Signed JWT with strong secret key; server validates user existence in DB on every request (`middleware/auth.js`). |
 | **Tampering** | Injected malicious payload in task budget or malicious SQL string. | **Zod schema validation** rejects malformed payloads; **Prisma ORM** enforces strict parameterized queries across all database operations. |

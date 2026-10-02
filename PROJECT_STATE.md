@@ -1,4 +1,4 @@
-# TaskConnect — Project State & Audit Report
+# Get It Done — Project State & Audit Report
 
 **Date of Audit:** September 30, 2026  
 **Auditor:** Lead Engineer, Security Engineer & DevOps Engineer  
@@ -8,10 +8,10 @@
 
 ## 1. Project Overview & Target Audience
 
-**TaskConnect** is a two-sided community task marketplace modeled after Airtasker and TaskRabbit. 
+**Get It Done** is a professional two-sided community task and services marketplace. 
 - **Posters** publish tasks detailing title, category, budget, due date, photo attachments, and geolocation (either remote or in-person with map coordinates).
 - **Taskers** browse, filter, inspect geolocation pins, submit quotes/proposals, chat with posters, and get hired.
-- **Transactions & Safety**: Simulated escrow holds funds upon offer acceptance and releases them to the tasker's wallet on client approval. Verified identity badges are awarded via an administrative KYC review queue.
+- **Transactions & Safety**: Automated escrow holds funds upon offer acceptance and releases them to the tasker's wallet on client approval. Verified identity badges are awarded via an administrative KYC review queue.
 
 ---
 
@@ -121,7 +121,7 @@ c:\Users\RANA\Desktop\G-Air\
   - Output files: `dist/index.html` (1.25 kB), `dist/assets/index-B8x1OJXd.css` (37.00 kB), `dist/assets/index-bdT_jb4s.js` (536.79 kB).
 - **Backend Smoke Test (`node src/server.js`):**
   - Result: Code 0 (Success)
-  - Output: `🚀 TaskConnect Server running on port 5000`, `📡 WebSocket server ready`, `GET /api/health` returned HTTP 200 `{"status":"ok"}`.
+  - Output: `🚀 Get It Done Server running on port 5000`, `📡 WebSocket server ready`, `GET /api/health` returned HTTP 200 `{"status":"ok"}`.
 - **Database Seeding (`node prisma/seed.js`):**
   - Result: Code 0 (Success)
   - Verified: 6 categories, 5 users, 4 tasks, 3 offers, 1 completed escrow payment, 1 review, 2 messages.

@@ -5,7 +5,9 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('taskconnect_token') || null);
+  const [token, setToken] = useState(
+    localStorage.getItem('getitdone_token') || localStorage.getItem('taskconnect_token') || null
+  );
   const [loading, setLoading] = useState(true);
 
   // Fetch current user on mount or token change
@@ -21,6 +23,7 @@ export const AuthProvider = ({ children }) => {
         setUser(res.data.user);
       } catch (err) {
         console.error('Failed to fetch user:', err);
+        localStorage.removeItem('getitdone_token');
         localStorage.removeItem('taskconnect_token');
         setToken(null);
         setUser(null);
@@ -35,6 +38,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
     const { token: newToken, user: loggedUser } = res.data;
+    localStorage.setItem('getitdone_token', newToken);
     localStorage.setItem('taskconnect_token', newToken);
     setToken(newToken);
     setUser(loggedUser);
@@ -44,6 +48,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     const res = await api.post('/auth/register', { name, email, password });
     const { token: newToken, user: newUser } = res.data;
+    localStorage.setItem('getitdone_token', newToken);
     localStorage.setItem('taskconnect_token', newToken);
     setToken(newToken);
     setUser(newUser);
@@ -56,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.warn('Server logout notice:', err);
     } finally {
+      localStorage.removeItem('getitdone_token');
       localStorage.removeItem('taskconnect_token');
       setToken(null);
       setUser(null);

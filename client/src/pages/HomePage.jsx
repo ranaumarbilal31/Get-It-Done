@@ -208,7 +208,7 @@ export default function HomePage() {
             Simple & Transparent
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold mt-2 tracking-tight">
-            How TaskConnect Works
+            How Get It Done Works
           </h2>
           <p className="text-sm sm:text-base text-slate-400 mt-3 max-w-xl mx-auto">
             From listing a job to final payment release, our platform ensures a smooth, secure experience for both parties.
@@ -270,7 +270,7 @@ export default function HomePage() {
               Built on uncompromising standards of safety and financial integrity
             </h2>
             <p className="text-sm text-slate-600 mt-3 leading-relaxed">
-              TaskConnect protects both parties at every stage of the service lifecycle. With bank-grade escrow pre-authorizations, certified government ID verification, and 24/7 dedicated dispute mediation, your projects and payments are completely secure.
+              Get It Done protects both parties at every stage of the service lifecycle. With bank-grade escrow pre-authorizations, certified government ID verification, and 24/7 dedicated dispute mediation, your projects and payments are completely secure.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">

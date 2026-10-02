@@ -1,4 +1,4 @@
-name: TaskConnect CI Pipeline
+name: Get It Done CI Pipeline
 
 on:
   push:

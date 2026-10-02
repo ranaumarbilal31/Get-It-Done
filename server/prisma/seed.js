@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seeding for TaskConnect...');
+  console.log('🌱 Starting database seeding for Get It Done...');
 
   // Clean existing tables (order matters for foreign keys)
   try {
@@ -80,13 +80,26 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       name: 'System Admin',
+      email: 'admin@getitdone.com',
+      password: passwordHash,
+      role: 'ADMIN',
+      isVerified: true,
+      verificationStatus: 'APPROVED',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      bio: 'Get It Done Platform Administrator and Trust & Safety Moderator.',
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      name: 'System Admin (Legacy Alias)',
       email: 'admin@taskconnect.com',
       password: passwordHash,
       role: 'ADMIN',
       isVerified: true,
       verificationStatus: 'APPROVED',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      bio: 'TaskConnect Platform Administrator and Trust & Safety Moderator.',
+      bio: 'Get It Done Platform Administrator and Trust & Safety Moderator.',
     },
   });
 

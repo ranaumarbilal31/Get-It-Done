@@ -457,7 +457,7 @@ export default function TaskDetailPage() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-sm font-bold text-teal-950">
-                  TaskConnect Escrow Payment Guarantee
+                  Get It Done Escrow Payment Guarantee
                 </h3>
                 <p className="text-xs text-teal-800 leading-relaxed">
                   When an offer is accepted, the agreed amount is held securely in platform escrow. The Tasker only receives payment after the Poster verifies and confirms satisfactory completion.

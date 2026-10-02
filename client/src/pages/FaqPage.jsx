@@ -9,7 +9,7 @@ export default function FaqPage() {
   const faqs = [
     {
       category: 'For Task Posters',
-      q: 'How does the TaskConnect Escrow Guarantee work?',
+      q: 'How does the Get It Done Escrow Guarantee work?',
       a: 'When you accept an offer, your payment is pre-authorized and held safely in platform escrow. The Tasker cannot access these funds until the task is completely finished and you approve the completion. If a Tasker does not show up or complete the job, your funds are refunded in full.',
     },
     {
@@ -30,12 +30,12 @@ export default function FaqPage() {
     {
       category: 'For Taskers',
       q: 'How and when do I get paid?',
-      a: 'Once the Poster inspects and confirms job completion, the escrow funds are automatically released to your TaskConnect digital wallet. You can transfer funds directly to your linked bank account at any time.',
+      a: 'Once the Poster inspects and confirms job completion, the escrow funds are automatically released to your Get It Done digital wallet. You can transfer funds directly to your linked bank account at any time.',
     },
     {
       category: 'For Taskers',
-      q: 'What is the TaskConnect service fee?',
-      a: 'TaskConnect retains a standard 10% platform fee from completed tasks. This fee covers secure payment processing, escrow protection, continuous server infrastructure, and round-the-clock dispute support.',
+      q: 'What is the Get It Done service fee?',
+      a: 'Get It Done retains a standard 10% platform fee from completed tasks. This fee covers secure payment processing, escrow protection, continuous server infrastructure, and round-the-clock dispute support.',
     },
     {
       category: 'For Taskers',

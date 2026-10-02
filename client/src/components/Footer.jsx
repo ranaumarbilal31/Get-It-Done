@@ -56,12 +56,12 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-2.5 text-white group">
               <img
                 src="/favicon.png"
-                alt="TaskConnect Logo"
+                alt="Get It Done Logo"
                 className="w-9 h-9 rounded-xl shadow-md group-hover:scale-105 transition-transform"
               />
               <div className="leading-tight">
                 <span className="font-extrabold text-lg tracking-tight text-white">
-                  Task<span className="text-brand-400">Connect</span>
+                  Get <span className="text-brand-400">It Done</span>
                 </span>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-semibold">
                   Community Services Marketplace
@@ -69,7 +69,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-              TaskConnect is the trusted on-demand community services marketplace. Posters publish everyday tasks, certified Taskers submit competitive proposals, and jobs are completed with total escrow security.
+              Get It Done is the trusted on-demand community services marketplace. Posters publish everyday tasks, certified Taskers submit competitive proposals, and jobs are completed with total escrow security.
             </p>
             <div className="pt-2 text-xs text-slate-400">
               <p className="font-semibold text-slate-300">Customer Support & Escalations:</p>
@@ -125,7 +125,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-xs">
               <li>
                 <Link to="/about" className="hover:text-white transition">
-                  About TaskConnect
+                  About Get It Done
                 </Link>
               </li>
               <li>
@@ -183,7 +183,7 @@ export default function Footer() {
 
         {/* Bottom Copyright Bar */}
         <div className="pt-8 mt-4 border-t border-slate-800 text-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} TaskConnect Technologies Inc. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Get It Done Technologies Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link to="/terms" className="hover:text-slate-300 transition">
               Terms & Conditions

@@ -26,7 +26,7 @@ export default function TrustSafetyPage() {
             <div className="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600">
               <Lock className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900">TaskConnect Escrow Guarantee</h3>
+            <h3 className="text-xl font-bold text-slate-900">Get It Done Escrow Guarantee</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               When an offer is accepted, the Poster’s payment is pre-authorized and locked safely in platform escrow. Money is only transferred to the Tasker’s wallet when the Poster confirms the job is completed to satisfaction.
             </p>

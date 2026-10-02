@@ -5,8 +5,8 @@ const authenticate = async (req, res, next) => {
   try {
     let token = null;
 
-    if (req.cookies && req.cookies.taskconnect_token) {
-      token = req.cookies.taskconnect_token;
+    if (req.cookies && (req.cookies.getitdone_token || req.cookies.taskconnect_token)) {
+      token = req.cookies.getitdone_token || req.cookies.taskconnect_token;
     } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }
@@ -15,7 +15,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: 'Authentication required. No token provided.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'taskconnect_dev_secret_key_change_in_production_998877');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877');
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -54,13 +54,13 @@ const authenticate = async (req, res, next) => {
 const optionalAuth = async (req, res, next) => {
   try {
     let token = null;
-    if (req.cookies && req.cookies.taskconnect_token) {
-      token = req.cookies.taskconnect_token;
+    if (req.cookies && (req.cookies.getitdone_token || req.cookies.taskconnect_token)) {
+      token = req.cookies.getitdone_token || req.cookies.taskconnect_token;
     } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'taskconnect_dev_secret_key_change_in_production_998877');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877');
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
         select: { id: true, name: true, email: true, role: true, avatar: true },
