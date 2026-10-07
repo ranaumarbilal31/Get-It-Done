@@ -15,13 +15,16 @@ const api = axios.create({
 // Request interceptor: attach Bearer token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('getitdone_token') || localStorage.getItem('taskconnect_token');
+    const token =
+      typeof window === 'undefined'
+        ? null
+        : localStorage.getItem('getitdone_token') || localStorage.getItem('taskconnect_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor: handle session expiry
@@ -30,13 +33,15 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Clear token if invalid or expired
-      const currentPath = window.location.pathname;
+      if (typeof window !== 'undefined' && !error.config?.url?.match(/auth\/(login|register)/))
+        window.dispatchEvent(new Event('session-expired'));
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
       if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
         // Optional: emit event or auto logout
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

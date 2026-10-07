@@ -25,6 +25,12 @@ const isCloudinaryConfigured = () => {
  */
 const uploadToStorage = async (file) => {
   if (!file) return null;
+  if (file.fieldname === 'idDocument') {
+    const bytes = fs.readFileSync(file.path);
+    fs.unlinkSync(file.path);
+    return `data:${file.mimetype};base64,${bytes.toString('base64')}`;
+  }
+  file = await require('./imageService').optimizeImage(file);
 
   // 1. Cloudinary upload if configured
   if (isCloudinaryConfigured()) {
@@ -44,7 +50,9 @@ const uploadToStorage = async (file) => {
       const mimeType = file.mimetype || 'image/jpeg';
       const base64 = fileBuffer.toString('base64');
       // Clean up temporary local file
-      try { fs.unlinkSync(file.path); } catch (e) {}
+      try {
+        fs.unlinkSync(file.path);
+      } catch (e) {}
       return `data:${mimeType};base64,${base64}`;
     } catch (err) {
       console.error('[Storage] Base64 encoding error:', err.message);
@@ -100,7 +108,9 @@ const uploadToCloudinary = (file) => {
           const json = JSON.parse(body);
           if (json.secure_url) {
             // Remove local temp file
-            try { fs.unlinkSync(file.path); } catch (e) {}
+            try {
+              fs.unlinkSync(file.path);
+            } catch (e) {}
             resolve(json.secure_url);
           } else {
             reject(new Error(json.error?.message || 'Cloudinary upload failed'));

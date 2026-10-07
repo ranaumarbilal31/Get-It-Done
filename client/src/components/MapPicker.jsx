@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
 
 // Custom modern SVG marker icon for Leaflet
@@ -44,13 +45,20 @@ function LocationMarker({ position, setPosition, onLocationSelect }) {
     },
   });
 
-  return position ? <Marker position={position} icon={customPinIcon} /> : null;
+  return position ? (
+    <Marker
+      position={position}
+      icon={customPinIcon}
+      title="Selected task location"
+      alt="Selected task location"
+    />
+  ) : null;
 }
 
 export default function MapPicker({ initialLat, initialLng, onLocationSelect }) {
-  const defaultCenter = [initialLat || 40.7128, initialLng || -74.0060]; // Default New York / customizable
+  const defaultCenter = [initialLat ?? 40.7128, initialLng ?? -74.006]; // Preserve valid zero coordinates.
   const [position, setPosition] = useState(
-    initialLat && initialLng ? [initialLat, initialLng] : defaultCenter
+    initialLat != null && initialLng != null ? [initialLat, initialLng] : defaultCenter,
   );
 
   return (

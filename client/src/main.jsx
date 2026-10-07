@@ -1,10 +1,13 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = document.getElementById('root');
+const initialData = window.__ROUTE_DATA__ || {};
+const app = (
   <React.StrictMode>
-    <App />
+    <App initialData={initialData} />
   </React.StrictMode>
 );
+if (root.hasChildNodes()) hydrateRoot(root, app);
+else createRoot(root).render(app);

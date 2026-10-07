@@ -10,7 +10,10 @@ const contactLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { message: 'Too many contact inquiries from this IP. Please wait 15 minutes before sending another message.' },
+  message: {
+    message:
+      'Too many contact inquiries from this IP. Please wait 15 minutes before sending another message.',
+  },
   skip: () => process.env.NODE_ENV === 'test',
 });
 
@@ -19,11 +22,13 @@ router.post('/', contactLimiter, validate(contactSchemas.submitInquiry), async (
     const { name, email, subject, category, message } = req.body;
 
     // Dispatch email notification to official customer support inbox
-    await sendContactInquiryEmail({ name, email, subject, category, message });
+    const delivery = await sendContactInquiryEmail({ name, email, subject, category, message });
 
     res.status(200).json({
       success: true,
-      message: 'Thank you for contacting Get It Done. Your inquiry has been routed to our support team (ranaumarbilal31@gmail.com), and we will reply within 2-4 hours.',
+      message: delivery?.simulated
+        ? 'Your inquiry was recorded in demo mode. Email delivery is not configured; please email ranaumarbilal31@gmail.com directly for support.'
+        : 'Your inquiry was sent to our support mailbox. Thank you for your feedback.',
     });
   } catch (error) {
     next(error);

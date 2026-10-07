@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { Dialog } from '../components/UI';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import MapPicker from '../components/MapPicker';
+import MapPicker from '../components/ClientMap';
 import {
   DollarSign,
   Calendar,
   MapPin,
-  Image,
   Sparkles,
   AlertCircle,
   CheckCircle2,
@@ -19,6 +19,7 @@ import {
 export default function PostTaskPage() {
   const { user, login, register } = useAuth();
   const navigate = useNavigate();
+  const publishLock = useRef(false);
 
   const [categories, setCategories] = useState([]);
   const [title, setTitle] = useState('');
@@ -28,7 +29,7 @@ export default function PostTaskPage() {
   const [isRemote, setIsRemote] = useState(false);
   const [locationName, setLocationName] = useState('');
   const [latitude, setLatitude] = useState(40.7128);
-  const [longitude, setLongitude] = useState(-74.0060);
+  const [longitude, setLongitude] = useState(-74.006);
   const [dueDate, setDueDate] = useState('');
   const [files, setFiles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -82,7 +83,17 @@ export default function PostTaskPage() {
     } catch (e) {
       // ignore quota errors
     }
-  }, [title, description, budget, categoryId, isRemote, locationName, latitude, longitude, dueDate]);
+  }, [
+    title,
+    description,
+    budget,
+    categoryId,
+    isRemote,
+    locationName,
+    latitude,
+    longitude,
+    dueDate,
+  ]);
 
   // Load categories
   useEffect(() => {
@@ -110,6 +121,8 @@ export default function PostTaskPage() {
   };
 
   const executePublish = async () => {
+    if (publishLock.current) return;
+    publishLock.current = true;
     setSubmitting(true);
     setError('');
 
@@ -143,6 +156,7 @@ export default function PostTaskPage() {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create task.');
       setSubmitting(false);
+      publishLock.current = false;
     }
   };
 
@@ -182,24 +196,28 @@ export default function PostTaskPage() {
       setShowAuthModal(false);
       await executePublish();
     } catch (err) {
-      setAuthError(err.response?.data?.message || err.message || 'Authentication failed. Please verify credentials.');
+      setAuthError(
+        err.response?.data?.message ||
+          err.message ||
+          'Authentication failed. Please verify credentials.',
+      );
       setAuthLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-8">
+    <div className="page-container workspace-page post-workspace py-10">
+      <div className="post-form-card bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-8">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold mb-2">
             <ShieldCheck className="w-3.5 h-3.5 text-brand-600" />
-            <span>Escrow-Protected Marketplace Listing</span>
+            <span>YOUR TASK. YOUR TERMS.</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Tell us what you need done
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Verified local taskers will review your listing and submit competitive quotes.
+            Describe your task clearly, then compare offers from interested taskers.
           </p>
         </div>
 
@@ -208,7 +226,8 @@ export default function PostTaskPage() {
             <div className="flex items-center gap-2.5 text-xs text-blue-900">
               <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
               <span>
-                <strong>Draft Mode:</strong> Your task is auto-saved locally. Fill out your details now and sign in when ready to publish.
+                <strong>Draft Mode:</strong> Your task is auto-saved locally. Fill out your details
+                now and sign in when ready to publish.
               </span>
             </div>
             <button
@@ -238,6 +257,7 @@ export default function PostTaskPage() {
               type="text"
               required
               placeholder="e.g. Move 2-seater sofa to 2nd floor apartment"
+              aria-label="Task title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 focus:bg-white transition"
@@ -252,6 +272,7 @@ export default function PostTaskPage() {
               </label>
               <select
                 required
+                aria-label="Task category"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 text-slate-700"
@@ -276,6 +297,7 @@ export default function PostTaskPage() {
                   step="1"
                   required
                   placeholder="150"
+                  aria-label="Budget in US dollars"
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
                   className="w-full pl-9 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 focus:bg-white transition"
@@ -327,6 +349,7 @@ export default function PostTaskPage() {
                 <input
                   type="text"
                   placeholder="e.g. Brooklyn, NY or East Village"
+                  aria-label="Location"
                   value={locationName}
                   onChange={(e) => setLocationName(e.target.value)}
                   className="w-full px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500"
@@ -350,6 +373,7 @@ export default function PostTaskPage() {
             </label>
             <input
               type="date"
+              aria-label="Due date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 text-slate-700"
@@ -365,6 +389,7 @@ export default function PostTaskPage() {
               rows="5"
               required
               placeholder="Describe the task in detail. What needs doing? What tools are required? Are there stairs or elevators?..."
+              aria-label="Task description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-4 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-brand-500 focus:bg-white resize-none"
@@ -377,6 +402,7 @@ export default function PostTaskPage() {
               Attach Photos (Optional)
             </label>
             <input
+              aria-label="Upload a file"
               type="file"
               multiple
               accept="image/*"
@@ -414,7 +440,7 @@ export default function PostTaskPage() {
 
       {/* Inline Auth Modal for Guests */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <Dialog title="Sign in to publish a task" onClose={() => setShowAuthModal(false)}>
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
             <button
               onClick={() => setShowAuthModal(false)}
@@ -432,7 +458,8 @@ export default function PostTaskPage() {
                 {authMode === 'login' ? 'Sign in to Publish' : 'Create Account to Publish'}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Your task draft is securely preserved. Once signed in, it will be posted immediately.
+                Your task draft is securely preserved. Once signed in, it will be posted
+                immediately.
               </p>
             </div>
 
@@ -440,7 +467,10 @@ export default function PostTaskPage() {
             <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-2xl mb-6">
               <button
                 type="button"
-                onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                onClick={() => {
+                  setAuthMode('login');
+                  setAuthError('');
+                }}
                 className={`py-2 text-xs font-bold rounded-xl transition ${
                   authMode === 'login'
                     ? 'bg-white text-slate-900 shadow-sm'
@@ -451,7 +481,10 @@ export default function PostTaskPage() {
               </button>
               <button
                 type="button"
-                onClick={() => { setAuthMode('register'); setAuthError(''); }}
+                onClick={() => {
+                  setAuthMode('register');
+                  setAuthError('');
+                }}
                 className={`py-2 text-xs font-bold rounded-xl transition ${
                   authMode === 'register'
                     ? 'bg-white text-slate-900 shadow-sm'
@@ -477,6 +510,7 @@ export default function PostTaskPage() {
                     type="text"
                     required
                     placeholder="e.g. Alex Morgan"
+                    aria-label="Full name"
                     value={authName}
                     onChange={(e) => setAuthName(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 focus:bg-white"
@@ -490,6 +524,7 @@ export default function PostTaskPage() {
                   type="email"
                   required
                   placeholder="name@example.com"
+                  aria-label="Email address"
                   value={authEmail}
                   onChange={(e) => setAuthEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 focus:bg-white"
@@ -502,6 +537,7 @@ export default function PostTaskPage() {
                   type="password"
                   required
                   placeholder="••••••••"
+                  aria-label="Password"
                   value={authPassword}
                   onChange={(e) => setAuthPassword(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 focus:bg-white"
@@ -519,14 +555,15 @@ export default function PostTaskPage() {
                     <span>Authenticating...</span>
                   </>
                 ) : (
-                  <span>{authMode === 'login' ? 'Sign In & Post Task' : 'Register & Post Task'}</span>
+                  <span>
+                    {authMode === 'login' ? 'Sign In & Post Task' : 'Register & Post Task'}
+                  </span>
                 )}
               </button>
             </form>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );
 }
-

@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-07T11:11:10.991Z",
+  "environment": "Local production build; simulated mobile throttling; disposable SQLite dataset",
+  "lighthouseVersion": "13.5.0",
+  "scores": {
+    "performance": 99,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "LCP_ms": 1593.7985,
+    "CLS": 0,
+    "TBT_ms": 32
+  },
+  "fieldData": "Unavailable"
+}

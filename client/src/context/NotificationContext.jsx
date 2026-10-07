@@ -1,101 +1,71 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import api from '../api/client';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
-
-const NotificationContext = createContext(null);
-
-export const NotificationProvider = ({ children }) => {
-  const { user } = useAuth();
-  const { socket } = useSocket();
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [toast, setToast] = useState(null);
-
+const Context = createContext(null);
+export function NotificationProvider({ children }) {
+  const { user } = useAuth(),
+    { socket } = useSocket();
+  const [notifications, setNotifications] = useState([]),
+    [toast, setToast] = useState(null);
+  const timer = useRef(null);
+  const currentUser = useRef(user?.id);
+  currentUser.current = user?.id;
   const fetchNotifications = async () => {
-    if (!user) return;
+    const id = user?.id;
+    if (!id) return;
     try {
       const res = await api.get('/notifications');
-      setNotifications(res.data.notifications);
-      setUnreadCount(res.data.unreadCount);
-    } catch (err) {
-      console.error('Failed to fetch notifications:', err);
+      if (currentUser.current === id) setNotifications(res.data.notifications || []);
+    } catch {
+      /* Keep last successful result. */
     }
   };
-
   useEffect(() => {
+    setNotifications([]);
+    setToast(null);
+    clearTimeout(timer.current);
     fetchNotifications();
-  }, [user]);
-
-  // Listen for real-time notifications via Socket.IO
+    return () => clearTimeout(timer.current);
+  }, [user?.id]);
   useEffect(() => {
     if (!socket) return;
-
-    const handleNotification = (notif) => {
-      setNotifications((prev) => [notif, ...prev]);
-      setUnreadCount((count) => count + 1);
-
-      // Trigger pop-in toast
-      setToast(notif);
-      setTimeout(() => {
-        setToast(null);
-      }, 5000);
+    const receive = (n) => {
+      setNotifications((prev) => (prev.some((item) => item.id === n.id) ? prev : [n, ...prev]));
+      setToast(n);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setToast(null), 5000);
     };
-
-    socket.on('notification_received', handleNotification);
-
+    socket.on('notification_received', receive);
     return () => {
-      socket.off('notification_received', handleNotification);
+      socket.off('notification_received', receive);
+      clearTimeout(timer.current);
     };
   }, [socket]);
-
   const markAsRead = async (id) => {
     try {
-      await api.patch(`/notifications/${id}/read`);
-      if (id === 'all') {
-        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-        setUnreadCount(0);
-      } else {
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-        );
-        setUnreadCount((count) => Math.max(0, count - 1));
-      }
-    } catch (err) {
-      console.error('Failed to mark notification read:', err);
-    }
+      await api.patch('/notifications/' + id + '/read');
+      setNotifications((prev) =>
+        prev.map((n) => (id === 'all' || n.id === id ? { ...n, isRead: true } : n)),
+      );
+    } catch {}
   };
-
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
   return (
-    <NotificationContext.Provider
-      value={{
-        notifications,
-        unreadCount,
-        markAsRead,
-        refreshNotifications: fetchNotifications,
-      }}
+    <Context.Provider
+      value={{ notifications, unreadCount, markAsRead, refreshNotifications: fetchNotifications }}
     >
       {children}
-      {/* Realtime Toast Notification */}
       {toast && (
-        <div className="fixed bottom-5 right-5 z-50 max-w-sm bg-white border border-brand-500/30 shadow-2xl rounded-2xl p-4 flex items-start space-x-3 transition-all transform animate-bounce">
-          <div className="w-9 h-9 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 font-bold">
-            🔔
-          </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-bold text-slate-900 truncate">{toast.title}</h4>
-            <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{toast.message}</p>
-          </div>
-          <button
-            onClick={() => setToast(null)}
-            className="text-slate-400 hover:text-slate-600 text-sm font-semibold"
-          >
-            ✕
+        <div role="status" className="notification-toast">
+          <strong>{toast.title}</strong>
+          <p>{toast.message}</p>
+          <button aria-label="Dismiss notification" onClick={() => setToast(null)}>
+            ×
           </button>
         </div>
       )}
-    </NotificationContext.Provider>
+    </Context.Provider>
   );
-};
-
-export const useNotification = () => useContext(NotificationContext);
+}
+export const useNotification = () => useContext(Context);

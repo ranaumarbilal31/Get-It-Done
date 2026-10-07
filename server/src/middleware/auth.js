@@ -5,17 +5,20 @@ const authenticate = async (req, res, next) => {
   try {
     let token = null;
 
-    if (req.cookies && (req.cookies.getitdone_token || req.cookies.taskconnect_token)) {
-      token = req.cookies.getitdone_token || req.cookies.taskconnect_token;
-    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (req.headers.authorization?.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies) {
+      token = req.cookies.getitdone_token || req.cookies.taskconnect_token;
     }
 
     if (!token) {
       return res.status(401).json({ message: 'Authentication required. No token provided.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877');
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877',
+    );
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -54,13 +57,16 @@ const authenticate = async (req, res, next) => {
 const optionalAuth = async (req, res, next) => {
   try {
     let token = null;
-    if (req.cookies && (req.cookies.getitdone_token || req.cookies.taskconnect_token)) {
-      token = req.cookies.getitdone_token || req.cookies.taskconnect_token;
-    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (req.headers.authorization?.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies) {
+      token = req.cookies.getitdone_token || req.cookies.taskconnect_token;
     }
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877');
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877',
+      );
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
         select: { id: true, name: true, email: true, role: true, avatar: true },

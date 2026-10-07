@@ -1,3 +1,4 @@
+import { Dialog } from '../components/UI';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
@@ -25,9 +26,11 @@ export default function AdminPage() {
   const [pendingVerifications, setPendingVerifications] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
   const [docModalOpen, setDocModalOpen] = useState(false);
   const [docPreviewUrl, setDocPreviewUrl] = useState(null);
+  const [docType, setDocType] = useState('');
   const [docLoading, setDocLoading] = useState(false);
   const [docError, setDocError] = useState('');
 
@@ -43,12 +46,15 @@ export default function AdminPage() {
       if (docPath.startsWith('http://') || docPath.startsWith('https://')) {
         setDocPreviewUrl(docPath);
       } else {
-        const res = await api.get(docPath, { responseType: 'blob' });
+        const res = await api.get(docPath.replace(/^\/api\//, '/'), { responseType: 'blob' });
         const blobUrl = URL.createObjectURL(res.data);
+        setDocType(res.data.type);
         setDocPreviewUrl(blobUrl);
       }
     } catch (err) {
-      setDocError('Unable to load document preview. Only authorized administrators can access identity documents.');
+      setDocError(
+        'Unable to load document preview. Only authorized administrators can access identity documents.',
+      );
     } finally {
       setDocLoading(false);
     }
@@ -71,6 +77,7 @@ export default function AdminPage() {
 
   const loadAdminData = async () => {
     setLoading(true);
+    setError('');
     try {
       const [statsRes, verifyRes, usersRes] = await Promise.all([
         api.get('/admin/stats'),
@@ -81,7 +88,7 @@ export default function AdminPage() {
       setPendingVerifications(verifyRes.data.pendingUsers || []);
       setUsersList(usersRes.data.users || []);
     } catch (err) {
-      console.error('Failed to load admin data:', err);
+      setError('We could not load administration data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -127,7 +134,19 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="page-container workspace-page admin-workspace py-10 space-y-8">
+      {error && (
+        <div role="alert">
+          {
+            <>
+              <p>{error}</p>
+              <button className="button" onClick={loadAdminData}>
+                Try again
+              </button>
+            </>
+          }
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -136,10 +155,11 @@ export default function AdminPage() {
             <span>Platform Administration & Trust Moderation</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Trust & Operations Dashboard
+            The marketplace, at a glance.
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage user identity verification reviews, moderate listings, and oversee platform escrow transactions.
+            Manage user identity verification reviews, moderate listings, and oversee simulated
+            payment records.
           </p>
         </div>
       </div>
@@ -150,7 +170,9 @@ export default function AdminPage() {
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>{actionSuccess}</span>
           </div>
-          <button onClick={() => setActionSuccess('')} className="text-emerald-500">✕</button>
+          <button onClick={() => setActionSuccess('')} className="text-emerald-500">
+            ✕
+          </button>
         </div>
       )}
 
@@ -179,14 +201,16 @@ export default function AdminPage() {
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Escrow Volume</span>
+              <span className="text-xs font-bold uppercase tracking-wider">
+                Simulated payment volume
+              </span>
               <DollarSign className="w-4 h-4 text-emerald-600" />
             </div>
             <div className="text-2xl font-black text-slate-900">
               ${(stats.escrowHeld + stats.totalReleased).toFixed(2)}
             </div>
             <span className="text-[11px] text-emerald-600 font-semibold">
-              ${stats.escrowHeld.toFixed(2)} currently in Escrow
+              ${stats.escrowHeld.toFixed(2)} in demo holds
             </span>
           </div>
 
@@ -195,9 +219,7 @@ export default function AdminPage() {
               <span className="text-xs font-bold uppercase tracking-wider">KYC Queue</span>
               <ShieldAlert className="w-4 h-4 text-amber-500" />
             </div>
-            <div className="text-2xl font-black text-amber-600">
-              {stats.pendingVerifications}
-            </div>
+            <div className="text-2xl font-black text-amber-600">{stats.pendingVerifications}</div>
             <span className="text-[11px] text-slate-400">Pending approval</span>
           </div>
         </div>
@@ -212,7 +234,8 @@ export default function AdminPage() {
               <span>Identity Verification Queue (Mock KYC Review)</span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Inspect submitted photo IDs and approve the official green "Verified Tasker" badge.
+              Review identity samples submitted by users. Approval records an administrative review;
+              it is not a background check.
             </p>
           </div>
           <span className="px-3 py-1 bg-amber-50 text-amber-800 text-xs font-bold rounded-full border border-amber-200">
@@ -229,11 +252,19 @@ export default function AdminPage() {
             {pendingVerifications.map((pUser) => (
               <div
                 key={pUser.id}
+                data-verification-user={pUser.id}
                 className="py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3">
                   <img
-                    src={pUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                    width="96"
+                    height="96"
+                    loading="lazy"
+                    src={pUser.avatar || '/brand.svg'}
+                    onError={(event) => {
+                      if (!event.currentTarget.src.endsWith('/brand.svg'))
+                        event.currentTarget.src = '/brand.svg';
+                    }}
                     alt={pUser.name}
                     className="w-12 h-12 rounded-full object-cover border border-slate-200"
                   />
@@ -264,7 +295,9 @@ export default function AdminPage() {
                   </button>
 
                   <button
-                    onClick={() => handleVerifyAction(pUser.id, 'REJECTED', 'Document blurry or unverified')}
+                    onClick={() =>
+                      handleVerifyAction(pUser.id, 'REJECTED', 'Document blurry or unverified')
+                    }
                     className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl flex items-center gap-1 transition"
                   >
                     <XCircle className="w-3.5 h-3.5" /> Reject
@@ -296,7 +329,14 @@ export default function AdminPage() {
                 <tr key={u.id} className="hover:bg-slate-50/50">
                   <td className="p-3 flex items-center gap-2">
                     <img
-                      src={u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                      width="96"
+                      height="96"
+                      loading="lazy"
+                      src={u.avatar || '/brand.svg'}
+                      onError={(event) => {
+                        if (!event.currentTarget.src.endsWith('/brand.svg'))
+                          event.currentTarget.src = '/brand.svg';
+                      }}
                       alt={u.name}
                       className="w-7 h-7 rounded-full object-cover border border-slate-200"
                     />
@@ -308,7 +348,9 @@ export default function AdminPage() {
                   <td className="p-3">
                     <span
                       className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                        u.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'
+                        u.role === 'ADMIN'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-slate-100 text-slate-700'
                       }`}
                     >
                       {u.role}
@@ -344,25 +386,37 @@ export default function AdminPage() {
 
       {/* ID Document Preview Modal */}
       {docModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <Dialog title="Submitted identity document" onClose={handleCloseDocModal}>
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-900 text-sm">Submitted ID Document Preview</h3>
-              <button onClick={handleCloseDocModal} className="text-slate-400 hover:text-slate-600">✕</button>
+              <button onClick={handleCloseDocModal} className="text-slate-400 hover:text-slate-600">
+                ✕
+              </button>
             </div>
             <div className="rounded-2xl overflow-hidden border border-slate-200 min-h-56 max-h-96 flex items-center justify-center bg-slate-100 p-2">
               {docLoading ? (
                 <div className="text-center py-10">
                   <div className="w-8 h-8 border-3 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                  <p className="text-xs text-slate-500 font-medium">Authorizing and retrieving document...</p>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Authorizing and retrieving document...
+                  </p>
                 </div>
               ) : docError ? (
                 <div className="text-center p-6 text-xs text-rose-600 font-medium">
                   <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto mb-2" />
                   {docError}
                 </div>
+              ) : docPreviewUrl && docType === 'application/pdf' ? (
+                <iframe title="Verification PDF document" src={docPreviewUrl} className="w-full" />
               ) : docPreviewUrl ? (
-                <img src={docPreviewUrl} alt="User ID Document" className="w-full h-auto max-h-80 object-contain rounded-xl" />
+                <img
+                  width="640"
+                  height="480"
+                  src={docPreviewUrl}
+                  alt="Verification Document"
+                  className="w-full h-auto max-h-80 object-contain rounded-xl"
+                />
               ) : null}
             </div>
             <div className="text-right">
@@ -374,7 +428,7 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );

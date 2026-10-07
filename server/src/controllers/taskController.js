@@ -5,7 +5,10 @@ const { uploadToStorage } = require('../services/storageService');
 const maskAddress = (address) => {
   if (!address || typeof address !== 'string') return address;
   // Strip street numbers to protect homeowner/poster privacy on public listings
-  const masked = address.replace(/^\s*(?:(?:Unit|Apt|Suite|Lot|#)\s*[\w-]+\s*,?\s*)?\d+[-\d\/]*\s+/i, '');
+  const masked = address.replace(
+    /^\s*(?:(?:Unit|Apt|Suite|Lot|#)\s*[\w-]+\s*,?\s*)?\d+[-\d\/]*\s+/i,
+    '',
+  );
   return masked.trim() || address;
 };
 
@@ -20,7 +23,8 @@ const sanitizeTaskForViewer = (task, viewerId, viewerRole) => {
   if (viewerId && (task.status === 'ASSIGNED' || task.status === 'COMPLETED')) {
     if (task.offers && Array.isArray(task.offers)) {
       isAssignedTasker = task.offers.some(
-        (o) => (o.status === 'ACCEPTED' || o.id === task.assignedOfferId) && o.taskerId === viewerId
+        (o) =>
+          (o.status === 'ACCEPTED' || o.id === task.assignedOfferId) && o.taskerId === viewerId,
       );
     }
   }
@@ -134,10 +138,7 @@ const getTasks = async (req, res, next) => {
         });
       }
       if (category !== 'all') {
-        where.OR = [
-          { categoryId: category },
-          { category: { slug: category } },
-        ];
+        where.OR = [{ categoryId: category }, { category: { slug: category } }];
       }
     }
 
@@ -175,7 +176,11 @@ const getTasks = async (req, res, next) => {
       where.budget.lte = parsedMax;
     }
 
-    if (where.budget?.gte !== undefined && where.budget?.lte !== undefined && where.budget.gte > where.budget.lte) {
+    if (
+      where.budget?.gte !== undefined &&
+      where.budget?.lte !== undefined &&
+      where.budget.gte > where.budget.lte
+    ) {
       return res.status(400).json({
         code: 'INVALID_BUDGET_RANGE',
         message: 'minBudget cannot exceed maxBudget.',
@@ -228,11 +233,15 @@ const getTasks = async (req, res, next) => {
           message: 'Input contains invalid characters (null byte).',
         });
       }
-      where.OR = [
+      const searchConditions = [
         { title: { contains: search } },
         { description: { contains: search } },
         { location: { contains: search } },
       ];
+      if (where.OR) {
+        where.AND = [{ OR: where.OR }, { OR: searchConditions }];
+        delete where.OR;
+      } else where.OR = searchConditions;
     }
 
     const skip = (parsedPage - 1) * parsedLimit;
@@ -362,7 +371,8 @@ const createTask = async (req, res, next) => {
       imagesArray = await Promise.all(req.files.map(uploadToStorage));
     } else if (req.body.images) {
       try {
-        imagesArray = typeof req.body.images === 'string' ? JSON.parse(req.body.images) : req.body.images;
+        imagesArray =
+          typeof req.body.images === 'string' ? JSON.parse(req.body.images) : req.body.images;
       } catch (e) {
         imagesArray = [req.body.images];
       }
@@ -374,7 +384,10 @@ const createTask = async (req, res, next) => {
         description,
         budget: parseFloat(budget),
         categoryId,
-        location: isRemote === 'true' || isRemote === true ? 'Remote / Online' : (location || 'Location upon acceptance'),
+        location:
+          isRemote === 'true' || isRemote === true
+            ? 'Remote / Online'
+            : location || 'Location upon acceptance',
         latitude: latitude ? parseFloat(latitude) : null,
         longitude: longitude ? parseFloat(longitude) : null,
         isRemote: isRemote === 'true' || isRemote === true,
@@ -413,7 +426,9 @@ const updateTask = async (req, res, next) => {
     }
 
     if (task.status !== 'OPEN' && req.user.role !== 'ADMIN') {
-      return res.status(400).json({ message: 'Cannot modify a task that is already assigned or completed.' });
+      return res
+        .status(400)
+        .json({ message: 'Cannot modify a task that is already assigned or completed.' });
     }
 
     const { title, description, budget, categoryId, location, isRemote, dueDate } = req.body;
@@ -461,11 +476,20 @@ const completeTask = async (req, res, next) => {
     }
 
     if (task.posterId !== req.user.id && req.user.role !== 'ADMIN') {
-      return res.status(403).json({ message: 'Only the poster or an administrator can mark this task complete and release funds.' });
+      return res
+        .status(403)
+        .json({
+          message:
+            'Only the poster or an administrator can mark this task complete and release funds.',
+        });
     }
 
     if (task.status !== 'ASSIGNED') {
-      return res.status(400).json({ message: `Cannot complete task with status: ${task.status}. Task must be ASSIGNED.` });
+      return res
+        .status(400)
+        .json({
+          message: `Cannot complete task with status: ${task.status}. Task must be ASSIGNED.`,
+        });
     }
 
     const acceptedOffer = task.offers[0];
@@ -473,7 +497,9 @@ const completeTask = async (req, res, next) => {
       return res.status(400).json({ message: 'No accepted offer found for this task.' });
     }
 
-    const payoutAmount = task.payment ? (task.payment.amount - task.payment.platformFee) : acceptedOffer.amount;
+    const payoutAmount = task.payment
+      ? task.payment.amount - task.payment.platformFee
+      : acceptedOffer.amount;
 
     await prisma.$transaction([
       prisma.task.update({

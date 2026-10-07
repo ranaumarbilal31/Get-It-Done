@@ -1,28 +1,32 @@
 {
   "name": "get-it-done-monorepo",
   "version": "1.0.0",
-  "description": "Get It Done - Enterprise On-Demand Community Services & Task Marketplace",
+  "description": "A local services marketplace for posting tasks, comparing offers, and collaborating through real-time chat.",
   "scripts": {
-    "build": "cd client && npm install && npm run build",
+    "build": "npm --prefix client run build",
     "server": "npm --prefix server start",
     "server:dev": "npm --prefix server run dev",
     "client": "npm --prefix client run dev",
     "client:build": "npm --prefix client run build",
     "seed": "npm --prefix server run seed",
-    "setup": "npm --prefix server install && npm --prefix server run prisma:push && npm --prefix server run seed && npm --prefix client install"
+    "setup": "npm --prefix server install && npm --prefix server run prisma:push && npm --prefix server run seed && npm --prefix client install",
+    "test": "npm --prefix client test && npm --prefix server test",
+    "test:e2e": "npm --prefix client run test:e2e"
   },
   "keywords": [
     "marketplace",
-    "on-demand-services",
+    "local-services",
     "react",
     "vite",
-    "tailwind",
+    "tailwindcss",
     "express",
     "prisma",
     "socketio",
-    "leaflet",
-    "escrow"
+    "technical-seo"
   ],
   "author": "Get It Done Technologies",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.19.0"
+  }
 }

@@ -1,85 +1,94 @@
+const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
-
-const setupSockets = (io) => {
+const { getConversation, createMessage, broadcastMessage } = require('../services/chatService');
+module.exports = function setupSockets(io) {
+  io.use(async (socket, next) => {
+    try {
+      const decoded = jwt.verify(
+        socket.handshake.auth?.token || '',
+        process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877',
+        { algorithms: ['HS256'] },
+      );
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: { id: true, name: true },
+      });
+      if (!user) throw new Error('Unknown user');
+      socket.data.user = user;
+      socket.data.expiresAt = decoded.exp * 1000;
+      next();
+    } catch {
+      next(new Error('Authentication required.'));
+    }
+  });
   io.on('connection', (socket) => {
-    console.log(`[Socket.IO] Client connected: ${socket.id}`);
-
-    // Join a private channel for user notifications
-    socket.on('join_user', (userId) => {
-      if (userId) {
-        socket.join(`user_${userId}`);
-        console.log(`[Socket.IO] Socket ${socket.id} joined user_${userId}`);
-      }
-    });
-
-    // Join a specific task chat room
-    socket.on('join_task', (taskId) => {
-      if (taskId) {
-        socket.join(`task_${taskId}`);
-        console.log(`[Socket.IO] Socket ${socket.id} joined task_${taskId}`);
-      }
-    });
-
-    // Leave a specific task room
-    socket.on('leave_task', (taskId) => {
-      if (taskId) {
-        socket.leave(`task_${taskId}`);
-        console.log(`[Socket.IO] Socket ${socket.id} left task_${taskId}`);
-      }
-    });
-
-    // Handle real-time messaging
-    socket.on('send_message', async (data) => {
-      try {
-        const { taskId, senderId, receiverId, content } = data;
-
-        if (!taskId || !senderId || !receiverId || !content) {
-          return socket.emit('error', { message: 'Missing message parameters.' });
+    const user = socket.data.user;
+    socket.join('user_' + user.id);
+    const expiryTimer = setTimeout(
+      () => socket.disconnect(true),
+      Math.min(socket.data.expiresAt - Date.now(), 2147483647),
+    );
+    const guard =
+      (handler) =>
+      async (...args) => {
+        const ack = typeof args[args.length - 1] === 'function' ? args.pop() : null;
+        try {
+          if (Date.now() >= socket.data.expiresAt) throw new Error('Session expired.');
+          const result = await handler(...args);
+          ack?.({ ok: true, ...result });
+        } catch (error) {
+          const response = {
+            ok: false,
+            message: error.status ? error.message : 'Conversation action failed.',
+          };
+          if (ack) ack(response);
+          else socket.emit('chat_error', response);
         }
-
-        const message = await prisma.message.create({
-          data: {
-            taskId,
-            senderId,
-            receiverId,
-            content: content.trim(),
-          },
-          include: {
-            sender: {
-              select: { id: true, name: true, avatar: true, isVerified: true },
-            },
-          },
-        });
-
-        // Broadcast to everyone in the task room
-        io.to(`task_${taskId}`).emit('new_message', message);
-
-        // Also notify receiver on their personal notification channel
-        io.to(`user_${receiverId}`).emit('notification_received', {
-          type: 'MESSAGE',
-          title: `New message from ${message.sender.name}`,
-          message: content,
-          link: `/tasks/${taskId}?tab=chat`,
-        });
-      } catch (err) {
-        console.error('[Socket.IO send_message error]:', err);
-        socket.emit('error', { message: 'Could not send message.' });
-      }
-    });
-
-    // Typing indicators
-    socket.on('typing_start', ({ taskId, userName }) => {
-      socket.to(`task_${taskId}`).emit('user_typing', { userName });
-    });
-
-    socket.on('typing_stop', ({ taskId }) => {
-      socket.to(`task_${taskId}`).emit('user_stopped_typing');
-    });
-
-    socket.on('disconnect', () => {
-      console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
-    });
+      };
+    socket.on(
+      'join_user',
+      guard(async (id) => {
+        if (id !== user.id)
+          throw Object.assign(new Error('Cannot join another user channel.'), { status: 403 });
+        socket.join('user_' + user.id);
+      }),
+    );
+    socket.on(
+      'join_task',
+      guard(async (taskId) => {
+        await getConversation(taskId, user.id);
+        await socket.join('task_' + taskId);
+      }),
+    );
+    socket.on('leave_task', (id) => typeof id === 'string' && socket.leave('task_' + id));
+    socket.on(
+      'send_message',
+      guard(async (data = {}) => {
+        const now = Date.now();
+        if (now - (socket.data.lastMessage || 0) < 500)
+          throw Object.assign(new Error('Please wait before sending another message.'), {
+            status: 429,
+          });
+        socket.data.lastMessage = now;
+        const result = await createMessage(data.taskId, user, data.content, data.receiverId);
+        broadcastMessage(io, result);
+        return { message: result.message };
+      }),
+    );
+    socket.on(
+      'typing_start',
+      guard(async ({ taskId } = {}) => {
+        await getConversation(taskId, user.id);
+        socket.to('task_' + taskId).emit('user_typing', { userName: user.name });
+      }),
+    );
+    socket.on(
+      'typing_stop',
+      guard(async ({ taskId } = {}) => {
+        await getConversation(taskId, user.id);
+        socket.to('task_' + taskId).emit('user_stopped_typing');
+      }),
+    );
+    socket.on('disconnect', () => clearTimeout(expiryTimer));
   });
 };
-
-module.exports = setupSockets;

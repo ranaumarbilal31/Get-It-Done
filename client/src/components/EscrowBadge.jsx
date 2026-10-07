@@ -10,10 +10,10 @@ export default function EscrowBadge({ amount }) {
       <span>
         {amount ? (
           <>
-            <strong>${amount}</strong> Held in Secure Platform Escrow
+            <strong>${amount}</strong> Simulated payment hold
           </>
         ) : (
-          'Protected by Get It Done Payment Escrow'
+          'Demo payments — no real money'
         )}
       </span>
     </div>

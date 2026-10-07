@@ -1,12 +1,16 @@
+import ResponsiveImage from '../components/ResponsiveImage';
+import { Dialog } from '../components/UI';
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useRouteData, metadata } from '../routeData';
+import { Alert } from '../components/UI';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import VerificationBadge from '../components/VerificationBadge';
 import RatingStars from '../components/RatingStars';
 import EscrowBadge from '../components/EscrowBadge';
-import MapPicker from '../components/MapPicker';
+import MapPicker from '../components/ClientMap';
 import {
   MapPin,
   Calendar,
@@ -20,21 +24,27 @@ import {
   MessageSquare,
   AlertCircle,
   Star,
-  Trash2,
 } from 'lucide-react';
 
 export default function TaskDetailPage() {
   const { id } = useParams();
+  const initial = useRouteData();
+  const [query] = useSearchParams();
+  const actionLock = useRef(false);
+  const messageLock = useRef(false);
+  const requestGeneration = useRef(0);
+  const [fetchError, setFetchError] = useState(initial.error || '');
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { socket, isConnected, joinTask, leaveTask, sendMessage, startTyping, stopTyping } = useSocket();
+  const { socket, isConnected, joinTask, leaveTask, sendMessage, startTyping, stopTyping } =
+    useSocket();
 
-  const [task, setTask] = useState(null);
+  const [task, setTask] = useState(initial.path === '/tasks/' + id ? initial.task || null : null);
   const [offers, setOffers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('details'); // 'details' or 'chat'
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(query.get('tab') === 'chat' ? 'chat' : 'details'); // URL deep link
+  const [loading, setLoading] = useState(!initial.task && !initial.error);
   const [typingUser, setTypingUser] = useState(null);
 
   // Modals state
@@ -58,20 +68,38 @@ export default function TaskDetailPage() {
 
   // Load Task & Offers
   const fetchTaskDetails = async () => {
+    const generation = ++requestGeneration.current;
+    setFetchError('');
     try {
       const res = await api.get(`/tasks/${id}`);
+      if (generation !== requestGeneration.current) return;
       setTask(res.data.task);
       setOffers(res.data.task.offers || []);
     } catch (err) {
-      console.error('Failed to load task:', err);
+      if (generation !== requestGeneration.current) return;
+      setFetchError(
+        err.response?.status === 404
+          ? 'This task could not be found.'
+          : 'We could not load this task. Please try again.',
+      );
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current) setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (task?.id === id) initial.setRouteData?.({ path: '/tasks/' + id, status: 200, task });
+  }, [task, id]);
+
   // Load Messages
   const fetchMessages = async () => {
-    if (!user) return;
+    if (
+      !user ||
+      !task?.offers?.some(
+        (o) => o.status === 'ACCEPTED' && (user.id === task.posterId || user.id === o.taskerId),
+      )
+    )
+      return;
     try {
       const res = await api.get(`/messages/task/${id}`);
       setMessages(res.data.messages || []);
@@ -82,17 +110,33 @@ export default function TaskDetailPage() {
 
   useEffect(() => {
     fetchTaskDetails();
+    return () => {
+      requestGeneration.current++;
+    };
+  }, [id, user?.id]);
+  useEffect(() => {
     fetchMessages();
-  }, [id, user]);
+  }, [id, user?.id, task?.status, task?.offers]);
+  useEffect(() => {
+    setActiveTab(query.get('tab') === 'chat' ? 'chat' : 'details');
+  }, [query]);
 
   // Socket.IO Room Joining & Message Listeners
   useEffect(() => {
-    if (!socket || !id) return;
+    if (
+      !socket ||
+      !id ||
+      !isConnected ||
+      !task?.offers?.some(
+        (o) => o.status === 'ACCEPTED' && (user?.id === task.posterId || user?.id === o.taskerId),
+      )
+    )
+      return;
 
     joinTask(id);
 
     const handleNewMessage = (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
       setTimeout(() => {
         chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
@@ -116,7 +160,7 @@ export default function TaskDetailPage() {
       socket.off('user_stopped_typing', handleUserStoppedTyping);
       leaveTask(id);
     };
-  }, [socket, id]);
+  }, [socket, id, isConnected, task?.status, task?.offers, user?.id]);
 
   // Scroll to bottom when messages update
   useEffect(() => {
@@ -132,6 +176,8 @@ export default function TaskDetailPage() {
       navigate('/login');
       return;
     }
+    if (actionLock.current) return;
+    actionLock.current = true;
     setOfferSubmitting(true);
     setActionError('');
     try {
@@ -147,6 +193,7 @@ export default function TaskDetailPage() {
     } catch (err) {
       setActionError(err.response?.data?.message || 'Failed to submit offer.');
     } finally {
+      actionLock.current = false;
       setOfferSubmitting(false);
     }
   };
@@ -154,39 +201,52 @@ export default function TaskDetailPage() {
   // Accept Offer with Simulated Escrow
   const handleAcceptOfferConfirm = async () => {
     if (!showAcceptModal) return;
+    if (actionLock.current) return;
+    actionLock.current = true;
     setAcceptSubmitting(true);
     setActionError('');
     try {
       await api.post(`/offers/${showAcceptModal.id}/accept`);
       setShowAcceptModal(null);
-      setActionSuccess('Offer accepted! Payment is securely held in Platform Escrow.');
+      setActionSuccess('Offer accepted. A simulated payment hold has been recorded.');
       fetchTaskDetails();
     } catch (err) {
       setActionError(err.response?.data?.message || 'Failed to accept offer.');
     } finally {
+      actionLock.current = false;
       setAcceptSubmitting(false);
     }
   };
 
   // Mark Completed & Release Escrow
   const handleCompleteTask = async () => {
-    if (!window.confirm('Are you sure the work is fully completed? This will release the escrow funds to the Tasker.')) {
+    if (actionLock.current) return;
+    if (
+      !window.confirm(
+        'Are you sure the work is fully completed? This records a simulated payout to the tasker.',
+      )
+    ) {
       return;
     }
+    actionLock.current = true;
     setActionError('');
     try {
       await api.patch(`/tasks/${id}/complete`);
-      setActionSuccess('Task marked as completed and escrow payment released!');
+      setActionSuccess('Task completed. A simulated payout has been recorded.');
       fetchTaskDetails();
       setShowReviewModal(true); // Open review modal right after completion
     } catch (err) {
       setActionError(err.response?.data?.message || 'Failed to complete task.');
+    } finally {
+      actionLock.current = false;
     }
   };
 
   // Submit Review
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    if (actionLock.current) return;
+    actionLock.current = true;
     setReviewSubmitting(true);
     setActionError('');
     try {
@@ -200,6 +260,7 @@ export default function TaskDetailPage() {
     } catch (err) {
       setActionError(err.response?.data?.message || 'Failed to submit review.');
     } finally {
+      actionLock.current = false;
       setReviewSubmitting(false);
     }
   };
@@ -207,28 +268,20 @@ export default function TaskDetailPage() {
   // Send Chat Message
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user) return;
-
+    if (!newMessage.trim() || !user || messageLock.current) return;
+    messageLock.current = true;
     const content = newMessage.trim();
-    setNewMessage('');
-    stopTyping(id);
-
     try {
-      // Determine receiver
-      const receiverId = isPoster ? task.offers.find((o) => o.status === 'ACCEPTED')?.taskerId : task.posterId;
-      sendMessage({
-        taskId: id,
-        senderId: user.id,
-        receiverId,
-        content,
-      });
-      // Fallback post if socket offline
-      if (!isConnected) {
-        await api.post(`/messages/task/${id}`, { content, receiverId });
-        fetchMessages();
-      }
+      const res = await api.post('/messages/task/' + id, { content });
+      setMessages((prev) =>
+        prev.some((m) => m.id === res.data.message.id) ? prev : [...prev, res.data.message],
+      );
+      setNewMessage('');
+      stopTyping(id);
     } catch (err) {
-      console.error(err);
+      setActionError(err.response?.data?.message || 'Message could not be sent. Please try again.');
+    } finally {
+      messageLock.current = false;
     }
   };
 
@@ -241,12 +294,25 @@ export default function TaskDetailPage() {
     );
   }
 
+  if (fetchError)
+    return (
+      <div className="page-container py-16">
+        <h1>Task unavailable</h1>
+        <Alert onRetry={fetchTaskDetails}>{fetchError}</Alert>
+      </div>
+    );
+
   if (!task) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <h2 className="text-xl font-bold text-slate-800">Task Not Found</h2>
-        <p className="text-slate-500 text-sm mt-2">This task may have been removed or does not exist.</p>
-        <Link to="/tasks" className="mt-4 inline-block px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl">
+        <p className="text-slate-500 text-sm mt-2">
+          This task may have been removed or does not exist.
+        </p>
+        <Link
+          to="/tasks"
+          className="mt-4 inline-block px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl"
+        >
           Return to Browse Tasks
         </Link>
       </div>
@@ -258,10 +324,14 @@ export default function TaskDetailPage() {
   const acceptedOffer = offers.find((o) => o.status === 'ACCEPTED');
   const isAssignedTasker = user?.id === acceptedOffer?.taskerId;
 
-  const imagesList = task.images ? (typeof task.images === 'string' ? JSON.parse(task.images) : task.images) : [];
+  let imagesList = [];
+  try {
+    imagesList = typeof task.images === 'string' ? JSON.parse(task.images) : task.images || [];
+  } catch {}
+  if (!Array.isArray(imagesList)) imagesList = [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="page-container workspace-page task-workspace py-8 space-y-6">
       {/* Action Notification Toasts */}
       {actionSuccess && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center justify-between">
@@ -269,7 +339,12 @@ export default function TaskDetailPage() {
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>{actionSuccess}</span>
           </div>
-          <button onClick={() => setActionSuccess('')} className="text-emerald-500 hover:text-emerald-700">✕</button>
+          <button
+            onClick={() => setActionSuccess('')}
+            className="text-emerald-500 hover:text-emerald-700"
+          >
+            ✕
+          </button>
         </div>
       )}
       {actionError && (
@@ -278,7 +353,9 @@ export default function TaskDetailPage() {
             <AlertCircle className="w-4 h-4 text-rose-600" />
             <span>{actionError}</span>
           </div>
-          <button onClick={() => setActionError('')} className="text-rose-500 hover:text-rose-700">✕</button>
+          <button onClick={() => setActionError('')} className="text-rose-500 hover:text-rose-700">
+            ✕
+          </button>
         </div>
       )}
 
@@ -292,8 +369,8 @@ export default function TaskDetailPage() {
                   task.status === 'OPEN'
                     ? 'bg-emerald-100 text-emerald-800'
                     : task.status === 'ASSIGNED'
-                    ? 'bg-amber-100 text-amber-800'
-                    : 'bg-blue-100 text-blue-800'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-blue-100 text-blue-800'
                 }`}
               >
                 {task.status}
@@ -365,13 +442,13 @@ export default function TaskDetailPage() {
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  Approve & Release Funds
+                  Mark task completed
                 </button>
               )}
 
               {task.status === 'ASSIGNED' && isAssignedTasker && (
                 <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200 font-semibold text-center">
-                  You are assigned to this task. Escrow is secured!
+                  You are hired for this task. Payment values are simulated.
                 </div>
               )}
 
@@ -400,9 +477,7 @@ export default function TaskDetailPage() {
           <button
             onClick={() => setActiveTab('chat')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
-              activeTab === 'chat'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
+              activeTab === 'chat' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
@@ -412,7 +487,12 @@ export default function TaskDetailPage() {
       </div>
 
       {/* Main Grid Body */}
-      {activeTab === 'details' ? (
+      {activeTab === 'chat' && !(isPoster || isAssignedTasker) && (
+        <Alert>
+          Private chat is available to the poster and hired tasker after an offer is accepted.
+        </Alert>
+      )}
+      {activeTab === 'details' || !(isPoster || isAssignedTasker) ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column (8 cols): Description, Photos, Map, Offers */}
           <div className="lg:col-span-8 space-y-6">
@@ -438,9 +518,9 @@ export default function TaskDetailPage() {
                         rel="noreferrer"
                         className="rounded-2xl overflow-hidden border border-slate-200 aspect-video group block"
                       >
-                        <img
+                        <ResponsiveImage
                           src={imgUrl}
-                          alt="Task attachment"
+                          alt={`${task.title} — attachment ${idx + 1}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
                         />
                       </a>
@@ -456,15 +536,14 @@ export default function TaskDetailPage() {
                 <Lock className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-bold text-teal-950">
-                  Get It Done Escrow Payment Guarantee
-                </h3>
+                <h3 className="text-sm font-bold text-teal-950">Demo payment workflow</h3>
                 <p className="text-xs text-teal-800 leading-relaxed">
-                  When an offer is accepted, the agreed amount is held securely in platform escrow. The Tasker only receives payment after the Poster verifies and confirms satisfactory completion.
+                  Accepting an offer records a simulated payment hold. Confirming completion records
+                  a simulated payout. No real money is charged or transferred.
                 </p>
                 {task.payment && (
                   <div className="mt-2 inline-block font-mono text-xs font-bold text-teal-900 bg-white/80 px-2.5 py-1 rounded-lg border border-teal-200">
-                    Escrow Status: {task.payment.status} (${task.payment.amount})
+                    Demo payment status: {task.payment.status} (${task.payment.amount})
                   </div>
                 )}
               </div>
@@ -487,9 +566,7 @@ export default function TaskDetailPage() {
             <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Offers ({offers.length})
-                  </h2>
+                  <h2 className="text-lg font-bold text-slate-900">Offers ({offers.length})</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Taskers proposing quotes to complete this task
                   </p>
@@ -522,13 +599,22 @@ export default function TaskDetailPage() {
                       <div
                         key={offer.id}
                         className={`pt-4 first:pt-0 ${
-                          isAccepted ? 'bg-amber-50/50 -mx-4 px-4 py-3 rounded-2xl border border-amber-200/80' : ''
+                          isAccepted
+                            ? 'bg-amber-50/50 -mx-4 px-4 py-3 rounded-2xl border border-amber-200/80'
+                            : ''
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-3">
                             <img
-                              src={offer.tasker.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                              width="96"
+                              height="96"
+                              loading="lazy"
+                              src={offer.tasker.avatar || '/brand.svg'}
+                              onError={(event) => {
+                                if (!event.currentTarget.src.endsWith('/brand.svg'))
+                                  event.currentTarget.src = '/brand.svg';
+                              }}
                               alt={offer.tasker.name}
                               className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
                             />
@@ -558,8 +644,8 @@ export default function TaskDetailPage() {
                                 isAccepted
                                   ? 'bg-emerald-100 text-emerald-800'
                                   : offer.status === 'REJECTED'
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : 'bg-slate-100 text-slate-600'
+                                    ? 'bg-rose-100 text-rose-800'
+                                    : 'bg-slate-100 text-slate-600'
                               }`}
                             >
                               {offer.status}
@@ -579,7 +665,7 @@ export default function TaskDetailPage() {
                               className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5 text-brand-400" />
-                              Accept Offer & Hold Escrow
+                              Accept Offer & Demo Hold
                             </button>
                           </div>
                         )}
@@ -616,7 +702,14 @@ export default function TaskDetailPage() {
 
               <div className="flex items-center gap-3">
                 <img
-                  src={task.poster.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                  width="96"
+                  height="96"
+                  loading="lazy"
+                  src={task.poster.avatar || '/brand.svg'}
+                  onError={(event) => {
+                    if (!event.currentTarget.src.endsWith('/brand.svg'))
+                      event.currentTarget.src = '/brand.svg';
+                  }}
                   alt={task.poster.name}
                   className="w-14 h-14 rounded-full object-cover border border-slate-200 shrink-0"
                 />
@@ -656,9 +749,7 @@ export default function TaskDetailPage() {
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
               <div>
-                <h3 className="text-sm font-bold text-slate-900">
-                  Live Discussion: {task.title}
-                </h3>
+                <h3 className="text-sm font-bold text-slate-900">Live Discussion: {task.title}</h3>
                 <span className="text-[11px] text-slate-500">
                   {isConnected ? 'Real-time WebSocket connected' : 'Connecting to chat...'}
                 </span>
@@ -687,7 +778,14 @@ export default function TaskDetailPage() {
                   >
                     {!isMe && (
                       <img
-                        src={msg.sender.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                        width="96"
+                        height="96"
+                        loading="lazy"
+                        src={msg.sender.avatar || '/brand.svg'}
+                        onError={(event) => {
+                          if (!event.currentTarget.src.endsWith('/brand.svg'))
+                            event.currentTarget.src = '/brand.svg';
+                        }}
                         alt={msg.sender.name}
                         className="w-7 h-7 rounded-full object-cover border border-slate-200 mb-1"
                       />
@@ -727,6 +825,7 @@ export default function TaskDetailPage() {
               type="text"
               placeholder={user ? 'Type a message...' : 'Log in to join the conversation'}
               disabled={!user}
+              aria-label="Message"
               value={newMessage}
               onChange={(e) => {
                 setNewMessage(e.target.value);
@@ -737,6 +836,7 @@ export default function TaskDetailPage() {
             />
             <button
               type="submit"
+              aria-label="Send message"
               disabled={!user || !newMessage.trim()}
               className="p-2.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white rounded-2xl transition"
             >
@@ -748,11 +848,12 @@ export default function TaskDetailPage() {
 
       {/* MODAL: Submit / Edit Offer */}
       {showOfferModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <Dialog title="Offer" onClose={() => setShowOfferModal(false)}>
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <h3 className="text-lg font-bold text-slate-900">Submit Your Offer</h3>
             <p className="text-xs text-slate-500">
-              Provide your proposed total price and explain why you are the ideal tasker for this job.
+              Provide your proposed total price and explain why you are the ideal tasker for this
+              job.
             </p>
 
             <form onSubmit={handleOfferSubmit} className="space-y-4">
@@ -768,6 +869,7 @@ export default function TaskDetailPage() {
                     min="5"
                     required
                     placeholder={task.budget.toString()}
+                    aria-label="Offer amount"
                     value={offerAmount}
                     onChange={(e) => setOfferAmount(e.target.value)}
                     className="w-full pl-8 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500"
@@ -783,6 +885,7 @@ export default function TaskDetailPage() {
                   rows="4"
                   required
                   placeholder="Introduce yourself, mention relevant experience, availability, and tools..."
+                  aria-label="Offer proposal"
                   value={offerMessage}
                   onChange={(e) => setOfferMessage(e.target.value)}
                   className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 resize-none"
@@ -807,12 +910,12 @@ export default function TaskDetailPage() {
               </div>
             </form>
           </div>
-        </div>
+        </Dialog>
       )}
 
       {/* MODAL: Accept Offer (Simulated Escrow Checkout) */}
       {showAcceptModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <Dialog title="Accept" onClose={() => setShowAcceptModal(null)}>
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-teal-500 text-white flex items-center justify-center font-bold">
@@ -820,11 +923,9 @@ export default function TaskDetailPage() {
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Accept Offer & Authorize Escrow
+                  Accept offer & record demo hold
                 </h3>
-                <p className="text-xs text-slate-500">
-                  256-Bit SSL Encrypted Escrow Payment Authorization
-                </p>
+                <p className="text-xs text-slate-500">Demo authorization — no real charge</p>
               </div>
             </div>
 
@@ -844,7 +945,7 @@ export default function TaskDetailPage() {
                 </span>
               </div>
               <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-900">
-                <span>Total Escrow Amount:</span>
+                <span>Simulated hold amount:</span>
                 <span>${showAcceptModal.amount}</span>
               </div>
             </div>
@@ -853,10 +954,11 @@ export default function TaskDetailPage() {
             <div className="p-3 bg-teal-50/70 border border-teal-200 rounded-2xl text-xs space-y-2">
               <div className="flex items-center gap-2 text-teal-800 font-bold">
                 <CreditCard className="w-4 h-4 text-teal-600" />
-                <span>Authorized Payment Card on File (•••• 4242)</span>
+                <span>Simulation only — no payment card on file</span>
               </div>
               <p className="text-[11px] text-teal-700">
-                Payment is pre-authorized and held safely in platform escrow. Funds will remain locked and will not be disbursed until you confirm satisfactory completion.
+                This records a simulated payment hold. Completion records a demo payout. No real
+                funds are charged, held or transferred.
               </p>
             </div>
 
@@ -874,16 +976,16 @@ export default function TaskDetailPage() {
                 disabled={acceptSubmitting}
                 className="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow flex items-center gap-1.5"
               >
-                {acceptSubmitting ? 'Processing Escrow...' : 'Confirm & Hold in Escrow'}
+                {acceptSubmitting ? 'Recording demo hold…' : 'Confirm demo hold'}
               </button>
             </div>
           </div>
-        </div>
+        </Dialog>
       )}
 
       {/* MODAL: Post-Completion Review */}
       {showReviewModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <Dialog title="Review" onClose={() => setShowReviewModal(false)}>
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <h3 className="text-lg font-bold text-slate-900">Leave a Review</h3>
             <p className="text-xs text-slate-500">
@@ -905,9 +1007,7 @@ export default function TaskDetailPage() {
                     >
                       <Star
                         className={`w-7 h-7 ${
-                          star <= reviewRating
-                            ? 'fill-amber-400 text-amber-400'
-                            : 'text-slate-300'
+                          star <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
                         }`}
                       />
                     </button>
@@ -919,13 +1019,12 @@ export default function TaskDetailPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Your Review
-                </label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">Your Review</label>
                 <textarea
                   rows="3"
                   required
                   placeholder="Was the work done cleanly, on time, and as described?..."
+                  aria-label="Review comment"
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
                   className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-brand-500 resize-none"
@@ -950,7 +1049,7 @@ export default function TaskDetailPage() {
               </div>
             </form>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );

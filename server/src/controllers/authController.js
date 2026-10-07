@@ -8,7 +8,7 @@ const generateToken = (userId) => {
   return jwt.sign(
     { userId },
     process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
   );
 };
 
@@ -216,12 +216,10 @@ const submitVerification = async (req, res, next) => {
     let documentUrl = null;
     if (req.file) {
       documentUrl = await uploadToStorage(req.file);
-    } else if (req.body.idDocument) {
-      documentUrl = req.body.idDocument;
     }
 
     if (!documentUrl) {
-      return res.status(400).json({ message: 'Please upload an ID document photo or provide a document URL.' });
+      return res.status(400).json({ message: 'Please upload a sample identity document.' });
     }
 
     const user = await prisma.user.update({
@@ -241,7 +239,8 @@ const submitVerification = async (req, res, next) => {
     });
 
     res.json({
-      message: 'Identity verification submitted for review. An administrator will review your documents.',
+      message:
+        'Identity verification submitted for review. An administrator will review your documents.',
       user,
     });
   } catch (error) {

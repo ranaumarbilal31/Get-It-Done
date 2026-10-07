@@ -1,100 +1,57 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { io } from 'socket.io-client';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-
 const SocketContext = createContext(null);
-
 export const SocketProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { token, user } = useAuth();
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-
   useEffect(() => {
-    // Resolve socket server URL from env, or localhost in dev, or Render in prod
-    const rawUrl = import.meta.env.VITE_API_URL || '';
-    const socketServerUrl = rawUrl
-      ? rawUrl.replace(/\/+$/, '')
-      : window.location.hostname === 'localhost'
-      ? 'http://localhost:5000'
-      : 'https://taskconnect-api.onrender.com';
-
-    const newSocket = io(socketServerUrl, {
-      transports: ['websocket', 'polling'],
-      reconnectionAttempts: 5,
-    });
-
-    newSocket.on('connect', () => {
-      console.log('⚡ Socket.IO connected:', newSocket.id);
-      setIsConnected(true);
-      if (user?.id) {
-        newSocket.emit('join_user', user.id);
-      }
-    });
-
-    newSocket.on('disconnect', () => {
-      console.log('❌ Socket.IO disconnected');
+    if (!token || !user) {
+      setSocket(null);
       setIsConnected(false);
-    });
-
-    setSocket(newSocket);
-
+      return;
+    }
+    const origin =
+      import.meta.env.VITE_API_URL ||
+      (import.meta.env.DEV || ['localhost', '127.0.0.1'].includes(window.location.hostname)
+        ? 'http://localhost:5000'
+        : 'https://taskconnect-api.onrender.com');
+    let active = true;
+    let connection;
+    import('socket.io-client')
+      .then(({ io }) => {
+        if (!active) return;
+        connection = io(origin.replace(/\/+$/, ''), {
+          auth: { token },
+          transports: ['websocket', 'polling'],
+          reconnectionAttempts: 5,
+        });
+        connection.on('connect', () => setIsConnected(true));
+        connection.on('disconnect', () => setIsConnected(false));
+        connection.on('connect_error', () => setIsConnected(false));
+        setSocket(connection);
+      })
+      .catch(() => {
+        if (active) setIsConnected(false);
+      });
     return () => {
-      newSocket.disconnect();
+      active = false;
+      connection?.disconnect();
+      setSocket(null);
+      setIsConnected(false);
     };
-  }, []);
-
-  // When user changes / logs in, join their private channel
-  useEffect(() => {
-    if (socket && isConnected && user?.id) {
-      socket.emit('join_user', user.id);
-    }
-  }, [socket, isConnected, user?.id]);
-
-  const joinTask = (taskId) => {
-    if (socket && taskId) {
-      socket.emit('join_task', taskId);
-    }
-  };
-
-  const leaveTask = (taskId) => {
-    if (socket && taskId) {
-      socket.emit('leave_task', taskId);
-    }
-  };
-
-  const sendMessage = ({ taskId, senderId, receiverId, content }) => {
-    if (socket) {
-      socket.emit('send_message', { taskId, senderId, receiverId, content });
-    }
-  };
-
-  const startTyping = (taskId, userName) => {
-    if (socket) {
-      socket.emit('typing_start', { taskId, userName });
-    }
-  };
-
-  const stopTyping = (taskId) => {
-    if (socket) {
-      socket.emit('typing_stop', { taskId });
-    }
-  };
-
+  }, [token, user?.id]);
+  const joinTask = useCallback((id) => socket?.emit('join_task', id), [socket]);
+  const leaveTask = useCallback((id) => socket?.emit('leave_task', id), [socket]);
+  const sendMessage = useCallback((data) => socket?.emit('send_message', data), [socket]);
+  const startTyping = useCallback((taskId) => socket?.emit('typing_start', { taskId }), [socket]);
+  const stopTyping = useCallback((taskId) => socket?.emit('typing_stop', { taskId }), [socket]);
   return (
     <SocketContext.Provider
-      value={{
-        socket,
-        isConnected,
-        joinTask,
-        leaveTask,
-        sendMessage,
-        startTyping,
-        stopTyping,
-      }}
+      value={{ socket, isConnected, joinTask, leaveTask, sendMessage, startTyping, stopTyping }}
     >
       {children}
     </SocketContext.Provider>
   );
 };
-
 export const useSocket = () => useContext(SocketContext);

@@ -1,45 +1,51 @@
-name: Get It Done CI Pipeline
-
+name: Get It Done checks
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  test-and-build:
+  verify:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
-      # Server checks
-      - name: Install Server Dependencies
-        working-directory: ./server
-        run: npm ci
-
-      - name: Initialize Prisma Schema & SQLite DB
-        working-directory: ./server
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+      - run: npm ci --prefix server
+      - run: npm ci --prefix client
+      - name: Isolated backend integration and security tests
+        run: npm --prefix server test
+      - name: Metadata and sitemap tests
+        run: npm --prefix client test
+      - name: Client, SSR, and prerender build
+        run: npm --prefix client run build
+      - name: Production dependency audit
         run: |
-          npx prisma db push
-          node prisma/seed.js
-
-      - name: Run Backend Integration & Security Tests
-        working-directory: ./server
-        run: npm test
-
-      # Client checks
-      - name: Install Client Dependencies
-        working-directory: ./client
-        run: npm ci
-
-      - name: Build Frontend Production Artifacts
-        working-directory: ./client
-        run: npm run build
+          npm --prefix server audit --omit=dev --audit-level=high
+          npm --prefix client audit --omit=dev --audit-level=high
+      - name: Install browser
+        working-directory: client
+        run: npx playwright install --with-deps chromium
+      - name: Browser, accessibility, and responsive tests
+        run: npm --prefix client run test:e2e
+        env:
+          E2E_PRODUCTION: '1'
+      - name: Keep browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-results
+          path: |
+            client/playwright-report/
+            client/test-results/

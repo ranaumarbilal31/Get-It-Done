@@ -1,105 +1,104 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import api from '../api/client';
-
-const AuthContext = createContext(null);
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(
-    localStorage.getItem('getitdone_token') || localStorage.getItem('taskconnect_token') || null
-  );
-  const [loading, setLoading] = useState(true);
-
-  // Fetch current user on mount or token change
+const Context = createContext(null);
+const readToken = () => {
+  try {
+    return (
+      localStorage.getItem('getitdone_token') || localStorage.getItem('taskconnect_token') || null
+    );
+  } catch {
+    return null;
+  }
+};
+const saveToken = (token) => {
+  try {
+    for (const key of ['getitdone_token', 'taskconnect_token'])
+      token ? localStorage.setItem(key, token) : localStorage.removeItem(key);
+  } catch {}
+};
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null),
+    [token, setToken] = useState(null),
+    [ready, setReady] = useState(false),
+    [loading, setLoading] = useState(true);
+  const generation = useRef(0);
+  const expire = () => {
+    generation.current++;
+    saveToken(null);
+    setToken(null);
+    setUser(null);
+    setLoading(false);
+  };
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      if (!token) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-      try {
-        const res = await api.get('/auth/me');
-        setUser(res.data.user);
-      } catch (err) {
-        console.error('Failed to fetch user:', err);
-        localStorage.removeItem('getitdone_token');
-        localStorage.removeItem('taskconnect_token');
-        setToken(null);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCurrentUser();
-  }, [token]);
-
-  const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    const { token: newToken, user: loggedUser } = res.data;
-    localStorage.setItem('getitdone_token', newToken);
-    localStorage.setItem('taskconnect_token', newToken);
-    setToken(newToken);
-    setUser(loggedUser);
-    return loggedUser;
+    setToken(readToken());
+    setReady(true);
+    window.addEventListener('session-expired', expire);
+    return () => window.removeEventListener('session-expired', expire);
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    const current = ++generation.current;
+    const controller = new AbortController();
+    setLoading(true);
+    api
+      .get('/auth/me', { signal: controller.signal })
+      .then((res) => {
+        if (current === generation.current) setUser(res.data.user);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted && error.response?.status === 401) expire();
+      })
+      .finally(() => {
+        if (current === generation.current) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [token, ready]);
+  const authenticate = async (endpoint, body) => {
+    const res = await api.post(endpoint, body);
+    generation.current++;
+    saveToken(res.data.token);
+    setToken(res.data.token);
+    setUser(res.data.user);
+    setLoading(false);
+    return res.data.user;
   };
-
-  const register = async (name, email, password) => {
-    const res = await api.post('/auth/register', { name, email, password });
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem('getitdone_token', newToken);
-    localStorage.setItem('taskconnect_token', newToken);
-    setToken(newToken);
-    setUser(newUser);
-    return newUser;
-  };
-
+  const login = (email, password) => authenticate('/auth/login', { email, password });
+  const register = (name, email, password) =>
+    authenticate('/auth/register', { name, email, password });
   const logout = async () => {
+    expire();
     try {
       await api.post('/auth/logout');
-    } catch (err) {
-      console.warn('Server logout notice:', err);
-    } finally {
-      localStorage.removeItem('getitdone_token');
-      localStorage.removeItem('taskconnect_token');
-      setToken(null);
-      setUser(null);
-    }
+    } catch {}
   };
-
-  const updateProfile = async (formData) => {
-    const res = await api.put('/auth/profile', formData, {
+  const updateProfile = async (form) => {
+    const res = await api.put('/auth/profile', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     setUser(res.data.user);
     return res.data.user;
   };
-
-  const submitVerification = async (formData) => {
-    const res = await api.post('/auth/verify-id', formData, {
+  const submitVerification = async (form) => {
+    const res = await api.post('/auth/verify-id', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    setUser((prev) => ({
-      ...prev,
-      verificationStatus: 'PENDING',
-      idDocument: res.data.user?.idDocument || prev?.idDocument,
-    }));
+    setUser((prev) => ({ ...prev, verificationStatus: 'PENDING' }));
     return res.data;
   };
-
   const refreshUser = async () => {
     if (!token) return;
     try {
       const res = await api.get('/auth/me');
       setUser(res.data.user);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
-
   return (
-    <AuthContext.Provider
+    <Context.Provider
       value={{
         user,
         token,
@@ -115,8 +114,7 @@ export const AuthProvider = ({ children }) => {
       }}
     >
       {children}
-    </AuthContext.Provider>
+    </Context.Provider>
   );
-};
-
-export const useAuth = () => useContext(AuthContext);
+}
+export const useAuth = () => useContext(Context);

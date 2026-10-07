@@ -28,7 +28,10 @@ const server = http.createServer(app);
 
 // Enterprise HTTP Security Headers & Permissions Policy
 app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=(), payment=(self)');
+  res.setHeader(
+    'Permissions-Policy',
+    'geolocation=(self), camera=(), microphone=(), payment=(self)',
+  );
   res.setHeader('X-Content-Type-Options', 'nosniff');
   next();
 });
@@ -40,7 +43,12 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'https://fonts.googleapis.com',
+          'https://unpkg.com',
+        ],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         imgSrc: [
           "'self'",
@@ -66,7 +74,7 @@ app.use(
       },
     },
     crossOriginEmbedderPolicy: false,
-  })
+  }),
 );
 
 // 2. Rate Limiting Defense
@@ -141,7 +149,7 @@ app.use(
       return callback(null, false);
     },
     credentials: true,
-  })
+  }),
 );
 
 app.use(cookieParser());
@@ -161,7 +169,11 @@ app.use((req, res, next) => {
   }
 
   // Check for Prototype Pollution attempts in URL string (keys or values)
-  if (fullUrl.includes('__proto__') || fullUrl.includes('constructor') || fullUrl.includes('prototype')) {
+  if (
+    fullUrl.includes('__proto__') ||
+    fullUrl.includes('constructor') ||
+    fullUrl.includes('prototype')
+  ) {
     return res.status(400).json({
       code: 'SUSPICIOUS_INPUT',
       message: 'Suspicious input parameter detected.',
@@ -215,7 +227,15 @@ app.use((req, res, next) => {
 });
 
 // Static local uploads (development fallback)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    if (req.path.startsWith('/idDocument-'))
+      return res.status(404).json({ code: 'NOT_FOUND', message: 'File not found.' });
+    next();
+  },
+  express.static(path.join(__dirname, '../uploads')),
+);
 
 // Minimal Public Liveness Probe (Scrubbed of DB internals and versions)
 app.get('/api/health', async (req, res) => {
@@ -229,6 +249,7 @@ app.get('/api/health', async (req, res) => {
 
 // Mount API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/categories', categoryRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/offers', offerRoutes);
@@ -252,8 +273,9 @@ app.use(errorHandler);
 
 // Setup WebSockets
 const io = new Server(server, {
+  allowRequest: (req, callback) => callback(null, isOriginAllowed(req.headers.origin)),
   cors: {
-    origin: '*',
+    origin: (origin, callback) => callback(null, isOriginAllowed(origin)),
     methods: ['GET', 'POST'],
   },
 });

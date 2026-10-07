@@ -34,3 +34,7 @@ server/uploads/*
 .DS_Store
 Thumbs.db
 *.log
+server/.test-data/
+client/test-results/
+client/playwright-report/
+client/reports/

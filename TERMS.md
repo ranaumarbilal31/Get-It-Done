@@ -1,43 +1,11 @@
-# Get It Done Terms of Service
+# Terms of Service — Demonstration Marketplace
 
-**Effective Date:** October 1, 2026 • Version 2.0 (Commercial Production Edition)
+Get It Done is a demonstration of local and remote task coordination. Provide accurate account and task information; do not impersonate another person, publish unlawful or harmful content, or access another user's private data.
 
-Welcome to **Get It Done** ("Get It Done," "Platform," "we," "our," or "us"). These Terms of Service constitute a legally binding agreement between you and Get It Done Technologies Inc. governing your access to and use of the Get It Done marketplace platform, website, mobile apps, and associated APIs.
+Posters and taskers are responsible for agreeing on scope, timing, qualifications and safety. Listings, ratings and identity badges do not guarantee skill, licensing, background checks or outcomes.
 
----
+All payment holds, releases, commissions and wallet balances are simulated records with no cash value. No real money is transferred by the implemented payment service.
 
-## 1. Description of Service & Marketplace Relationship
-Get It Done operates an on-demand, two-sided technology marketplace connecting clients requesting local or digital services ("Posters") with certified independent service providers ("Taskers"). 
+Administrators may review identity samples and moderate account access. Availability is not guaranteed. Contact ranaumarbilal31@gmail.com with questions.
 
-* Taskers are independent contractors, not employees, partners, agents, or joint venturers of Get It Done.
-* Taskers maintain full autonomy regarding work proposals, hours, methods, and delivery.
-* A direct contracting relationship is created between Poster and Tasker upon offer acceptance.
-
----
-
-## 2. Escrow Payment Guarantee & Platform Fees
-All transactions conducted on Get It Done are protected by the **Get It Done Escrow Guarantee**:
-* **Pre-Authorization:** When a Poster accepts an offer, the agreed task budget is pre-authorized via encrypted payment gateway and secured in platform escrow.
-* **Release Upon Satisfaction:** Funds remain locked until the Poster inspects and confirms satisfactory completion of the work.
-* **Platform Fee:** Get It Done retains a standard 10% platform fee from completed payouts to cover secure infrastructure, dispute mediation, and continuous service availability.
-
----
-
-## 3. User Conduct & Prohibited Tasks
-Users agree to provide truthful and verifiable information. Users may not:
-* Post or bid on tasks that violate municipal, state, or international laws.
-* Coordinate tasks involving hazardous substances, unregulated regulated trades, or unlicensed services.
-* Attempt to circumvent platform escrow protections to avoid marketplace fees.
-
----
-
-## 4. Identity Verification (KYC)
-Taskers may submit government-issued photo identification (Driver's License, Passport) to earn the **Verified Tasker Badge**. Identity documents are encrypted with AES-256 and reviewed in compliance with international identity verification standards.
-
----
-
-## 5. Dispute Resolution & Customer Support
-In the event of a dispute regarding task completion or quality, either party may escalate to Get It Done Dispute Resolution. Our dedicated mediation officers will review task agreements and chat transcripts to provide binding, impartial settlements.
-
-* **Official Contact & Inquiries:** [ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com)
-* **Corporate Entity:** Get It Done Technologies Inc.
+These demonstration terms require human legal and editorial review before commercial operation. The public `/terms` page contains the corresponding explanation.

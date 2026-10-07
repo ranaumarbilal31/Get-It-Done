@@ -58,10 +58,7 @@ const getUsers = async (req, res, next) => {
 
     const where = {};
     if (search) {
-      where.OR = [
-        { name: { contains: search } },
-        { email: { contains: search } },
-      ];
+      where.OR = [{ name: { contains: search } }, { email: { contains: search } }];
     }
     if (role) where.role = role;
     if (verificationStatus) where.verificationStatus = verificationStatus;
@@ -177,16 +174,30 @@ const getVerificationDocument = async (req, res, next) => {
     });
 
     if (!user || !user.idDocument) {
-      return res.status(404).json({ code: 'NOT_FOUND', message: 'No verification document found for this user.' });
+      return res
+        .status(404)
+        .json({ code: 'NOT_FOUND', message: 'No verification document found for this user.' });
     }
 
     if (user.idDocument.startsWith('http://') || user.idDocument.startsWith('https://')) {
       return res.redirect(user.idDocument);
     }
 
-    const filePath = path.resolve(user.idDocument);
+    res.set('Cache-Control', 'no-store');
+    const data = user.idDocument.match(
+      /^data:(image\/(?:png|jpeg|webp|gif)|application\/pdf);base64,([A-Za-z0-9+/=]+)$/,
+    );
+    if (data) return res.type(data[1]).send(Buffer.from(data[2], 'base64'));
+    const uploadRoot = path.resolve(__dirname, '../../uploads');
+    const filePath = user.idDocument.startsWith('/uploads/')
+      ? path.join(uploadRoot, path.basename(user.idDocument))
+      : path.resolve(user.idDocument);
+    if (!filePath.startsWith(uploadRoot + path.sep))
+      return res.status(404).json({ message: 'Document unavailable.' });
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ code: 'NOT_FOUND', message: 'Document file not found on disk.' });
+      return res
+        .status(404)
+        .json({ code: 'NOT_FOUND', message: 'Document file not found on disk.' });
     }
 
     res.sendFile(filePath);

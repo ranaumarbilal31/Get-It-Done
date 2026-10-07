@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Link } from 'react-router-dom';
 import { DollarSign, Clock, MapPin } from 'lucide-react';
 
@@ -31,8 +32,10 @@ const createPricePin = (price) => {
   });
 };
 
-export default function TaskMap({ tasks = [], center = [40.7128, -74.0060] }) {
-  const geoTasks = tasks.filter((t) => t.latitude && t.longitude);
+export default function TaskMap({ tasks = [], center = [40.7128, -74.006] }) {
+  const geoTasks = tasks.filter(
+    (t) => !t.isRemote && Number.isFinite(t.latitude) && Number.isFinite(t.longitude),
+  );
 
   return (
     <div className="w-full h-full min-h-[450px] rounded-3xl overflow-hidden shadow-sm border border-slate-200">
@@ -49,6 +52,8 @@ export default function TaskMap({ tasks = [], center = [40.7128, -74.0060] }) {
         {geoTasks.map((task) => (
           <Marker
             key={task.id}
+            title={task.title}
+            alt={task.title}
             position={[task.latitude, task.longitude]}
             icon={createPricePin(task.budget)}
           >
@@ -57,17 +62,13 @@ export default function TaskMap({ tasks = [], center = [40.7128, -74.0060] }) {
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-brand-50 text-brand-700">
                   {task.category?.name || 'Task'}
                 </span>
-                <h4 className="font-bold text-slate-900 text-sm mt-1 line-clamp-2">
-                  {task.title}
-                </h4>
+                <h4 className="font-bold text-slate-900 text-sm mt-1 line-clamp-2">{task.title}</h4>
                 <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
                   <MapPin className="w-3 h-3 text-brand-600" />
                   <span className="truncate">{task.location}</span>
                 </div>
                 <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                  <span className="text-base font-extrabold text-slate-900">
-                    ${task.budget}
-                  </span>
+                  <span className="text-base font-extrabold text-slate-900">${task.budget}</span>
                   <Link
                     to={`/tasks/${task.id}`}
                     className="text-xs bg-brand-600 hover:bg-brand-700 text-white font-semibold px-2.5 py-1 rounded-lg transition"

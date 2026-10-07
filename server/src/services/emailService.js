@@ -17,7 +17,7 @@ const createTransporter = () => {
 };
 
 const sendEmail = async ({ to, subject, html, text }) => {
-  const transporter = createTransporter();
+  const transporter = process.env.NODE_ENV === 'test' ? null : createTransporter();
 
   if (transporter) {
     try {
@@ -31,7 +31,10 @@ const sendEmail = async ({ to, subject, html, text }) => {
       console.log(`[Email Service] Sent email to ${to}: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
     } catch (error) {
-      console.error('[Email Service] Error sending real email, falling back to log:', error.message);
+      console.error(
+        '[Email Service] Error sending real email, falling back to log:',
+        error.message,
+      );
     }
   }
 

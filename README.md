@@ -1,231 +1,237 @@
-# 🛠️ Get It Done — On-Demand Services Marketplace
+# 🛠️ Get It Done — A Little Help. A Lot More Done.
 
 <div align="center">
 
-[![CI Pipeline](https://github.com/ranaumarbilal31/Get-It-Done/actions/workflows/ci.yml/badge.svg)](https://github.com/ranaumarbilal31/Get-It-Done/actions)
-[![API Status](https://img.shields.io/badge/API-Live%20on%20Render-brightgreen?logo=render)](https://taskconnect-api.onrender.com/api/health)
-[![Database](https://img.shields.io/badge/Database-Neon%20Postgres%2018-00E599?logo=postgresql)](https://neon.tech)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Security Tested](https://img.shields.io/badge/Security-OWASP%20Hardened%20(65%2F65)-brightgreen?logo=shield)](SECURITY_REPORT.md)
-[![Deployment](https://img.shields.io/badge/Deployment-Production%20Cloud-blue?logo=vercel)](#-cloud-architecture--infrastructure)
+[![Checks](https://github.com/ranaumarbilal31/Get-It-Done/actions/workflows/ci.yml/badge.svg)](https://github.com/ranaumarbilal31/Get-It-Done/actions/workflows/ci.yml)
+[![React](https://img.shields.io/badge/React-18-24221e?logo=react)](https://react.dev)
+[![Rendering](https://img.shields.io/badge/Rendering-SSR%20%2B%20Prerender-ba4214)](#-rendering--seo)
+[![License](https://img.shields.io/badge/License-MIT-819d79)](LICENSE)
 
-**An enterprise-grade, two-sided marketplace for local services and on-demand tasks.**  
-Engineered with real-time bi-directional WebSockets, OpenStreetMap coordinate mapping, bank-grade escrow payment pre-authorizations, and administrative KYC identity verification.
+**A local services marketplace for posting tasks, comparing offers, and collaborating through real-time chat.**
 
-[🌐 Live API](https://taskconnect-api.onrender.com) • [🏥 Health Status](https://taskconnect-api.onrender.com/api/health) • [📖 API Reference](#-api-endpoints-reference) • [🛡️ Security Report](SECURITY_REPORT.md) • [👥 Demo Accounts](#-pre-configured-demo-accounts) • [📬 Contact Support](#-support--business-inquiries)
+Warm cream. Charcoal type. Orange accents. Practical tools for everyday jobs and remote projects.
+
+[🌐 Website](https://get-it-done-steel.vercel.app) · [📡 API health](https://taskconnect-api.onrender.com/api/health) · [🧪 Verification](SEO_AUDIT.md) · [🛡️ Security](SECURITY_REPORT.md)
+
+**Demonstration marketplace:** payment holds, commissions, payouts, and wallets are simulated. No real money is charged or transferred. Identity badges reflect admin-reviewed submissions, not background checks or trade credentials.
 
 </div>
 
----
-
-## 📌 Product Overview
-
-**Get It Done** is a commercial-ready, full-stack peer-to-peer service marketplace. Designed for seamless trust and execution, it connects everyday clients (*Posters*) with verified, skilled service providers (*Taskers*) across home services, repairs, moving, and digital projects.
-
-The platform provides end-to-end operational coverage: coordinate-based task publishing, dynamic bidding, 256-bit encrypted escrow fund locking, instant bi-directional chat, two-sided 5-star reputation metrics, and administrative document verification.
+![Desktop homepage preview using local demonstration data](docs/homepage-desktop.png)
 
 ---
 
-## ✨ Core Feature Highlights
+## ✨ What You Can Do
 
-### 1. 📍 Task Publishing & Geolocation Discovery
-* **Interactive Coordinate Picker:** Posters pin exact coordinates directly on a **Leaflet / OpenStreetMap** canvas with automated reverse geocoding.
-* **Remote & Physical Filters:** Instant switching between digital/remote tasks and local in-person work.
-* **Multi-Marker Price Canvas:** Explore available tasks on an interactive map rendered with live dollar-value price badge markers (`$180`, `$220`).
+| For posters                               | For taskers                                  | For administrators                             |
+| ----------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
+| Describe a task and set a USD budget      | Search local or remote work                  | Review identity sample submissions             |
+| Choose a category, location, and due date | Filter tasks by category, budget, and status | Inspect documents through authorized endpoints |
+| Compare proposals and hire a tasker       | Send a price and proposal                    | Approve/reject submissions and manage roles    |
+| Chat privately after hiring               | Coordinate with the poster in real time      | View marketplace activity and demo balances    |
+| Confirm completion and leave feedback     | Receive a simulated wallet credit            | Monitor the demonstration workflow             |
 
-### 2. 💼 Competitive Bidding & Proposal Review
-* **Custom Quotations:** Taskers submit tailored proposals with custom pricing and cover notes.
-* **Reputation Comparison:** Posters inspect bidder profiles, average ratings, historical review volume, and verified ID credentials.
+The complete interface shares a responsive visual system: accessible fields, keyboard focus, dialogs, clear errors, retries, and honest demo labels. Informational pages explain the product without invented testimonials, rankings, or safety guarantees.
 
-### 3. 💳 Escrow Payment Guarantee Engine
-* **Pre-Authorized Fund Locking:** When an offer is accepted, funds are pre-authorized via encrypted payment gateway and secured in platform escrow (`HELD_IN_ESCROW`).
-* **Platform Revenue Automation:** Automatically processes a 10% marketplace commission upon successful job completion.
-* **Protected Payouts:** Funds are transferred to the Tasker’s digital wallet only after the Poster inspects and confirms job satisfaction.
+## 🏗️ Architecture
 
-### 4. 💬 Real-Time WebSockets In-App Chat
-* **Private Task Channels:** Instant room-based messaging (`task_{taskId}`) between poster and hired tasker powered by **Socket.IO**.
-* **Live Presence:** Real-time online indicators, live typing indicators, and instant unread notification counters.
-
-### 5. ⭐ Two-Sided 5-Star Reputation System
-* **Mutual Feedback:** Post-job ratings (1–5 stars) and detailed reviews from both sides.
-* **Atomic Recalculation:** Atomic database updates of average ratings and total job counts.
-
-### 6. 🛡️ Trust & Safety Moderation (KYC)
-* **Government ID Verification:** Taskers upload photo ID documents to earn the green **Verified Tasker** badge.
-* **Administrative Control Center:** Dedicated `/admin` dashboard for administrators to inspect KYC submissions, manage user roles, and monitor marketplace KPIs (Active Users, Open Tasks, Escrow Volume, Completed Jobs).
-
----
-
-## 🏗️ Cloud Architecture & Infrastructure
-
-```
-                                  +-----------------------+
-                                  |      Vercel CDN       |
-                                  |  React 18 + Vite SPA  |
-                                  | Tailwind CSS + Lucide |
-                                  +-----------+-----------+
-                                              |
-                          HTTPS / REST API    |   WSS / Socket.IO
-                         (Bearer JWT Tokens)  |  (Bi-directional)
-                                              v
-                                  +-----------------------+
-                                  |   Render Web Service  |
-                                  |  Express.js API Node  |
-                                  |  Helmet + RateLimit   |
-                                  +-----+-----------+-----+
-                                        |           |
-               Prisma Connection Pooler |           | Multi-Tier Adapter
-                                        v           v
-                          +-------------------+   +--------------------+
-                          |     Neon.tech     |   | Cloudinary / Vault |
-                          |  PostgreSQL 18.6  |   | Persistent Storage |
-                          | High-Availability |   | Data URI Fallback  |
-                          +-------------------+   +--------------------+
+```text
+Vercel: React + Vite
+  ├── Prerendered informational pages
+  ├── Node functions: public page SSR + sitemap
+  └── Hydrated interactions + lazy Leaflet maps
+            │ REST proxy / authenticated Socket.IO
+Render: Express + Prisma + Socket.IO
+            │
+SQLite for isolated local evaluation / PostgreSQL deployment schema
 ```
 
-| Layer | Provider / Tech | Specifications |
-| :--- | :--- | :--- |
-| **Frontend** | **Vercel** | React 18, Vite SPA, Tailwind CSS, Leaflet, Lucide Icons |
-| **Backend API** | **Render** | Node.js Express, Socket.IO WebSockets, Helmet, RateLimit |
-| **Database** | **Neon.tech** | PostgreSQL 18.6 with Prisma ORM Connection Pooling |
-| **Asset Storage**| **Cloudinary / Vault** | Multi-tier persistent asset adapter with base64 data URI fallback |
-| **Maps & Geo** | **Leaflet + OpenStreetMap** | Global tile server with dynamic coordinate markers |
-| **Escrow Engine**| **Payment Gateway** | Automated pre-authorization, escrow hold, and wallet disbursement |
+- **UI:** React 18, React Router 7, Tailwind 3, Lucide, Leaflet/OpenStreetMap.
+- **API:** Express, Prisma, Zod, JWT authentication, Socket.IO.
+- **Uploads:** Multer 2; Sharp converts new task/avatar raster uploads to bounded WebP. Identity submissions remain private data in the database.
+- **Email:** Nodemailer; SMTP is optional. Unconfigured delivery is explicitly reported as demo mode.
+- **Payments:** simulated records only. The presence of a Stripe dependency does not establish a live integration.
 
----
+## 🚀 Local Setup
 
-## 👥 Pre-Configured Demo Accounts
-
-For instant platform evaluation, the login screen (`/login`) includes **1-Click Demo Login** shortcuts:
-
-| Role | Demo Email | Password | Primary Capabilities |
-| :--- | :--- | :--- | :--- |
-| 👑 **Administrator** | `admin@getitdone.com` | `Password123!` | Moderates KYC identity queues, manages platform settings at `/admin`. |
-| 📝 **Poster** | `sarah@example.com` | `Password123!` | Publishes tasks, reviews bids, pre-authorizes escrow, confirms completion. |
-| 🔨 **Verified Tasker** | `alex@example.com` | `Password123!` | Handyman specialist with Verified Badge and earned wallet funds. |
-| 🧹 **Verified Tasker** | `elena@example.com` | `Password123!` | Cleaning expert with 5.0 star rating and 20+ verified client reviews. |
-| ⏳ **Pending KYC** | `jessica@example.com` | `Password123!` | Applicant with pending ID verification in the moderation queue. |
-
----
-
-## 🔒 Security Posture & Defense-in-Depth
-
-Get It Done is engineered according to the **STRIDE threat model** and defends against the OWASP Top 10 vulnerabilities:
-
-* **HTTP Security Headers:** Configured via **Helmet** with custom Content Security Policy (CSP), `X-Content-Type-Options: nosniff`, and `Permissions-Policy`.
-* **Anti-Spam & DoS Defense:** Multi-tier rate limiting using **express-rate-limit** (15 auth attempts / 15 min; 120 API requests / min; 5 contact inquiries / 15 min).
-* **Strict Payload Validation:** Comprehensive schema validation powered by **Zod** on all incoming parameters.
-* **Access Control & IDOR Guard:** Explicit server-side ownership checks preventing unauthorized access to tasks, bids, and financial records.
-* **Sanitized Error Handling:** Production error responses strip all internal database schema names and stack traces.
-
-### 🧪 Automated Test Suite (65/65 Tests Passing)
+Use **Node.js 22.19+** and npm. Commands below are run from the repository root.
 
 ```bash
-$ npm test
-
- RUN  v3.2.7 server/
-
- ✓ test/redteam.test.js (12 tests) 426ms
-   ✓ SQL Injection immunity on search & filter queries
-   ✓ Cross-Site Scripting (XSS) payload sanitization
-   ✓ IDOR prevention on task updates and bid cancellations
-   ✓ Unauthorized escrow release prevention
-   ✓ Role privilege escalation defense (admin guard)
-   ✓ Brute-force rate limiting trip verification
-
- ✓ test/api.test.js (17 tests) 667ms
-   ✓ User registration & JWT generation
-   ✓ Credential validation & 401 on bad password
-   ✓ Public task catalog browsing
-   ✓ Bidding, acceptance, and escrow transition
-   ✓ Job completion and wallet payout
-   ✓ Mutual rating recalculation
-   ✓ Customer support contact validation & dispatch
-
- Test Files  2 passed (2)
-      Tests  29 passed (29)
-   Duration  1.68s
+npm ci --prefix server
+npm ci --prefix client
 ```
 
-*See [`SECURITY_REPORT.md`](SECURITY_REPORT.md) for the complete 12-vector offensive penetration testing audit.*
+Create `server/.env` from `server/.env.example` and set a local SQLite URL and development JWT secret. Then initialize a **new local evaluation database**:
+
+```bash
+npm --prefix server run prisma:generate
+npm --prefix server run prisma:push
+npm --prefix server run seed
+```
+
+**The seed script resets its configured database. Use it only with your disposable local database.** Automated tests create their own isolated databases; they do not use your application database.
+
+Start the API and frontend in separate terminals:
+
+```bash
+npm --prefix server run dev
+npm --prefix client run dev
+```
+
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The frontend defaults to the local API at port 5000. Do not copy a production `VITE_API_URL` into your local environment unless you intend to use that API.
+
+```bash
+npm run build
+npm --prefix client run preview
+```
+
+The preview serves the production SSR build. Set `API_ORIGIN` to change its server-side API origin.
+
+## 👥 Sample Accounts
+
+The login screen fills these credentials for evaluation; you still click **Log in** to submit them. Accounts exist only after seeding or when the deployment operator provisions them.
+
+| Role   | Email                 | Password       |
+| ------ | --------------------- | -------------- |
+| Admin  | `admin@getitdone.com` | `Password123!` |
+| Poster | `sarah@example.com`   | `Password123!` |
+| Tasker | `alex@example.com`    | `Password123!` |
+
+Public demo passwords are unsuitable for commercial deployment. Use clearly labelled sample documents to evaluate verification; do not upload sensitive real identity records.
+
+## 🧪 Verified Results
+
+October 7, 2026: **75 backend tests, 5 SEO tests and 14 production browser tests passed**. Responsive routes were checked at 375, 768 and 1440 pixels, including task details, public profiles, account and admin screens.
+
+Local Lighthouse mobile simulation: **99 performance / 100 accessibility / 100 best practices / 100 SEO**; LCP **1.6s**, CLS **0**, TBT **32ms**. These are lab observations, not field Core Web Vitals or ranking claims. See [full audit](SEO_AUDIT.md) and [measurement summary](docs/lighthouse-summary.json).
+
+Both production dependency audits reported zero vulnerabilities. Five high findings remain in the frontend Tailwind 3 build-only dependency chain; details and limits are recorded in [security verification](SECURITY_REPORT.md).
+
+## 🔎 Rendering & SEO
+
+Public informational pages are prerendered. The homepage, listings, and task details receive public content and links in their initial HTML, then hydrate. Maps and account interactions remain client-side.
+
+- Absolute, route-specific canonicals and unique titles/descriptions.
+- One H1 with descriptive content and a logical heading hierarchy.
+- Visible breadcrumbs with matching `BreadcrumbList` JSON-LD; factual `WebSite` markup.
+- Search/filter variants, private accounts, public profiles, and utility screens deliberately use `noindex`.
+- Open tasks and public informational routes populate a generated sitemap. Closed tasks and utility routes are excluded. The generator splits at 50,000 entries or before 50 MB.
+- Missing routes/tasks return 404; catalog outages return 503. Errors do not masquerade as empty results.
+- Prerendered preview deployments use `noindex`; SSR previews also send an `X-Robots-Tag` header.
+
+Example generated metadata:
+
+```html
+<title>Browse tasks | Get It Done</title>
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://get-it-done-steel.vercel.app/tasks" />
+```
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://get-it-done-steel.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Browse tasks",
+      "item": "https://get-it-done-steel.vercel.app/tasks"
+    }
+  ]
+}
+```
+
+```text
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /template.html
+
+Sitemap: https://get-it-done-steel.vercel.app/sitemap.xml
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://get-it-done-steel.vercel.app/</loc></url>
+  <url><loc>https://get-it-done-steel.vercel.app/tasks</loc></url>
+</urlset>
+```
+
+The examples illustrate the generated output; the live sitemap also includes eligible informational pages and existing open task URLs. Meta descriptions help communicate relevance and can influence click-through; they are not a direct ranking factor. No FAQ rich-result eligibility is claimed; FAQ markup is intentionally omitted.
+
+## 🧪 Verification
+
+```bash
+npm test                         # frontend SEO + isolated backend suites
+npm --prefix client exec playwright install chromium
+npm run test:e2e                  # isolated browser and accessibility tests
+npm --prefix client run lighthouse # production-build mobile lab measurement
+```
+
+The browser suite covers 375px, 768px, and 1440px layouts, raw HTML without JavaScript, profile identity, filter/history synchronization, retries, duplicate submissions, the task lifecycle, and verification/admin inspection. CI installs dependencies from explicit lockfiles and retains browser diagnostics.
+
+See [SEO_AUDIT.md](SEO_AUDIT.md) for measured results and [SECURITY_REPORT.md](SECURITY_REPORT.md) for limitations. Test coverage is evidence for the tested scenarios, not certification or proof of immunity.
+
+## 📡 Selected API Interfaces
+
+| Method     | Route                                       | Purpose                                           |
+| ---------- | ------------------------------------------- | ------------------------------------------------- |
+| GET        | `/api/health`                               | Minimal availability check                        |
+| POST       | `/api/auth/register`, `/api/auth/login`     | Account access                                    |
+| GET        | `/api/users/:id`                            | Requested public profile; excludes private fields |
+| GET / POST | `/api/tasks`                                | Discovery and task creation                       |
+| GET        | `/api/tasks/:id`                            | Task details with viewer-appropriate privacy      |
+| POST       | `/api/offers/task/:id`                      | Submit/update a proposal                          |
+| POST       | `/api/offers/:id/accept`                    | Hire and record a simulated payment hold          |
+| PATCH      | `/api/tasks/:id/complete`                   | Complete and record simulated payout              |
+| GET / POST | `/api/messages/task/:id`                    | Authorized participant conversations              |
+| POST       | `/api/reviews/task/:id`                     | Post-completion feedback                          |
+| POST       | `/api/auth/verify-id`                       | Submit an identity sample                         |
+| GET        | `/api/admin/verifications/:userId/document` | Admin-only document inspection                    |
+| POST       | `/api/contact`                              | Send an inquiry or report demo delivery           |
+
+Sockets authenticate with `auth.token`. The server derives message identity and authorizes task rooms; client-supplied sender IDs do not grant access.
+
+## ☁️ Deployment
+
+Vercel project root: **`client`**. Build: `npm run build`. Output: `dist/client`. Keep Node functions enabled; this is not a static SPA deployment.
+
+- `API_ORIGIN`: server-only backend origin, normally `https://taskconnect-api.onrender.com`.
+- `VITE_API_URL`: optional direct browser API/socket origin; leaving it empty uses the REST proxy and the production socket default.
+- `CLIENT_URL`: backend CORS origin; configure the production URL explicitly.
+- Deploy the backend using its **PostgreSQL schema** and the operator's established deployment process. Do not run the local SQLite seed on production data.
+- Set a unique production JWT secret, SMTP if needed, and appropriate storage configuration.
+
+Cloudinary/Unsplash assets receive responsive WebP source sets where supported. Local uploads are WebP; the database data-URI fallback has no responsive CDN delivery and needs replacement with an appropriate storage configuration before larger deployments.
+
+## 📬 Contact & Documentation
+
+[ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com) · [About](https://get-it-done-steel.vercel.app/about) · [Questions](https://get-it-done-steel.vercel.app/faq)
+
+[Security model](SECURITY.md) · [Security report](SECURITY_REPORT.md) · [SEO audit](SEO_AUDIT.md) · [Architecture decisions](DECISIONS.md) · [Project state](PROJECT_STATE.md) · [Terms](TERMS.md) · [Privacy](PRIVACY.md)
+
+No response-time SLA, legal compliance certification, ranking, or field Core Web Vitals result is claimed.
+
+## ✅ Next Steps — Operator Checklist
+
+- [ ] Complete a human factual/editorial review of public copy, identity wording, and legal pages before commercial launch.
+- [ ] Verify ownership of the production URL in Google Search Console, open **Sitemaps**, and submit `sitemap.xml`.
+- [ ] Use **URL Inspection → Test live URL** for the homepage, `/tasks`, and an open task.
+- [ ] Validate representative breadcrumb markup with [Google's Rich Results Test](https://search.google.com/test/rich-results).
+- [ ] Review CrUX/Search Console field data against LCP ≤ 2.5s, INP ≤ 200ms, and CLS ≤ 0.1 at the 75th percentile. Local lab results do not establish these outcomes.
+- [ ] Replace demo credentials/payment behavior and review legacy identity-document storage before handling real users or money.
 
 ---
 
-## 📡 API Endpoints Reference
+**#GetItDone #LocalServices #Marketplace #React #Vite #TailwindCSS #Express #Prisma #SocketIO #TechnicalSEO**
 
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/health` | Public | System uptime, version, and database connectivity. |
-| `POST` | `/api/auth/register` | Public | Register new user account with Zod validation. |
-| `POST` | `/api/auth/login` | Public | Authenticate user and return signed JWT. |
-| `GET` | `/api/auth/me` | Authenticated | Fetch current profile, role, and wallet balance. |
-| `GET` | `/api/categories` | Public | Retrieve marketplace categories with task counts. |
-| `GET` | `/api/tasks` | Public | Browse, search, and filter task listings with geo-coordinates. |
-| `POST` | `/api/tasks` | Authenticated | Post a new task with budget, deadline, and location. |
-| `POST` | `/api/offers/task/:id` | Authenticated | Submit bid quote and proposal on an open task. |
-| `POST` | `/api/offers/:id/accept`| Poster Only | Accept bid, transition task to `ASSIGNED`, lock escrow funds. |
-| `PATCH`| `/api/tasks/:id/complete`| Poster Only| Release escrow funds ($90% to Tasker, 10% platform fee). |
-| `POST` | `/api/reviews/task/:id`| Hired Parties | Submit mutual 5-star review and rating. |
-| `POST` | `/api/contact` | Public | Rate-limited customer support & partnership inquiry submission. |
-| `GET` | `/api/admin/stats` | Admin Only | Inspect marketplace KPIs and escrow volume. |
-| `POST` | `/api/admin/kyc/:id` | Admin Only | Approve or reject user identity verification submissions. |
-
----
-
-## 🚀 Local Development Setup
-
-### Prerequisites
-* Node.js (v18+)
-* npm (v9+)
-
-### Installation
-
-1. **Clone repository:**
-   ```bash
-   git clone https://github.com/ranaumarbilal31/Get-It-Done.git
-   cd Get-It-Done
-   ```
-
-2. **Setup Server & Database:**
-   ```bash
-   cd server
-   npm install
-   npx prisma db push
-   node prisma/seed.js
-   npm start
-   # Server running at: http://localhost:5000
-   ```
-
-3. **Setup Client:**
-   ```bash
-   cd ../client
-   npm install
-   npm run dev
-   # Web application open at: http://localhost:5173
-   ```
-
----
-
-## 📬 Support & Business Inquiries
-
-* **Customer Care & Trust Inquiries:** [ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com)
-* **Average Response SLA:** Under 2 hours (24/7 coverage)
-* **Corporate Inquiries:** Get It Done Technologies Inc.
-
----
-
-## 📚 Documentation Index
-
-* [`TERMS.md`](TERMS.md) & `/terms` — Complete commercial Terms of Service.
-* [`PRIVACY.md`](PRIVACY.md) & `/privacy` — GDPR & CCPA privacy policy.
-* [`SECURITY.md`](SECURITY.md) — STRIDE threat model, security policies, and defense layers.
-* [`SECURITY_REPORT.md`](SECURITY_REPORT.md) — Red-team penetration audit record.
-* [`DECISIONS.md`](DECISIONS.md) — Architectural decision records (ADRs).
-* [`PROJECT_STATE.md`](PROJECT_STATE.md) — Runtime environment and dependency audit.
-* [`LICENSE`](LICENSE) — Open-source MIT License.
-
----
-
-<div align="center">
-© 2026 Get It Done Technologies Inc. All rights reserved.
-</div>
+<div align="center">Good skills. Everyday possibilities.</div>
