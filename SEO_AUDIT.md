@@ -4,19 +4,19 @@
 
 Verified locally on October 7, 2026. No crawl, ranking, traffic or field-performance metrics were invented.
 
-| Priority | Issue / why it matters                                      | Exact correction / status                                                                                                                                            |
-| -------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Critical | Chat could trust arbitrary identities and rooms             | JWT identity, explicit origins, participant checks, expiry and revoked-session checks. Implemented and tested.                                                       |
-| Critical | Repeated or competing approvals could duplicate credits     | Integer cents, transaction/CAS guards, immutable operation ledger keys and a single settlement path. Implemented and tested.                                         |
-| Critical | Live activation/reset delivery lacks owner credentials      | Configure Gmail app password in Vercel, shared relay secret in both hosts, and relay URL in Render. Verify both links in the owner inbox. Pending.                   |
-| High     | Payment records must not be mistaken for real fund custody  | Localized checkout notice; no card collection; simulated provider adapter retained. Real provider and withdrawals require integration before actual funds.           |
-| High     | Public content previously relied on SPA rendering           | SSR homepage/listings/details, prerender informational pages, safe hydration and sanitized serialized data. Implemented.                                             |
-| High     | New workflow must preserve old data                         | Compatible schema additions, legacy fee/balance reconciliation without new credits, funding support for older open tasks. Tested locally; deployment smoke required. |
-| High     | Filters, auth transitions and failures could mislead users  | URL/history synchronization, aborts/debounce, range validation, retries, auth initialization and submit locks. Tested.                                               |
-| Medium   | Utility/search/profile pages could enter the index          | Deliberate noindex, clean absolute canonicals, open-task sitemap, visible breadcrumbs and matching schema. Tested.                                                   |
-| Medium   | Real-world performance and storage retention are unverified | Render uses the PostgreSQL schema and a configured database URL. Verify backups/retention with the provider; measure production cold starts and field CWV.           |
-| Medium   | Build-chain advisories may differ from runtime exposure     | Run both production dependency audits in CI. Monitor the Tailwind 3 development chain separately.                                                                    |
-| Low      | Public policies and generated draft copy need human review  | Owner editorial/legal pass; no invented credentials, testimonials or rich-result guarantees.                                                                         |
+| Priority | Issue / why it matters                                      | Exact correction / status                                                                                                                                                                 |
+| -------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Critical | Chat could trust arbitrary identities and rooms             | JWT identity, explicit origins, participant checks, expiry and revoked-session checks. Implemented and tested.                                                                            |
+| Critical | Repeated or competing approvals could duplicate credits     | Integer cents, transaction/CAS guards, immutable operation ledger keys and a single settlement path. Implemented and tested.                                                              |
+| Critical | Live activation/reset delivery lacks owner credentials      | Configure Gmail app password in Vercel, shared relay secret in both hosts, and relay URL in Render. Verify both links in the owner inbox. Pending.                                        |
+| High     | Payment records must not be mistaken for real fund custody  | Localized checkout notice; no card collection; simulated provider adapter retained. Real provider and withdrawals require integration before actual funds.                                |
+| High     | Public content previously relied on SPA rendering           | SSR homepage/listings/details, prerender informational pages, safe hydration and sanitized serialized data. Implemented.                                                                  |
+| High     | New workflow must preserve old data                         | Compatible schema additions, legacy fee/balance reconciliation without new credits, funding support for older open tasks. Tested locally; deployment smoke required.                      |
+| High     | Filters, auth transitions and failures could mislead users  | URL/history synchronization, aborts/debounce, range validation, retries, auth initialization and submit locks. Tested.                                                                    |
+| Medium   | Utility/search/profile pages could enter the index          | Deliberate noindex, clean absolute canonicals, open-task sitemap, visible breadcrumbs and matching schema. Tested.                                                                        |
+| Medium   | Real-world performance and storage retention are unverified | Production startup confirms Neon PostgreSQL connectivity and successful schema synchronization. Verify backups/retention with the provider; measure production cold starts and field CWV. |
+| Medium   | Build-chain advisories may differ from runtime exposure     | Run both production dependency audits in CI. Monitor the Tailwind 3 development chain separately.                                                                                         |
+| Low      | Public policies and generated draft copy need human review  | Owner editorial/legal pass; no invented credentials, testimonials or rich-result guarantees.                                                                                              |
 
 ## Recorded verification
 
@@ -25,6 +25,7 @@ Verified locally on October 7, 2026. No crawl, ranking, traffic or field-perform
 - Production Chromium: **17 passed**, including registration/activation, posting/funding, offer adjustment, hiring, chat, delivery, approval, review, recovery and dispute resolution.
 - Public, account and admin routes checked at **375, 768 and 1440px**; public HTML also checked with JavaScript disabled. Automated accessibility checks passed on representative public screens.
 - Local mobile Lighthouse: **93 / 100 / 100 / 100**, LCP **2.22s**, CLS **0**, TBT **238ms**. [Recorded lab measurement](docs/lighthouse-summary.json).
+- Production smoke: canonical public HTML, one H1, missing-resource 404s, robots and a 12-entry sitemap passed. [Recorded report](docs/production-smoke.json). Vercel and Render deployed successfully; PostgreSQL schema synchronization and database connectivity were confirmed in Render startup logs.
 - Private API population: **15 taskers, 10 jobbers, 120 tasks, 28 reviews**. These are isolated fixtures, not production activity.
 
 TBT is not INP. No CrUX or Search Console data was available, and no field Core Web Vitals pass is claimed. Browser coverage is Chromium; broader browsers, devices and assistive technologies remain useful.

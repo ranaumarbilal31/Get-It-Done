@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-07T11:59:51.497Z",
+  "checkedAt": "2026-10-07T15:28:29.902Z",
   "origin": "https://get-it-done-steel.vercel.app",
   "findings": [
     {
@@ -64,6 +64,27 @@
       "initialContent": true
     },
     {
+      "route": "/payments",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/payments",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/dispute-policy",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/dispute-policy",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/how-it-works",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/how-it-works",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
       "route": "/missing-smoke-check",
       "status": 404
     },
@@ -78,7 +99,7 @@
     {
       "route": "/sitemap.xml",
       "status": 200,
-      "URLs": 9
+      "URLs": 12
     }
   ],
   "failures": []

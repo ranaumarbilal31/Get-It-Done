@@ -41,3 +41,6 @@ client/reports/
 
 # Private generated accounts and isolated marketplace
 .private-staging/
+
+# Local smoke-test output
+/reports/

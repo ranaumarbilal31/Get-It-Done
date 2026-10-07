@@ -25,7 +25,7 @@ Source review and local verification on October 7, 2026. This is not external pe
 - Rate limits and relay replay suppression are process/instance-local. A shared durable limiter/replay store is appropriate for horizontal scaling.
 - The immutable ledger is enforced by application operations and unique keys; database administrators retain database access. There is no external tamper-evident audit service.
 - Financial APIs currently simulate provider operations. No real custody, settlement, withdrawal or card processing exists.
-- PostgreSQL deployment configuration exists, but backup/retention guarantees require provider confirmation. Production schema additions run without destructive acceptance; back up before release.
+- Production startup and API reads confirm persistent Neon PostgreSQL connectivity and successful compatible schema synchronization; backup/retention guarantees require provider confirmation. Production schema additions run without destructive acceptance; back up before release.
 - Synthetic staging accounts/reviews are private and Git-ignored. They must never be represented as real customer experiences.
 - Runtime dependency audits run in CI; development/build-chain advisories need separate review.
 - No government, financial-compliance, background-check or bank-grade security claim is made.

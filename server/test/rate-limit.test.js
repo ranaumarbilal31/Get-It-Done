@@ -3,20 +3,30 @@ import request from 'supertest';
 import { app } from '../src/server.js';
 it('limits account-security requests independently of account existence', async () => {
   const previous = process.env.NODE_ENV;
+  const previousProxy = app.get('trust proxy');
+  app.set('trust proxy', 1);
   process.env.NODE_ENV = 'development';
   try {
     for (let i = 0; i < 20; i++) {
       const r = await request(app)
         .post('/api/auth/forgot-password')
+        .set('X-Forwarded-For', '203.0.113.10')
         .send({ email: 'unknown-rate-limit@example.com' });
       expect(r.status).not.toBe(429);
     }
     const limited = await request(app)
       .post('/api/auth/forgot-password')
+      .set('X-Forwarded-For', '203.0.113.10')
       .send({ email: 'unknown-rate-limit@example.com' });
     expect(limited.status).toBe(429);
     expect(limited.headers['ratelimit-limit']).toBe('20');
+    const other = await request(app)
+      .post('/api/auth/forgot-password')
+      .set('X-Forwarded-For', '203.0.113.11')
+      .send({ email: 'another-address@example.com' });
+    expect(other.status).not.toBe(429);
   } finally {
     process.env.NODE_ENV = previous;
+    app.set('trust proxy', previousProxy);
   }
 });

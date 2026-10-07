@@ -63,9 +63,10 @@ Vercel: React + Vite + Tailwind
                │ REST proxy / authenticated Socket.IO
 Render: Express + Prisma + Socket.IO
                │
-Persistent PostgreSQL in deployment / SQLite for isolated local work
+Persistent Neon PostgreSQL in deployment / SQLite for isolated local work
 ```
 
+- Production startup confirms persistent Neon PostgreSQL connectivity and compatible schema synchronization. Database reads and public production smoke checks passed; provider backup/retention still needs owner confirmation.
 - Public HTML contains headings, categories, task links and descriptions before JavaScript runs.
 - Maps and administrative modules load separately; private account state stays client-side.
 - Public profiles use a narrow field selection and remain `noindex`.

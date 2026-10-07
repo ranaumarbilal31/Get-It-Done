@@ -24,6 +24,13 @@ const adminRoutes = require('./routes/adminRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
+// Render terminates requests through its reverse proxy. Trust only the configured
+// number of nearest hops, so forwarded client IPs drive per-visitor rate limits.
+const proxyHops = Number(process.env.TRUST_PROXY_HOPS ?? (process.env.RENDER ? 1 : 0));
+if (!Number.isInteger(proxyHops) || proxyHops < 0 || proxyHops > 5)
+  throw new Error('TRUST_PROXY_HOPS must be an integer from 0 to 5.');
+app.set('trust proxy', proxyHops);
+
 const server = http.createServer(app);
 
 // Enterprise HTTP Security Headers & Permissions Policy
