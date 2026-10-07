@@ -62,7 +62,11 @@ Local production server, compressed assets, disposable SQLite dataset, Lighthous
 
 ## Deployment verification
 
-The repository update is delivered to `main` without force-pushing. Connected CI and Vercel deployment results are checked after publication; production smoke evidence is recorded in the delivery follow-up. No production seed or database migration is run. The existing backend deployment must pick up the server changes for the new public profile and socket behavior to be available in production.
+The rebuild is pushed to main without force-pushing. [Implementation CI](https://github.com/ranaumarbilal31/Get-It-Done/actions/runs/37616456503) passed all checks. Vercel deployed successfully. The first live smoke test found a root-only 404; an explicit homepage rewrite fixed the issue in commit 79b50e1.
+
+[Production smoke evidence](docs/production-smoke.json) records successful homepage/listing/information/task HTML, canonicals, one H1, a nine-entry sitemap, filtered noindex and missing-route/task/profile 404s. Chromium confirmed no hydration or console errors and no overflow on the production homepage, listing and About page. The deployed public profile endpoint returned only the eight approved fields; an unauthenticated Socket.IO connection was rejected with Authentication required.
+
+No production seed, account mutation or database migration was run. Deployment smoke checks were read-only. Field metrics and Search Console coverage remain unavailable.
 
 ## ✅ Next steps — Owner actions
 

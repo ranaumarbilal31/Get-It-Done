@@ -1,0 +1,85 @@
+{
+  "checkedAt": "2026-10-07T11:59:51.497Z",
+  "origin": "https://get-it-done-steel.vercel.app",
+  "findings": [
+    {
+      "route": "/",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/tasks",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/tasks",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/tasks/5b3a75d9-9c7b-4a77-9ce8-ef14cb9ed7cf",
+      "status": 200,
+      "initialContent": true
+    },
+    {
+      "route": "/about",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/about",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/trust-safety",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/trust-safety",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/faq",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/faq",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/contact",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/contact",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/terms",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/terms",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/privacy",
+      "status": 200,
+      "canonical": "https://get-it-done-steel.vercel.app/privacy",
+      "h1s": 1,
+      "initialContent": true
+    },
+    {
+      "route": "/missing-smoke-check",
+      "status": 404
+    },
+    {
+      "route": "/tasks/missing-smoke-check",
+      "status": 404
+    },
+    {
+      "route": "/users/missing-smoke-check",
+      "status": 404
+    },
+    {
+      "route": "/sitemap.xml",
+      "status": 200,
+      "URLs": 9
+    }
+  ],
+  "failures": []
+}
