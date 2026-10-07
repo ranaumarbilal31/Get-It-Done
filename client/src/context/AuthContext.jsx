@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  startTransition,
+  useRef,
+  useState,
+} from 'react';
 import api from '../api/client';
 const Context = createContext(null);
 const readToken = () => {
@@ -30,31 +37,35 @@ export function AuthProvider({ children }) {
     setLoading(false);
   };
   useEffect(() => {
-    setToken(readToken());
-    setReady(true);
+    startTransition(() => {
+      setToken(readToken());
+      setReady(true);
+    });
     window.addEventListener('session-expired', expire);
     return () => window.removeEventListener('session-expired', expire);
   }, []);
   useEffect(() => {
     if (!ready) return;
     if (!token) {
-      setUser(null);
-      setLoading(false);
+      startTransition(() => {
+        setUser(null);
+        setLoading(false);
+      });
       return;
     }
     const current = ++generation.current;
     const controller = new AbortController();
-    setLoading(true);
+    startTransition(() => setLoading(true));
     api
       .get('/auth/me', { signal: controller.signal })
       .then((res) => {
-        if (current === generation.current) setUser(res.data.user);
+        if (current === generation.current) startTransition(() => setUser(res.data.user));
       })
       .catch((error) => {
         if (!controller.signal.aborted && error.response?.status === 401) expire();
       })
       .finally(() => {
-        if (current === generation.current) setLoading(false);
+        if (current === generation.current) startTransition(() => setLoading(false));
       });
     return () => controller.abort();
   }, [token, ready]);
@@ -69,7 +80,7 @@ export function AuthProvider({ children }) {
   };
   const login = (email, password) => authenticate('/auth/login', { email, password });
   const register = (name, email, password) =>
-    authenticate('/auth/register', { name, email, password });
+    api.post('/auth/register', { name, email, password }).then((res) => res.data);
   const logout = async () => {
     expire();
     try {

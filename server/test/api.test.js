@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/server.js';
+import { createRequire } from 'node:module';
+const { captures } = createRequire(import.meta.url)('../src/services/accountEmail.js');
 import prisma from '../src/config/prisma.js';
 
 describe('Get It Done Comprehensive API Test Suite', () => {
@@ -58,14 +60,18 @@ describe('Get It Done Comprehensive API Test Suite', () => {
       expect(res.status).toBe(400);
     });
 
-    it('POST /api/auth/register creates user and returns JWT on valid input', async () => {
+    it('POST /api/auth/register creates a pending account requiring activation', async () => {
       const uniqueEmail = `testuser_${Date.now()}@example.com`;
       const res = await request(app)
         .post('/api/auth/register')
         .send({ name: 'Test User', email: uniqueEmail, password: 'Password123!' });
       expect(res.status).toBe(201);
-      expect(res.body.token).toBeDefined();
-      expect(res.body.user.email).toBe(uniqueEmail);
+      expect(res.body.token).toBeUndefined();
+      expect(res.body.requiresVerification).toBe(true);
+      const mail = captures.find((m) => m.to === uniqueEmail);
+      expect(
+        (await request(app).post('/api/auth/verify-email').send({ token: mail.token })).status,
+      ).toBe(200);
     });
 
     it('POST /api/auth/login returns 401 on incorrect password', async () => {
@@ -115,7 +121,8 @@ describe('Get It Done Comprehensive API Test Suite', () => {
         .set('Authorization', `Bearer ${posterToken}`)
         .send({
           title: 'Mount Floating Shelves in Living Room',
-          description: 'Need two 4-foot solid oak floating shelves mounted securely into brick wall studs.',
+          description:
+            'Need two 4-foot solid oak floating shelves mounted securely into brick wall studs.',
           budget: 95,
           categoryId: categories[0].id,
           isRemote: false,
@@ -127,6 +134,15 @@ describe('Get It Done Comprehensive API Test Suite', () => {
       expect(res.status).toBe(201);
       expect(res.body.task.title).toContain('Floating Shelves');
       testTaskId = res.body.task.id;
+      expect(res.body.task.status).toBe('DRAFT');
+      expect(
+        (
+          await request(app)
+            .post('/api/payments/tasks/' + testTaskId + '/fund')
+            .set('Authorization', 'Bearer ' + posterToken)
+            .send({ confirmPreview: true })
+        ).status,
+      ).toBe(200);
     });
 
     it('GET /api/tasks/:id fuzzes coordinates for public unassigned viewers', async () => {
@@ -162,21 +178,30 @@ describe('Get It Done Comprehensive API Test Suite', () => {
     it('POST /api/offers/:id/accept transitions task to ASSIGNED and locks escrow', async () => {
       const res = await request(app)
         .post(`/api/offers/${testOfferId}/accept`)
-        .set('Authorization', `Bearer ${posterToken}`);
+        .set('Authorization', `Bearer ${posterToken}`)
+        .send({ confirmPreview: true });
 
       expect(res.status).toBe(200);
       expect(res.body.escrowPayment.status).toBe('HELD_IN_ESCROW');
       expect(res.body.escrowPayment.amount).toBe(90);
     });
 
-    it('PATCH /api/tasks/:id/complete releases escrow funds to tasker wallet', async () => {
+    it('PATCH /api/tasks/:id/complete releases funds only after tasker delivery', async () => {
+      expect(
+        (
+          await request(app)
+            .post('/api/payments/tasks/' + testTaskId + '/deliver')
+            .set('Authorization', 'Bearer ' + taskerToken)
+            .send({ notes: 'Shelves mounted and installation inspected.' })
+        ).status,
+      ).toBe(200);
       const res = await request(app)
         .patch(`/api/tasks/${testTaskId}/complete`)
         .set('Authorization', `Bearer ${posterToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.message).toContain('completed successfully');
-      expect(res.body.payoutAmount).toBe(81); // $90 - $9 platform fee
+      expect(res.body.message).toContain('payment released');
+      expect(res.body.payoutAmount).toBe(85.44); // $90 minus $1 and 4% of $89
     });
 
     it('POST /api/reviews/task/:id submits review and updates rating stats', async () => {
@@ -240,18 +265,16 @@ describe('Get It Done Comprehensive API Test Suite', () => {
     });
 
     it('POST /api/contact accepts valid inquiry and dispatches to support', async () => {
-      const res = await request(app)
-        .post('/api/contact')
-        .send({
-          name: 'Business Partner',
-          email: 'partner@example.com',
-          subject: 'Commercial Partnership Inquiry',
-          category: 'Partnership',
-          message: 'We are interested in integrating our corporate services with Get It Done.',
-        });
+      const res = await request(app).post('/api/contact').send({
+        name: 'Business Partner',
+        email: 'partner@example.com',
+        subject: 'Commercial Partnership Inquiry',
+        category: 'Partnership',
+        message: 'We are interested in integrating our corporate services with Get It Done.',
+      });
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.message).toContain('ranaumarbilal31@gmail.com');
+      expect(res.body.message).toContain('received');
     });
   });
 });

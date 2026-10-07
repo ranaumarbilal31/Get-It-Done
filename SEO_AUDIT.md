@@ -1,79 +1,45 @@
-# 👑 Get It Done — UI, Security & Technical SEO Audit
+# 🔎 Get It Done — Technical & Commercial Readiness Audit
 
-**Verdict:** the warm premium rebuild is implemented, public marketplace content renders in initial HTML, and local security and browser checks pass. Fabulous presentation now has evidence behind it.
+**Verdict:** the commercial interface, crawlable public pages and controlled task settlement are implemented; live email configuration and real payment processing remain owner/integration dependencies. The polish is here; the evidence keeps its crown.
 
-Verified October 7, 2026. Canonical origin: `https://get-it-done-steel.vercel.app`.
+Verified locally on October 7, 2026. No crawl, ranking, traffic or field-performance metrics were invented.
 
-## Prioritized findings and exact fixes
+| Priority | Issue / why it matters                                      | Exact correction / status                                                                                                                                            |
+| -------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Critical | Chat could trust arbitrary identities and rooms             | JWT identity, explicit origins, participant checks, expiry and revoked-session checks. Implemented and tested.                                                       |
+| Critical | Repeated or competing approvals could duplicate credits     | Integer cents, transaction/CAS guards, immutable operation ledger keys and a single settlement path. Implemented and tested.                                         |
+| Critical | Live activation/reset delivery lacks owner credentials      | Configure Gmail app password in Vercel, shared relay secret in both hosts, and relay URL in Render. Verify both links in the owner inbox. Pending.                   |
+| High     | Payment records must not be mistaken for real fund custody  | Localized checkout notice; no card collection; simulated provider adapter retained. Real provider and withdrawals require integration before actual funds.           |
+| High     | Public content previously relied on SPA rendering           | SSR homepage/listings/details, prerender informational pages, safe hydration and sanitized serialized data. Implemented.                                             |
+| High     | New workflow must preserve old data                         | Compatible schema additions, legacy fee/balance reconciliation without new credits, funding support for older open tasks. Tested locally; deployment smoke required. |
+| High     | Filters, auth transitions and failures could mislead users  | URL/history synchronization, aborts/debounce, range validation, retries, auth initialization and submit locks. Tested.                                               |
+| Medium   | Utility/search/profile pages could enter the index          | Deliberate noindex, clean absolute canonicals, open-task sitemap, visible breadcrumbs and matching schema. Tested.                                                   |
+| Medium   | Real-world performance and storage retention are unverified | Render uses the PostgreSQL schema and a configured database URL. Verify backups/retention with the provider; measure production cold starts and field CWV.           |
+| Medium   | Build-chain advisories may differ from runtime exposure     | Run both production dependency audits in CI. Monitor the Tailwind 3 development chain separately.                                                                    |
+| Low      | Public policies and generated draft copy need human review  | Owner editorial/legal pass; no invented credentials, testimonials or rich-result guarantees.                                                                         |
 
-| Priority | Issue and why it matters                                                             | Fix and status                                                                                                                                                                                                           |
-| -------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Critical | Arbitrary socket identities and task rooms exposed conversations                     | Verified JWT handshake, server-derived identity, token expiry, restricted origins, participant checks for joins/messages/typing. REST chat uses the same authorization. Implemented and tested.                          |
-| Critical | Simulated payments were presented with unsupported safety claims                     | Replaced guarantee, bank-grade, background-check and payout claims with accurate demo wording. Wallet withdrawals are disabled. Implemented.                                                                             |
-| High     | Public content depended on client rendering                                          | Vite SSR and hydration for homepage, listings and details; six information pages prerender. Maps and secondary account modules load in the browser. Implemented and checked without JavaScript.                          |
-| High     | Public profiles loaded the signed-in person or risked exposing private fields        | Public profile endpoint selects eight permitted fields. Requested profiles render public data and remain noindex; missing profiles return 404. Implemented and tested.                                                   |
-| High     | Identity previews failed and new uploads could become public                         | Private database storage, authenticated admin document endpoint, corrected preview URL, image/PDF preview and blocked legacy local document URLs. Implemented. Legacy remote public objects require operator removal.    |
-| High     | Inconsistent navigation, forms and mobile layout                                     | Shared cream/charcoal/orange design, navigation/footer, fields, cards, badges, dialogs, alerts, pagination and loading/error states across all screens. Checked at 375/768/1440 pixels.                                  |
-| High     | Filter/history races, expired sessions and duplicate actions caused misleading state | URL-driven filters, debounce, aborts, budget validation, combined category/search, auth initialization/expiry, submission locks, chat deep links and message deduplication. Implemented and tested.                      |
-| Medium   | Missing canonical/indexation/sitemap controls                                        | Absolute clean canonicals, query/utility/profile noindex, visible breadcrumbs and matching JSON-LD, dynamic open-task sitemap with protocol splitting. Assets remain crawlable. Implemented.                             |
-| Medium   | Heavy initial JavaScript and image/layout instability                                | Split secondary routes and Socket.IO, lazy Leaflet, explicit image/map dimensions, bounded WebP uploads and CDN responsive source sets. Local mobile Lighthouse improved from 67 to 99 performance.                      |
-| Medium   | Field Core Web Vitals and production capacity are unknown                            | Obtain real-user CrUX/Search Console measurements and assess backend cold starts/storage. No field pass, ranking or response-time claim is made. Operator action.                                                        |
-| Medium   | Frontend build dependencies retain five high advisories                              | Tailwind 3 build chain rooted in braces remains affected; registry has no patched braces release at verification time. Production dependency audits are clean. Monitor upstream or plan a reviewed build-tool migration. |
-| Low      | Public content and policies need human editorial/legal review                        | Copy is revised, but owner review is still required before commercial use. No invented authors, credentials, ratings or FAQ rich-result eligibility claims were added.                                                   |
+## Recorded verification
 
-## Measured local verification
+- Backend: **106 passed** against disposable SQLite, with external delivery disabled.
+- Metadata/sitemap: **5 passed**.
+- Production Chromium: **17 passed**, including registration/activation, posting/funding, offer adjustment, hiring, chat, delivery, approval, review, recovery and dispute resolution.
+- Public, account and admin routes checked at **375, 768 and 1440px**; public HTML also checked with JavaScript disabled. Automated accessibility checks passed on representative public screens.
+- Local mobile Lighthouse: **93 / 100 / 100 / 100**, LCP **2.22s**, CLS **0**, TBT **238ms**. [Recorded lab measurement](docs/lighthouse-summary.json).
+- Private API population: **15 taskers, 10 jobbers, 120 tasks, 28 reviews**. These are isolated fixtures, not production activity.
 
-| Check                                     | Result                                                                                                                                                                                                                           |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Backend integration/security suite        | **75 passed**, disposable SQLite database, external effects disabled                                                                                                                                                             |
-| Frontend metadata/sitemap suite           | **5 passed**                                                                                                                                                                                                                     |
-| Chromium production browser suite         | **14 passed**                                                                                                                                                                                                                    |
-| Client, SSR and six-page prerender builds | Passed                                                                                                                                                                                                                           |
-| Production dependency audits              | **0 vulnerabilities** in client and server                                                                                                                                                                                       |
-| Full frontend dependency audit            | **5 high** build-only findings; see security report                                                                                                                                                                              |
-| WCAG 2 A/AA and 2.1 AA automated checks   | No detected violations on eight representative public screens                                                                                                                                                                    |
-| Responsive checks                         | Public routes, task details, public profiles, account/admin at **375, 768, 1440px**, one H1 and no horizontal overflow                                                                                                           |
-| Browser workflows                         | Registration/login, posting, bidding, acceptance, private chat, simulated completion, review, sample verification/admin inspection, permissions, expiry, duplicate submits, retries, out-of-order filters, keyboard focus/escape |
-| Initial HTML                              | Homepage categories and task links, listing cards and task content visible with JavaScript disabled                                                                                                                              |
-| HTTP behavior                             | Unknown routes/tasks/profiles return 404; upstream errors map to 503; utility content uses deliberate noindex                                                                                                                    |
+TBT is not INP. No CrUX or Search Console data was available, and no field Core Web Vitals pass is claimed. Browser coverage is Chromium; broader browsers, devices and assistive technologies remain useful.
 
-Screenshots use local sample data: [desktop homepage](docs/homepage-desktop.png), [mobile homepage](docs/homepage-mobile.png). These are not real marketplace activity metrics. Browser verification is Chromium-based; broader device and assistive-technology testing remains useful.
+## Indexation and HTML
 
-## Lighthouse lab results
+`README.md` contains the HTML, JSON-LD, robots and sitemap snippets. Sitemap entries include clean informational pages, discovery and existing open tasks. Private drafts, profiles, accounts and filtered variants are excluded. Missing routes/tasks/profiles return 404; upstream failure returns 503. Query variants use clean canonicals and noindex. CSS, JavaScript, fonts and images remain crawlable.
 
-Local production server, compressed assets, disposable SQLite dataset, Lighthouse 13 mobile simulation:
+Structured data matches visible breadcrumbs and verified organization/site facts. No invented authors, credentials, product ratings or FAQ rich-result promises are added. Meta descriptions describe the page and support click-through, not a direct ranking improvement.
 
-| Performance | Accessibility | Best practices | SEO     | LCP      | CLS   | TBT      |
-| ----------- | ------------- | -------------- | ------- | -------- | ----- | -------- |
-| **99**      | **100**       | **100**        | **100** | **1.6s** | **0** | **32ms** |
+## Next steps
 
-[Recorded measurement](docs/lighthouse-summary.json). One lab run is not a field guarantee. TBT is a lab responsiveness diagnostic and does not establish INP. Real-user 75th-percentile targets remain LCP ≤ 2.5s, INP ≤ 200ms and CLS ≤ 0.1. [Official metric guidance](https://web.dev/articles/defining-core-web-vitals-thresholds).
-
-## Rendering and indexing contract
-
-- Indexable routes: homepage, clean `/tasks`, `/about`, `/trust-safety`, `/faq`, `/contact`, `/terms`, `/privacy`, and existing open tasks.
-- Noindex: filtered/query URLs, closed tasks, authentication, posting, account, administration and public profiles. Search pages remain crawlable so crawlers can read noindex.
-- Sitemaps use only canonical public route URLs and open tasks returned by the API. Each file splits at 50,000 entries or before 50 MB. The catalog cache lasts 60 seconds, so changed task state may briefly remain in a cached sitemap. [Google's sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap).
-- Unknown resources return real 404s. Catalog failures return 503 instead of a false empty list. There is no universal homepage redirect.
-- Task SSR serializes public content and excludes offers/payment records. Public profiles omit email, phone, documents, wallet and authentication fields. SSR responses use `no-store`; authenticated responses are not placed in shared HTML caches.
-- Schema matches the visible brand and breadcrumbs. No fabricated Organization facts, Person credentials, testimonials, ratings or FAQ markup.
-- CSS, JavaScript, images and maps are crawlable. Robots blocks admin/API paths as a crawl preference; backend authorization remains the security boundary.
-- Code snippets for HTML, JSON-LD, robots and sitemap are in the [README](README.md#-rendering--seo).
-
-## Deployment verification
-
-The rebuild is pushed to main without force-pushing. [Implementation CI](https://github.com/ranaumarbilal31/Get-It-Done/actions/runs/37616456503) passed all checks. Vercel deployed successfully. The first live smoke test found a root-only 404; an explicit homepage rewrite fixed the issue in commit 79b50e1.
-
-[Production smoke evidence](docs/production-smoke.json) records successful homepage/listing/information/task HTML, canonicals, one H1, a nine-entry sitemap, filtered noindex and missing-route/task/profile 404s. Chromium confirmed no hydration or console errors and no overflow on the production homepage, listing and About page. The deployed public profile endpoint returned only the eight approved fields; an unauthenticated Socket.IO connection was rejected with Authentication required.
-
-No production seed, account mutation or database migration was run. Deployment smoke checks were read-only. Field metrics and Search Console coverage remain unavailable.
-
-## ✅ Next steps — Owner actions
-
-- [ ] Review public copy, policies and identity-review language with a human editor.
-- [ ] Review and remove legacy public identity objects; establish retention/access policies before accepting sensitive real submissions.
-- [ ] Verify Search Console ownership → **Sitemaps** → submit `https://get-it-done-steel.vercel.app/sitemap.xml`.
-- [ ] **URL Inspection → Test live URL** for homepage, clean task listing and an open task; check rendered content and canonical choice.
-- [ ] Validate breadcrumb markup with [Google's Rich Results Test](https://search.google.com/test/rich-results).
-- [ ] Review CrUX/Search Console field data against the 75th-percentile thresholds. No analytics/crawl access was supplied, so rankings, crawl coverage and field metrics remain unavailable.
-- [ ] Before commercial launch, replace simulated payment behavior and demo credentials and review database/storage operations.
+- Configure Gmail and verify live activation/reset delivery.
+- Complete the owner’s public copy and policy review.
+- Verify Search Console ownership and submit `/sitemap.xml`; inspect homepage, discovery and an open task.
+- Validate representative breadcrumb/site markup with the Rich Results Test.
+- Review real-user CWV at the 75th percentile: LCP ≤2.5s, INP ≤200ms, CLS ≤0.1.
+- Confirm persistent storage, backups and image hosting; complete real payment integration before taking funds.

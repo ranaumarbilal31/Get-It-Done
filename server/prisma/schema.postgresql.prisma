@@ -1,5 +1,6 @@
-// Get It Done Prisma Schema - PostgreSQL Variant (For Neon, Supabase, Render)
-// To use: rename this to schema.prisma and configure DATABASE_URL="postgresql://user:password@host:5432/dbname"
+// Get It Done Prisma Schema
+// Supports SQLite for zero-dependency instant local evaluation,
+// and PostgreSQL for cloud deployments (Neon, Supabase, Render).
 
 generator client {
   provider = "prisma-client-js"
@@ -18,11 +19,14 @@ model User {
   avatar               String?
   bio                  String?
   phone                String?
-  role                 String         @default("USER")
+  role                 String         @default("USER") // "USER", "ADMIN"
   isVerified           Boolean        @default(false)
-  verificationStatus   String         @default("NONE")
+  verificationStatus   String         @default("NONE") // "NONE", "PENDING", "APPROVED", "REJECTED"
   idDocument           String?
   verificationNotes    String?
+  walletBalanceCents   Int            @default(0)
+  sessionVersion       Int            @default(0)
+  emailVerifyExpires   DateTime?
   walletBalance        Float          @default(0.0)
   ratingAvg            Float          @default(0.0)
   ratingCount          Int            @default(0)
@@ -46,45 +50,48 @@ model Category {
   id          String   @id @default(uuid())
   name        String   @unique
   slug        String   @unique
-  icon        String
+  icon        String   // Lucide icon name, e.g. "Wrench", "Truck", "Home", etc.
   description String?
   tasks       Task[]
 }
 
 model Task {
-  id              String    @id @default(uuid())
-  title           String
-  description     String
-  budget          Float
-  status          String    @default("OPEN")
-  isRemote        Boolean   @default(false)
-  location        String?
-  latitude        Float?
-  longitude       Float?
-  dueDate         DateTime?
-  images          String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  title          String
+  description    String
+  budget         Float
+  status         String    @default("OPEN") // "OPEN", "ASSIGNED", "COMPLETED", "CANCELLED"
+  isRemote       Boolean   @default(false)
+  location       String?   // human readable address or suburb
+  latitude       Float?
+  longitude      Float?
+  dueDate        DateTime?
+  images         String?   // JSON array of image URLs
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  posterId        String
-  poster          User      @relation("PostedTasks", fields: [posterId], references: [id], onDelete: Cascade)
+  posterId       String
+  poster         User      @relation("PostedTasks", fields: [posterId], references: [id], onDelete: Cascade)
   
-  categoryId      String
-  category        Category  @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  category       Category  @relation(fields: [categoryId], references: [id])
 
   assignedOfferId String?
 
-  offers          Offer[]
-  messages        Message[]
-  payment         Payment?
-  review          Review?
+  offers         Offer[]
+  messages       Message[]
+  payment        Payment?
+  deliveries     Delivery[]
+  dispute        Dispute?
+  ledger         LedgerEntry[]
+  review         Review?
 }
 
 model Offer {
   id          String   @id @default(uuid())
   amount      Float
   message     String
-  status      String   @default("PENDING")
+  status      String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED", "WITHDRAWN"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -98,8 +105,16 @@ model Offer {
 model Payment {
   id                    String   @id @default(uuid())
   amount                Float
-  platformFee           Float    @default(0.0)
-  status                String   @default("HELD_IN_ESCROW")
+  amountCents           Int      @default(0)
+  posterTotalCents      Int      @default(0)
+  taskerNetCents        Int      @default(0)
+  platformFeeCents      Int      @default(0)
+  feeRate               Int      @default(0)
+  feeVersion            String   @default("v1")
+  provider              String   @default("preview")
+  revision              Int      @default(0)
+  platformFee           Float    @default(0.0) // Legacy dollars retained for compatibility; cents are authoritative
+  status                String   @default("HELD_IN_ESCROW") // "PENDING", "HELD_IN_ESCROW", "RELEASED", "REFUNDED"
   stripePaymentIntentId String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -126,7 +141,7 @@ model Message {
 
 model Review {
   id          String   @id @default(uuid())
-  rating      Int
+  rating      Int      // 1 to 5
   comment     String
   createdAt   DateTime @default(now())
 
@@ -142,7 +157,7 @@ model Review {
 
 model Notification {
   id        String   @id @default(uuid())
-  type      String
+  type      String   // "OFFER_RECEIVED", "OFFER_ACCEPTED", "TASK_COMPLETED", "MESSAGE", "VERIFICATION", "SYSTEM"
   title     String
   message   String
   link      String?
@@ -151,4 +166,62 @@ model Notification {
 
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Delivery {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id])
+  authorId    String
+  notes       String
+  attachments String   @default("[]")
+  createdAt   DateTime @default(now())
+}
+
+model Dispute {
+  id          String   @id @default(uuid())
+  taskId      String   @unique
+  task        Task     @relation(fields: [taskId], references: [id])
+  openedBy    String
+  reason      String
+  status      String   @default("OPEN")
+  outcome     String?
+  decision    String?
+  decidedBy   String?
+  awardCents  Int?
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  evidence    DisputeEvidence[]
+}
+
+model DisputeEvidence {
+  id          String   @id @default(uuid())
+  disputeId   String
+  dispute     Dispute  @relation(fields: [disputeId], references: [id])
+  authorId    String
+  content     String
+  createdAt   DateTime @default(now())
+}
+
+model LedgerEntry {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id])
+  userId      String?
+  actorId     String
+  kind        String
+  amountCents Int
+  key         String   @unique
+  createdAt   DateTime @default(now())
+  @@index([userId, createdAt])
+}
+
+model SupportInquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  category  String?
+  message   String
+  createdAt DateTime @default(now())
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, startTransition, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
@@ -11,22 +11,23 @@ import { useAuth } from './context/AuthContext';
 import { Loading } from './components/UI';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import AccountPage from './pages/AccountPage';
+import AccountSecurityPage from './pages/AccountSecurityPage';
+import InfoPage from './pages/InfoPage';
 import HomePage from './pages/HomePage';
 import BrowseTasksPage from './pages/BrowseTasksPage';
 import TaskDetailSSR from './pages/TaskDetailPage';
-const TaskDetailPage = import.meta.env.SSR
-  ? TaskDetailSSR
-  : lazy(() => import('./pages/TaskDetailPage'));
+const TaskDetailPage = TaskDetailSSR;
 import PostTaskSSR from './pages/PostTaskPage';
-const PostTaskPage = import.meta.env.SSR ? PostTaskSSR : lazy(() => import('./pages/PostTaskPage'));
+const PostTaskPage = PostTaskSSR;
 import ProfileSSR from './pages/ProfilePage';
-const ProfilePage = import.meta.env.SSR ? ProfileSSR : lazy(() => import('./pages/ProfilePage'));
+const ProfilePage = ProfileSSR;
 import AdminSSR from './pages/AdminPage';
 const AdminPage = import.meta.env.SSR ? AdminSSR : lazy(() => import('./pages/AdminPage'));
 import LoginSSR from './pages/LoginPage';
-const LoginPage = import.meta.env.SSR ? LoginSSR : lazy(() => import('./pages/LoginPage'));
+const LoginPage = LoginSSR;
 import RegisterSSR from './pages/RegisterPage';
-const RegisterPage = import.meta.env.SSR ? RegisterSSR : lazy(() => import('./pages/RegisterPage'));
+const RegisterPage = RegisterSSR;
 import ContactPage from './pages/ContactPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -66,7 +67,10 @@ function NavigationEffects() {
 export default function App({ url, initialData = {} }) {
   const Router = url ? StaticRouter : BrowserRouter;
   const [routeData, setRouteData] = useState(initialData);
-  const context = useMemo(() => ({ ...routeData, setRouteData }), [routeData]);
+  const context = useMemo(
+    () => ({ ...routeData, setRouteData: (data) => startTransition(() => setRouteData(data)) }),
+    [routeData],
+  );
   return (
     <Router location={url}>
       <RouteDataContext.Provider value={context}>
@@ -106,6 +110,37 @@ export default function App({ url, initialData = {} }) {
                       />
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/register" element={<RegisterPage />} />
+                      <Route
+                        path="/account"
+                        element={
+                          <Guard>
+                            <AccountPage />
+                          </Guard>
+                        }
+                      />
+                      <Route
+                        path="/change-password"
+                        element={
+                          <Guard>
+                            <AccountSecurityPage kind="change-password" />
+                          </Guard>
+                        }
+                      />
+                      {[
+                        'verify-email',
+                        'resend-verification',
+                        'forgot-password',
+                        'reset-password',
+                      ].map((kind) => (
+                        <Route
+                          key={kind}
+                          path={'/' + kind}
+                          element={<AccountSecurityPage key={kind} kind={kind} />}
+                        />
+                      ))}
+                      <Route path="/payments" element={<InfoPage kind="payments" />} />
+                      <Route path="/dispute-policy" element={<InfoPage kind="disputes" />} />
+                      <Route path="/how-it-works" element={<InfoPage kind="how" />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />

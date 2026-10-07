@@ -1,7 +1,19 @@
 import fs from 'node:fs/promises';
 const origin = process.argv[2] || 'https://get-it-done-steel.vercel.app';
 const canonicalOrigin = 'https://get-it-done-steel.vercel.app';
-const routes = ['/', '/tasks', '/about', '/trust-safety', '/faq', '/contact', '/terms', '/privacy'];
+const routes = [
+  '/',
+  '/tasks',
+  '/about',
+  '/trust-safety',
+  '/faq',
+  '/contact',
+  '/terms',
+  '/privacy',
+  '/payments',
+  '/dispute-policy',
+  '/how-it-works',
+];
 const findings = [];
 const failures = [];
 const get = async (path) => {

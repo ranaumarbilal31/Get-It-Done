@@ -76,7 +76,7 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-              <Link className="account-link" to="/profile">
+              <Link className="account-link" to="/account">
                 {user.name.split(' ')[0]}
               </Link>
               {isAdmin && (
@@ -115,6 +115,7 @@ export default function Navbar() {
           <Link to="/post-task">Post a task</Link>
           {user ? (
             <>
+              <Link to="/account">Your account</Link>
               <Link to="/profile">Your profile</Link>
               {isAdmin && <Link to="/admin">Admin</Link>}
               <button onClick={logout}>Log out</button>

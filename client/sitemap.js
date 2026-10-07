@@ -1,5 +1,17 @@
 const SITE = 'https://get-it-done-steel.vercel.app';
-const pages = ['/', '/tasks', '/about', '/trust-safety', '/faq', '/contact', '/terms', '/privacy'];
+const pages = [
+  '/',
+  '/tasks',
+  '/about',
+  '/trust-safety',
+  '/faq',
+  '/contact',
+  '/terms',
+  '/privacy',
+  '/payments',
+  '/dispute-policy',
+  '/how-it-works',
+];
 let cache;
 let cacheTime = 0;
 const xmlEscape = (text) =>

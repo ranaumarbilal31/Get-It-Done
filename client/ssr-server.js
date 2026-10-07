@@ -68,7 +68,8 @@ const server = http.createServer(async (req, res) => {
           );
           res.setHeader(
             'Cache-Control',
-            file.includes(path.sep + 'assets' + path.sep)
+            file.includes(path.sep + 'assets' + path.sep) ||
+              file.includes(path.sep + 'fonts' + path.sep)
               ? 'public, max-age=31536000, immutable'
               : 'public, max-age=3600',
           );

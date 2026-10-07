@@ -1,12 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
-const { sendWelcomeEmail } = require('../services/emailService');
+const security = require('./accountSecurityController');
 const { uploadToStorage } = require('../services/storageService');
 
-const generateToken = (userId) => {
+const generateToken = (userId, sessionVersion = 0) => {
   return jwt.sign(
-    { userId },
+    { userId, sessionVersion },
     process.env.JWT_SECRET || 'getitdone_dev_secret_key_change_in_production_998877',
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
   );
@@ -16,12 +16,24 @@ const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
+    if (
+      !(process.env.NODE_ENV === 'test' && process.env.EMAIL_TRANSPORT === 'capture') &&
+      (!process.env.EMAIL_RELAY_URL || !process.env.EMAIL_RELAY_SECRET)
+    )
+      return res
+        .status(503)
+        .json({ message: 'Account email delivery is unavailable. Please try again later.' });
     const existingUser = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: 'An account with this email already exists.' });
+      return res
+        .status(201)
+        .json({
+          message: 'Check your email for activation instructions if this address is eligible.',
+          requiresVerification: true,
+        });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -32,6 +44,7 @@ const register = async (req, res, next) => {
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
+        isEmailVerified: false,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
       },
       select: {
@@ -50,26 +63,13 @@ const register = async (req, res, next) => {
       },
     });
 
-    const token = generateToken(user.id);
-
-    // Set secure HttpOnly cookies
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    };
-    res.cookie('getitdone_token', token, cookieOptions);
-    res.cookie('taskconnect_token', token, cookieOptions);
-
-    // Send welcome email (fire-and-forget)
-    sendWelcomeEmail(user).catch(console.error);
-
-    res.status(201).json({
-      message: 'Registration successful',
-      token,
-      user,
-    });
+    await security.issue(user, 'activation');
+    res
+      .status(201)
+      .json({
+        message: 'Check your email for activation instructions if this address is eligible.',
+        requiresVerification: true,
+      });
   } catch (error) {
     next(error);
   }
@@ -100,7 +100,14 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid email or password credentials.' });
     }
 
-    const token = generateToken(user.id);
+    if (!user.isEmailVerified)
+      return res
+        .status(403)
+        .json({
+          code: 'EMAIL_UNVERIFIED',
+          message: 'Activate your account from your email before logging in.',
+        });
+    const token = generateToken(user.id, user.sessionVersion);
 
     // Set secure HttpOnly cookies
     const cookieOptions = {
@@ -219,7 +226,7 @@ const submitVerification = async (req, res, next) => {
     }
 
     if (!documentUrl) {
-      return res.status(400).json({ message: 'Please upload a sample identity document.' });
+      return res.status(400).json({ message: 'Please upload an identity document.' });
     }
 
     const user = await prisma.user.update({

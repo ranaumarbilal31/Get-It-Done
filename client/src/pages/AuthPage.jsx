@@ -1,155 +1,131 @@
 import React, { useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Check } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/UI';
 export default function AuthPage({ registerMode = false }) {
-  const { login, register } = useAuth();
-  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const { login, register } = useAuth(),
+    navigate = useNavigate(),
+    lock = useRef(false);
   const [name, setName] = useState(''),
     [email, setEmail] = useState(''),
-    [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false),
-    [error, setError] = useState('');
-  const submitting = useRef(false);
-  const submit = async (event) => {
-    event.preventDefault();
-    if (submitting.current) return;
-    submitting.current = true;
+    [password, setPassword] = useState(''),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState(''),
+    [message, setMessage] = useState(
+      params.get('password') === 'updated'
+        ? 'Password updated. Log in with your new password.'
+        : '',
+    );
+  const submit = async (e) => {
+    e.preventDefault();
+    if (lock.current) return;
+    lock.current = true;
     setBusy(true);
     setError('');
     try {
-      const user = registerMode
-        ? await register(name, email, password)
-        : await login(email, password);
-      navigate(user.role === 'ADMIN' ? '/admin' : '/tasks');
-    } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          'We could not sign you in. Check your details and try again.',
-      );
+      if (registerMode) {
+        const r = await register(name, email, password);
+        setMessage(r.message);
+      } else {
+        const u = await login(email, password);
+        navigate(u.role === 'ADMIN' ? '/admin' : '/account');
+      }
+    } catch (e) {
+      setError(e.response?.data?.message || 'Check your details and try again.');
     } finally {
-      submitting.current = false;
+      lock.current = false;
       setBusy(false);
     }
   };
   return (
     <div className="page-container auth-layout">
       <aside className="auth-story">
-        <span className="eyebrow">YOUR NEXT CHAPTER STARTS HERE</span>
+        <span className="eyebrow">A LITTLE HELP. A LOT MORE POSSIBLE.</span>
         <h2>
-          A little help.
-          <br />A world of
+          Your skills.
           <br />
-          <em>possibility.</em>
+          Someone’s
+          <br />
+          <em>next step.</em>
         </h2>
-        <p>
-          Turn a to-do into a done.
-          <br />
-          Or turn your skills into someone’s solution.
-        </p>
+        <p>Find the right help for your project, or put your skills to work on your own terms.</p>
         <div className="auth-promises">
-          <span>
-            <Check size={18} />
-            Find local and remote tasks
-          </span>
-          <span>
-            <Check size={18} />
-            Compare offers on your terms
-          </span>
-          <span>
-            <Check size={18} />
-            Keep the conversation in one place
-          </span>
+          <span>Local and remote opportunities</span>
+          <span>Clear task agreements</span>
+          <span>Conversations and delivery in one place</span>
         </div>
-        <span className="demo-note">Demo marketplace · No real payments</span>
       </aside>
       <section className="auth-form-panel">
-        <span className="eyebrow">{registerMode ? 'COME ON IN' : 'GOOD TO SEE YOU AGAIN'}</span>
-        <h1>{registerMode ? 'Make yourself at home.' : 'Welcome back.'}</h1>
+        <span className="eyebrow">
+          {registerMode ? 'LET’S GET STARTED' : 'GOOD TO SEE YOU AGAIN'}
+        </span>
+        <h1>{registerMode ? 'Create your account.' : 'Welcome back.'}</h1>
         <p>
           {registerMode
-            ? 'Create your account and get things moving.'
-            : 'Sign in to pick up where you left off.'}
+            ? 'Your next project starts here.'
+            : 'Log in to pick up where you left off.'}
         </p>
         {error && <Alert>{error}</Alert>}
+        {message && (
+          <p role="status" className="notice">
+            {message} <Link to="/resend-verification">Resend activation email</Link>
+          </p>
+        )}
         <form onSubmit={submit}>
           {registerMode && (
             <label>
               Full name
               <input
-                name="name"
                 autoComplete="name"
                 required
                 minLength={2}
+                maxLength={60}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Your full name"
               />
             </label>
           )}
           <label>
             Email address
             <input
-              name="email"
               type="email"
               autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
             />
           </label>
           <label>
             Password
             <input
-              name="password"
               type="password"
-              autoComplete={registerMode ? 'new-password' : 'current-password'}
-              minLength={registerMode ? 6 : undefined}
               required
+              autoComplete={registerMode ? 'new-password' : 'current-password'}
+              minLength={registerMode ? 8 : undefined}
+              maxLength={100}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your password"
             />
           </label>
-          <button type="submit" className="button" disabled={busy}>
+          <button className="button" disabled={busy}>
             {busy ? 'Just a moment…' : registerMode ? 'Create an account' : 'Log in'}
-            <ArrowUpRight size={18} />
           </button>
         </form>
         {!registerMode && (
-          <div className="demo-accounts">
-            <span>EXPLORE THE DEMO</span>
-            <div>
-              {[
-                ['Poster', 'sarah@example.com'],
-                ['Tasker', 'alex@example.com'],
-                ['Admin', 'admin@getitdone.com'],
-              ].map(([label, value]) => (
-                <button
-                  type="button"
-                  key={label}
-                  onClick={() => {
-                    setEmail(value);
-                    setPassword('Password123!');
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <p>These buttons fill sample credentials. Click Log in to continue.</p>
-          </div>
+          <p className="auth-switch">
+            <Link to="/forgot-password">Forgot password?</Link> ·{' '}
+            <Link to="/resend-verification">Activate account</Link>
+          </p>
         )}
         <p className="auth-switch">
-          {registerMode ? 'Already have an account?' : 'New around here?'}{' '}
+          {registerMode ? 'Already a member?' : 'New here?'}{' '}
           <Link to={registerMode ? '/login' : '/register'}>
             {registerMode ? 'Log in' : 'Create an account'}
           </Link>
         </p>
         <p className="fine-print">
-          By continuing you agree to our <Link to="/terms">terms</Link> and acknowledge our{' '}
+          By continuing, you agree to our <Link to="/terms">terms</Link> and{' '}
           <Link to="/privacy">privacy policy</Link>.
         </p>
       </section>

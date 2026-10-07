@@ -1,31 +1,31 @@
-# 🛡️ Security Verification — Get It Done
+# 🛡️ Get It Done — Security Verification
 
-**Audit date: October 7, 2026.** This report records source findings and local verification. It does not represent external penetration testing, certification, or a guarantee of safety.
+Source review and local verification on October 7, 2026. This is not external penetration testing or certification.
 
-| Priority | Finding                                                               | Implemented correction                                                                       |
-| -------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Critical | Sockets trusted client-supplied identities and unrestricted rooms     | JWT handshake, server-derived identity, expiration, origin checks, participant authorization |
-| Critical | REST chat lacked conversation authorization                           | Shared authorization for reads and writes; related-recipient checks                          |
-| High     | Identity data-URI previews failed and local document URLs were public | Private persisted submissions, authorized decoding, blocked legacy local ID URLs             |
-| High     | Public profiles fetched the current signed-in user                    | Explicit public profile endpoint with a narrow field selection                               |
-| High     | Old email/upload/test dependencies had advisories                     | Updated Multer, Nodemailer, Vitest and audited transitive dependencies                       |
-| Medium   | Category and keyword filters overwrote each other                     | Combined filters with AND semantics                                                          |
-| Medium   | Session expiry and request failures could be misleading               | Explicit expiry handling, errors, retries and protected-route initialization                 |
+| Priority | Implemented control                                                                                                                                 |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Critical | JWT socket handshake, server-derived identity, explicit origin allowlist and task-participant authorization                                         |
+| Critical | Financial transactions use integer cents, status/revision comparisons and unique ledger keys; repeated/competing settlement cannot duplicate payout |
+| High     | Disputes freeze payments; admin-only release/refund/split, written decisions, evidence and audit records                                            |
+| High     | Activation/reset tokens are hashed, expiring and single-use; resend invalidates older tokens                                                        |
+| High     | Password reset/change increments session version and disconnects user sockets; REST and socket actions reject revoked versions                      |
+| High     | Narrow public profile selection; private drafts, delivery/evidence/payment data omitted from public HTML; private responses use no-store            |
+| High     | Private persisted identity submissions and authorized document access; no public local identity-file URLs                                           |
+| Medium   | Signed relay: HMAC, ±60-second timestamp, allowed templates/origin, bounded payload, TLS SMTP and generic recovery responses                        |
+| Medium   | Auth/API request limits, input validation, duplicate-submit locks, session initialization, stale-request cancellation and retries                   |
 
-## Verification boundaries
+## Evidence
 
-Backend tests use a newly created SQLite database, sample accounts and disabled external integrations. Browser tests use a separate disposable database. No live accounts, payments or production database records are modified by tests.
+**106 backend/security tests**, **5 metadata tests** and **17 production Chromium tests** passed locally. Disposable SQLite databases isolate external effects. Tests cover fee boundaries, fractional cents, offer refunds, authorization, repeated/concurrent settlement, dispute locks, partial/refund outcomes, legacy reconciliation, token expiry/replay, recovery, profile privacy and socket impersonation/rooms/messages. Email-relay tests reject unsigned, expired, repeated and arbitrary-template requests. Local capture does not prove inbox delivery.
 
-The server dependency audit and both production dependency audits are clean at verification time. The frontend full audit reports five high findings in the Tailwind 3 build-only chain rooted in `braces`. No patched `braces` release is available from the registry at the audit date. The affected tools parse repository-controlled styles; they are not shipped as production application dependencies. Retaining Tailwind 3 is an explicit compatibility choice, not a claim that those advisories are fixed.
+## Boundaries and operator dependencies
 
-## Remaining limitations
-
-- Payment authorization and payouts are simulations. Demo wallet values cannot be withdrawn.
-- Browser tokens are stored in localStorage. This preserves the existing authentication interface and requires strong XSS prevention; it is not equivalent to a cookie-only session architecture.
-- Identity documents are private database data. Review operator access, encryption, retention and deletion policies before collecting sensitive real information.
-- Previously stored public cloud document URLs may remain externally accessible. Operators must retire or relocate those legacy objects; source changes cannot revoke an existing remote URL.
-- The data-URI fallback can enlarge database rows and HTML. Configure suitable asset delivery for larger deployments.
-- Rate limiting is per process; horizontally scaled services need shared state.
-- Demo credentials and legal pages require production review.
-
-See [SEO_AUDIT.md](SEO_AUDIT.md) for exact verified counts and browser results. Report a security issue privately to [ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com); do not publish credentials or identity records.
+- Gmail live delivery is pending the owner’s app password and shared relay secret. Never commit or expose secrets through frontend variables.
+- Recovery responses are generic to reduce account enumeration; provider acceptance does not guarantee inbox placement. Registration exposes delivery failure.
+- Rate limits and relay replay suppression are process/instance-local. A shared durable limiter/replay store is appropriate for horizontal scaling.
+- The immutable ledger is enforced by application operations and unique keys; database administrators retain database access. There is no external tamper-evident audit service.
+- Financial APIs currently simulate provider operations. No real custody, settlement, withdrawal or card processing exists.
+- PostgreSQL deployment configuration exists, but backup/retention guarantees require provider confirmation. Production schema additions run without destructive acceptance; back up before release.
+- Synthetic staging accounts/reviews are private and Git-ignored. They must never be represented as real customer experiences.
+- Runtime dependency audits run in CI; development/build-chain advisories need separate review.
+- No government, financial-compliance, background-check or bank-grade security claim is made.

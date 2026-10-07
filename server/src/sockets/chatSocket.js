@@ -11,9 +11,10 @@ module.exports = function setupSockets(io) {
       );
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
-        select: { id: true, name: true },
+        select: { id: true, name: true, sessionVersion: true, isEmailVerified: true },
       });
-      if (!user) throw new Error('Unknown user');
+      if (!user || !user.isEmailVerified || user.sessionVersion !== (decoded.sessionVersion || 0))
+        throw new Error('Session invalid');
       socket.data.user = user;
       socket.data.expiresAt = decoded.exp * 1000;
       next();
@@ -34,6 +35,14 @@ module.exports = function setupSockets(io) {
         const ack = typeof args[args.length - 1] === 'function' ? args.pop() : null;
         try {
           if (Date.now() >= socket.data.expiresAt) throw new Error('Session expired.');
+          const current = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { sessionVersion: true, isEmailVerified: true },
+          });
+          if (!current?.isEmailVerified || current.sessionVersion !== user.sessionVersion) {
+            socket.disconnect(true);
+            throw new Error('Session invalid');
+          }
           const result = await handler(...args);
           ack?.({ ok: true, ...result });
         } catch (error) {

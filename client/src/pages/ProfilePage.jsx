@@ -1,7 +1,7 @@
 import { Dialog } from '../components/UI';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouteData } from '../routeData';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Alert } from '../components/UI';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -31,6 +31,20 @@ export default function ProfilePage() {
     isOwnProfile ? currentUser : initial.profile || null,
   );
   const [reviews, setReviews] = useState([]);
+  const [history, setHistory] = useState({ tasks: [], page: 1, pages: 1, total: 0 });
+  const loadHistory = async (page = 1) => {
+    const target = userId || currentUser?.id;
+    if (!target) return;
+    try {
+      const r = await api.get('/users/' + target + '/completed?page=' + page);
+      setHistory(r.data);
+    } catch {
+      setError('Completed work could not be loaded.');
+    }
+  };
+  useEffect(() => {
+    loadHistory();
+  }, [userId, currentUser?.id]);
   const [loading, setLoading] = useState(!initial.profile && !initial.error);
 
   // Edit Profile modal state
@@ -288,6 +302,36 @@ export default function ProfilePage() {
         )}
       </div>
 
+      <section className="surface">
+        <h2>Completed work · {history.total}</h2>
+        {history.tasks.map((t) => (
+          <p key={t.id}>
+            <Link to={'/tasks/' + t.id}>{t.title}</Link> · {t.category.name}
+          </p>
+        ))}
+        {!history.total && <p>Completed tasks will appear here after delivery approval.</p>}
+        {history.pages > 1 && (
+          <div className="hero-actions">
+            <button
+              className="button secondary"
+              disabled={history.page <= 1}
+              onClick={() => loadHistory(history.page - 1)}
+            >
+              Previous
+            </button>
+            <span>
+              Page {history.page} of {history.pages}
+            </span>
+            <button
+              className="button secondary"
+              disabled={history.page >= history.pages}
+              onClick={() => loadHistory(history.page + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </section>
       {/* Grid: Wallet (if own profile) & Reviews */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Wallet & Trust Status */}
@@ -297,7 +341,7 @@ export default function ProfilePage() {
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-6 shadow-md space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Demo Wallet Balance
+                  Task earnings
                 </span>
                 <Wallet className="w-5 h-5 text-brand-400" />
               </div>
@@ -305,14 +349,14 @@ export default function ProfilePage() {
                 ${(profileUser.walletBalance || 0).toFixed(2)}
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Simulated task payouts appear here. This balance has no cash value.
+                Approved task payments appear in your account history.
               </p>
               <button
-                disabled
-                aria-label="Withdrawals unavailable in demo"
+                onClick={() => navigate('/account')}
+                aria-label="View account history"
                 className="w-full bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition"
               >
-                Withdrawals unavailable in demo
+                View account history
               </button>
             </div>
 
@@ -345,7 +389,7 @@ export default function ProfilePage() {
               ) : (
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 space-y-2">
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Verify your identity to increase trust and win up to 3x more offers!
+                    Add an identity submission for administrative review.
                   </p>
                   <button
                     onClick={() => setShowVerifyModal(true)}
@@ -498,7 +542,7 @@ export default function ProfilePage() {
 
       {/* MODAL: ID Document Verification (Simulated KYC) */}
       {showVerifyModal && (
-        <Dialog title="Submit identity sample" onClose={() => setShowVerifyModal(false)}>
+        <Dialog title="Submit identity document" onClose={() => setShowVerifyModal(false)}>
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-xs">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
@@ -513,9 +557,8 @@ export default function ProfilePage() {
             <div className="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200 text-emerald-900 space-y-1">
               <p className="font-bold">Identity & Trust Verification</p>
               <p className="text-[11px] text-emerald-800">
-                Upload a clearly labelled sample document for this demo. Submissions are available
-                through an authorized administrator endpoint. Do not upload real sensitive identity
-                documents.
+                Upload an identity document for administrative review. Documents are accessible only
+                to authorized administrators.
               </p>
             </div>
 

@@ -46,8 +46,8 @@ export default function ContactPage() {
         <p>We'd like to hear it. Share the details and help us make the marketplace better.</p>
         <div className="contact-aside">
           <strong>Prefer email?</strong>
-          <a href="mailto:ranaumarbilal31@gmail.com">
-            ranaumarbilal31@gmail.com <ArrowUpRight size={15} />
+          <a href="mailto:phalanx.getitdone@gmail.com">
+            phalanx.getitdone@gmail.com <ArrowUpRight size={15} />
           </a>
           <p>Never include passwords or identity documents in your inquiry.</p>
         </div>

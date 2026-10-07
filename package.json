@@ -9,9 +9,11 @@
     "client": "npm --prefix client run dev",
     "client:build": "npm --prefix client run build",
     "seed": "npm --prefix server run seed",
-    "setup": "npm --prefix server install && npm --prefix server run prisma:push && npm --prefix server run seed && npm --prefix client install",
+    "setup": "npm --prefix server install && npm --prefix server run prisma:push && npm --prefix client install",
     "test": "npm --prefix client test && npm --prefix server test",
-    "test:e2e": "npm --prefix client run test:e2e"
+    "test:e2e": "npm --prefix client run test:e2e",
+    "staging:populate": "npm --prefix server run staging:populate",
+    "staging:serve": "npm --prefix server run staging:serve"
   },
   "keywords": [
     "marketplace",

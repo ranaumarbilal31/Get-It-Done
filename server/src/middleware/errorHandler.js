@@ -1,6 +1,9 @@
 const errorHandler = (err, req, res, next) => {
-  console.error('[Error Details]:', err);
+  if (!err.status || err.status >= 500)
+    console.error('[Request failed]', err.code || err.name || 'Error');
 
+  if (err.status && err.status >= 400 && err.status < 600)
+    return res.status(err.status).json({ message: err.message });
   // Prisma unique constraint violation
   if (err.code === 'P2002') {
     const field = err.meta?.target ? err.meta.target : 'field';
@@ -26,9 +29,10 @@ const errorHandler = (err, req, res, next) => {
 
   const statusCode = res.statusCode >= 400 && res.statusCode < 600 ? res.statusCode : 500;
   const isProduction = process.env.NODE_ENV === 'production';
-  const safeMessage = (isProduction && statusCode === 500)
-    ? 'An unexpected system error occurred. Please try again or contact support.'
-    : (err.message || 'An internal server error occurred.');
+  const safeMessage =
+    isProduction && statusCode === 500
+      ? 'An unexpected system error occurred. Please try again or contact support.'
+      : err.message || 'An internal server error occurred.';
 
   res.status(statusCode).json({
     message: safeMessage,

@@ -65,21 +65,18 @@ describe('Red Team Offensive Security Battery', () => {
   // TEST 1: SQL Injection Attack
   describe('ATTACK VECTOR 1: SQL / NoSQL Injection', () => {
     it('Rejects classic SQL injection strings in login payload', async () => {
-      const res = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: "' OR '1'='1' --",
-          password: "password' OR '1'='1",
-        });
+      const res = await request(app).post('/api/auth/login').send({
+        email: "' OR '1'='1' --",
+        password: "password' OR '1'='1",
+      });
       // Rejected by Zod email schema with 400 or fails auth with 401
       expect([400, 401]).toContain(res.status);
       expect(res.body.token).toBeUndefined();
     });
 
     it('Safely parameterizes SQL injection strings in task keyword search', async () => {
-      const sqliPayload = "'; DROP TABLE \"Task\"; --";
-      const res = await request(app)
-        .get(`/api/tasks?search=${encodeURIComponent(sqliPayload)}`);
+      const sqliPayload = '\'; DROP TABLE "Task"; --';
+      const res = await request(app).get(`/api/tasks?search=${encodeURIComponent(sqliPayload)}`);
       expect(res.status).toBe(200);
       // Table must still exist and return empty or normal results without throwing SQL errors
       expect(Array.isArray(res.body.tasks)).toBe(true);
@@ -144,7 +141,7 @@ describe('Red Team Offensive Security Battery', () => {
         .set('Authorization', `Bearer ${taskerToken}`);
 
       expect(res.status).toBe(403);
-      expect(res.body.message).toContain('Only the task poster can accept');
+      expect(res.body.message).toContain('Only the jobber can select');
     });
 
     it('Prevents unauthorized user from completing someone else task', async () => {
@@ -154,7 +151,7 @@ describe('Red Team Offensive Security Battery', () => {
         .set('Authorization', `Bearer ${taskerToken}`);
 
       expect(res.status).toBe(403);
-      expect(res.body.message).toContain('Only the poster or an administrator');
+      expect(res.body.message).toContain('Only the jobber can approve');
     });
 
     it('Prevents unauthorized user from deleting another user task', async () => {
@@ -215,7 +212,7 @@ describe('Red Team Offensive Security Battery', () => {
         });
 
       expect(res.status).toBe(400);
-      expect(res.body.message).toContain('at least $5');
+      expect(res.body.message).toContain('at least $2');
     });
   });
 
@@ -236,7 +233,9 @@ describe('Red Team Offensive Security Battery', () => {
         .set('Origin', 'https://get-it-done-steel.vercel.app');
 
       expect(res.status).toBe(200);
-      expect(res.headers['access-control-allow-origin']).toBe('https://get-it-done-steel.vercel.app');
+      expect(res.headers['access-control-allow-origin']).toBe(
+        'https://get-it-done-steel.vercel.app',
+      );
     });
 
     it('Permits authorized legacy/staging origin (phalanx1)', async () => {
@@ -245,13 +244,13 @@ describe('Red Team Offensive Security Battery', () => {
         .set('Origin', 'https://get-it-done-phalanx1.vercel.app');
 
       expect(res.status).toBe(200);
-      expect(res.headers['access-control-allow-origin']).toBe('https://get-it-done-phalanx1.vercel.app');
+      expect(res.headers['access-control-allow-origin']).toBe(
+        'https://get-it-done-phalanx1.vercel.app',
+      );
     });
 
     it('Disallows untrusted origin without triggering HTTP 500 server crash', async () => {
-      const res = await request(app)
-        .get('/api/tasks?limit=1')
-        .set('Origin', 'https://example.com');
+      const res = await request(app).get('/api/tasks?limit=1').set('Origin', 'https://example.com');
 
       // Crucial: Must NOT throw 500
       expect(res.status).not.toBe(500);
@@ -493,7 +492,11 @@ describe('Red Team Offensive Security Battery', () => {
       const res = await request(app)
         .post('/api/auth/verify-id')
         .set('Authorization', `Bearer ${unverifiedToken}`)
-        .attach('idDocument', Buffer.from('This is a plain text file, not an image.'), 'document.txt');
+        .attach(
+          'idDocument',
+          Buffer.from('This is a plain text file, not an image.'),
+          'document.txt',
+        );
 
       expect(res.status).toBe(400);
       expect(res.status).not.toBe(500);
@@ -502,7 +505,10 @@ describe('Red Team Offensive Security Battery', () => {
     });
 
     it('Accepts valid document upload (.png / .jpg / .pdf) for unverified applicant and sets PENDING state', async () => {
-      const pngBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+      const pngBuffer = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        'base64',
+      );
       const res = await request(app)
         .post('/api/auth/verify-id')
         .set('Authorization', `Bearer ${unverifiedToken}`)
@@ -573,4 +579,3 @@ describe('Red Team Offensive Security Battery', () => {
     });
   });
 });
-

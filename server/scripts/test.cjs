@@ -9,6 +9,9 @@ writeFileSync(join(directory, 'test.db'), '');
 const env = {
   ...process.env,
   NODE_ENV: 'test',
+  EMAIL_TRANSPORT: 'capture',
+  EMAIL_RELAY_URL: '',
+  EMAIL_RELAY_SECRET: '',
   DATABASE_URL: 'file:../.test-data/' + directory.split(/[\\/]/).pop() + '/test.db',
   JWT_SECRET: 'isolated-test-secret-not-for-production',
   SMTP_USER: '',

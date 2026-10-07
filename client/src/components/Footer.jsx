@@ -29,7 +29,6 @@ export default function Footer() {
               <br />
               help and remote projects.
             </p>
-            <span className="demo-note">Demo marketplace · Payments are simulated</span>
           </div>
           <div>
             <h3>Explore</h3>
@@ -42,18 +41,18 @@ export default function Footer() {
           <div>
             <h3>Good to know</h3>
             <Link to="/about">About us</Link>
+            <Link to="/how-it-works">How it works</Link>
             <Link to="/trust-safety">Trust & safety</Link>
-            <Link to="/faq">Common questions</Link>
+            <Link to="/faq">Help & questions</Link>
             <Link to="/contact">Get in touch</Link>
           </div>
           <div>
             <h3>The details</h3>
             <Link to="/terms">Terms of service</Link>
             <Link to="/privacy">Privacy policy</Link>
-            <a href="https://github.com/ranaumarbilal31/Get-It-Done">
-              Source on GitHub <ArrowUpRight size={13} />
-            </a>
-            <a href="mailto:ranaumarbilal31@gmail.com">Email support</a>
+            <Link to="/payments">Payments</Link>
+            <Link to="/dispute-policy">Dispute policy</Link>
+            <a href="mailto:phalanx.getitdone@gmail.com">Email support</a>
           </div>
         </div>
         <div className="footer-bottom">

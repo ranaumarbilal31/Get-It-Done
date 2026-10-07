@@ -10,6 +10,9 @@ writeFileSync(join(directory, 'test.db'), '');
 const env = {
   ...process.env,
   NODE_ENV: 'test',
+  EMAIL_TRANSPORT: 'capture',
+  EMAIL_RELAY_URL: '',
+  EMAIL_RELAY_SECRET: '',
   DATABASE_URL: 'file:../.test-data/' + directory.split(/[\\/]/).pop() + '/test.db',
   JWT_SECRET: 'isolated-browser-test-secret',
   SMTP_USER: '',
@@ -34,7 +37,10 @@ for (const [script, args] of [
 }
 const child = spawn(
   process.execPath,
-  ['-e', "const {server}=require('./src/server.js');server.listen(5000,'127.0.0.1');"],
+  [
+    '-e',
+    "const {app,server}=require('./src/server.js');app.get('/__test/email',(req,res)=>res.json(require('./src/services/accountEmail').captures.filter(m=>m.to===req.query.to)));server.listen(5000,'127.0.0.1');",
+  ],
   { cwd, env, stdio: 'inherit' },
 );
 const stop = () => child.kill();

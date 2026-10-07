@@ -4,10 +4,19 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
+  if (process.env.NODE_ENV !== 'test' && process.env.ALLOW_DESTRUCTIVE_SEED !== 'yes')
+    throw new Error(
+      'Seed is destructive. Use private staging or explicitly authorize a disposable database.',
+    );
   console.log('🌱 Starting database seeding for Get It Done...');
 
   // Clean existing tables (order matters for foreign keys)
   try {
+    await prisma.disputeEvidence.deleteMany();
+    await prisma.dispute.deleteMany();
+    await prisma.delivery.deleteMany();
+    await prisma.ledgerEntry.deleteMany();
+    await prisma.supportInquiry.deleteMany();
     await prisma.review.deleteMany();
     await prisma.message.deleteMany();
     await prisma.notification.deleteMany();
@@ -185,7 +194,8 @@ async function main() {
   const task1 = await prisma.task.create({
     data: {
       title: 'Assemble 3-door IKEA Pax Wardrobe & Queen Bed',
-      description: 'Need experienced flatpack assembler to build a Pax wardrobe (hinged doors) and a Queen Malm bed frame with 4 storage drawers. Boxes are in the bedroom. Please bring your own drill/tools.',
+      description:
+        'Need experienced flatpack assembler to build a Pax wardrobe (hinged doors) and a Queen Malm bed frame with 4 storage drawers. Boxes are in the bedroom. Please bring your own drill/tools.',
       budget: 180.0,
       status: 'OPEN',
       isRemote: false,
@@ -203,7 +213,8 @@ async function main() {
   const task2 = await prisma.task.create({
     data: {
       title: 'End of Lease Deep Clean - 2 Bedroom 1 Bath',
-      description: 'Looking for a comprehensive bond return clean for a 2BR apartment. Includes oven degreasing, bathroom scrubbing, interior window panes, and vacuuming throughout.',
+      description:
+        'Looking for a comprehensive bond return clean for a 2BR apartment. Includes oven degreasing, bathroom scrubbing, interior window panes, and vacuuming throughout.',
       budget: 220.0,
       status: 'OPEN',
       isRemote: false,
@@ -211,7 +222,9 @@ async function main() {
       latitude: 40.7081,
       longitude: -73.9571,
       dueDate: new Date(Date.now() + 86400000 * 2),
-      images: JSON.stringify(['https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600']),
+      images: JSON.stringify([
+        'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600',
+      ]),
       posterId: posterSarah.id,
       categoryId: categories[0].id, // Cleaning
     },
@@ -221,7 +234,8 @@ async function main() {
   const task3 = await prisma.task.create({
     data: {
       title: 'Fix WordPress Slow Loading Speed & SSL Certificate',
-      description: 'My WooCommerce boutique store is taking 8+ seconds to load. Need a web developer to optimize caching, images, and ensure HTTPS / SSL redirect works flawlessly.',
+      description:
+        'My WooCommerce boutique store is taking 8+ seconds to load. Need a web developer to optimize caching, images, and ensure HTTPS / SSL redirect works flawlessly.',
       budget: 150.0,
       status: 'OPEN',
       isRemote: true,
@@ -238,13 +252,14 @@ async function main() {
   const task4 = await prisma.task.create({
     data: {
       title: 'Mount 65-inch Samsung Frame TV on Drywall',
-      description: 'Mount TV onto drywall with metal studs. Heavy duty bracket provided, need someone with stud finder and proper toggle bolts.',
+      description:
+        'Mount TV onto drywall with metal studs. Heavy duty bracket provided, need someone with stud finder and proper toggle bolts.',
       budget: 120.0,
       status: 'COMPLETED',
       isRemote: false,
       location: 'SoHo, New York, NY',
       latitude: 40.7233,
-      longitude: -74.0030,
+      longitude: -74.003,
       dueDate: new Date(Date.now() - 86400000 * 2),
       posterId: posterSarah.id,
       categoryId: categories[1].id, // Handyman
@@ -258,7 +273,8 @@ async function main() {
       taskId: task1.id,
       taskerId: taskerAlex.id,
       amount: 175.0,
-      message: 'Hi Sarah! I have assembled over 40 IKEA Pax systems and Malm beds. I have my own DeWalt power tools and can come this Saturday at 10 AM. Guaranteed neat and fast!',
+      message:
+        'Hi Sarah! I have assembled over 40 IKEA Pax systems and Malm beds. I have my own DeWalt power tools and can come this Saturday at 10 AM. Guaranteed neat and fast!',
       status: 'PENDING',
     },
   });
@@ -269,7 +285,8 @@ async function main() {
       taskId: task2.id,
       taskerId: taskerElena.id,
       amount: 220.0,
-      message: 'Hello! I specialize in end-of-lease bond cleans with a 100% guarantee. I bring all eco-friendly cleaning supplies, steamers, and HEPA vacuums. Happy to help!',
+      message:
+        'Hello! I specialize in end-of-lease bond cleans with a 100% guarantee. I bring all eco-friendly cleaning supplies, steamers, and HEPA vacuums. Happy to help!',
       status: 'PENDING',
     },
   });
@@ -280,7 +297,8 @@ async function main() {
       taskId: task4.id,
       taskerId: taskerAlex.id,
       amount: 120.0,
-      message: 'I have mounted dozens of Frame TVs flush against walls with concealed cables. Can do this today.',
+      message:
+        'I have mounted dozens of Frame TVs flush against walls with concealed cables. Can do this today.',
       status: 'ACCEPTED',
     },
   });
@@ -309,7 +327,8 @@ async function main() {
       reviewerId: posterSarah.id,
       revieweeId: taskerAlex.id,
       rating: 5,
-      comment: 'Alex did a sensational job! Perfect alignment with the laser level, super clean wire hiding, and very friendly. 10/10 recommend!',
+      comment:
+        'Alex did a sensational job! Perfect alignment with the laser level, super clean wire hiding, and very friendly. 10/10 recommend!',
     },
   });
 
@@ -319,7 +338,8 @@ async function main() {
       taskId: task1.id,
       senderId: taskerAlex.id,
       receiverId: posterSarah.id,
-      content: 'Hi Sarah, are the wardrobe doors glass or solid oak? Also what floor is the apartment on?',
+      content:
+        'Hi Sarah, are the wardrobe doors glass or solid oak? Also what floor is the apartment on?',
     },
   });
 
@@ -328,7 +348,8 @@ async function main() {
       taskId: task1.id,
       senderId: posterSarah.id,
       receiverId: taskerAlex.id,
-      content: 'Hi Alex! They are white hinged doors and we have an elevator in the building, 3rd floor.',
+      content:
+        'Hi Alex! They are white hinged doors and we have an elevator in the building, 3rd floor.',
     },
   });
 

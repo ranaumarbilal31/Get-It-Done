@@ -1,15 +1,43 @@
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/fira-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/fira-sans-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/fira-sans-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/fira-sans-latin-700-normal.woff2') format('woff2');
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 :root {
   --paper: #faf8f4;
-  --ink: #24221e;
+  --ink: #090907;
   --muted: #70675d;
   --line: #ded8ce;
-  --accent: #ba4214;
+  --accent: #6c5636;
   --soft: #f0ece5;
-  --serif: Georgia, 'Times New Roman', serif;
-  font-family: Arial, Helvetica, sans-serif;
+  --serif: 'Fira Sans', sans-serif;
+  font-family: 'Fira Sans', sans-serif;
   color: var(--ink);
   background: var(--paper);
   font-synthesis: none;
@@ -39,7 +67,7 @@
     opacity: 0.55;
   }
   *:focus-visible {
-    outline: 3px solid #ba4214;
+    outline: 3px solid #6c5636;
     outline-offset: 4px;
   }
   input,
@@ -1884,4 +1912,478 @@ em {
 
 .button {
   transition: transform 0.18s;
+}
+
+/* Commercial marketplace surfaces */
+.hero-centered {
+  text-align: center;
+  padding: 92px 0 78px;
+  max-width: 1080px;
+}
+.hero-centered h1 {
+  font-size: clamp(42px, 6.5vw, 82px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.055em;
+  margin: 24px 0;
+}
+.hero-centered h1 em {
+  font-style: normal;
+  color: #6c5636;
+}
+.hero-centered > p {
+  max-width: 630px;
+  margin: 0 auto 30px;
+  font-size: 20px;
+  color: var(--muted);
+}
+.hero-centered .hero-actions {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.hero-centered .hero-footnote {
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+  gap: 24px;
+}
+.hero-footnote > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.button {
+  border-radius: 12px;
+  background: #090907;
+  color: #fff;
+  font-weight: 600;
+  min-height: 48px;
+}
+.button:hover {
+  background: #6c5636;
+}
+.button.secondary {
+  background: transparent;
+  border: 1px solid #6c5636;
+  color: #090907;
+}
+.button.secondary:hover {
+  background: #ede5da;
+}
+.brand-dot {
+  color: #6c5636;
+}
+.category-icon {
+  color: #6c5636;
+  background: #eee5d8;
+  border-radius: 16px;
+}
+.category-card {
+  border-radius: 18px;
+}
+.how-section {
+  background: #eee7dc;
+  padding: 64px 0;
+}
+.how-section .button {
+  margin-top: 30px;
+}
+.steps-grid article {
+  border-radius: 18px;
+  background: #faf8f4;
+  border: 1px solid #ded8ce;
+  padding: 28px;
+}
+.step-top > span {
+  color: #6c5636;
+}
+.tasker-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  padding: 60px;
+  border-radius: 24px;
+  background: #090907;
+  color: #faf8f4;
+}
+.tasker-panel h2 {
+  color: #faf8f4;
+  font-size: 42px;
+  line-height: 1.15;
+  margin: 18px 0;
+}
+.tasker-panel p {
+  color: #d9cfbf;
+  margin-bottom: 24px;
+}
+.tasker-panel .eyebrow {
+  color: #b89973;
+}
+.tasker-panel .button {
+  background: #b89973;
+  color: #090907;
+}
+.skill-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+.skill-stack > div {
+  padding: 22px;
+  border: 1px solid #6c5636;
+  border-radius: 14px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.skill-stack span {
+  color: #b89973;
+}
+.skill-stack svg {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.surface {
+  padding: 30px;
+  background: #fffdf9;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+.surface h2 {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  line-height: 1.2;
+}
+.surface h3 {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 18px 0 10px;
+}
+.form-surface {
+  max-width: 780px;
+  margin: 0 auto 40px;
+}
+.surface form,
+.dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.surface label,
+.dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 500;
+}
+.surface input,
+.surface textarea,
+.surface select,
+.dialog input,
+.dialog textarea,
+.dialog select {
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #faf8f4;
+  max-width: 100%;
+  width: 100%;
+  font-size: 16px;
+}
+.check-label {
+  flex-direction: row !important;
+  align-items: center;
+}
+.check-label input {
+  width: 20px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.notice {
+  border: 1px solid #d9ccb9;
+  background: #f3ede3;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 16px 0;
+  color: #453e35;
+}
+.notice a,
+.surface a:not(.button),
+.auth-switch a {
+  color: #6c5636;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.payment-breakdown {
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+}
+.payment-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 8px 0;
+  font-size: 15px;
+}
+.payment-breakdown dd {
+  white-space: nowrap;
+  font-weight: 600;
+}
+.payment-total {
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+  font-weight: 600;
+}
+.security-page {
+  padding: 60px 0;
+}
+.security-page h1 {
+  font-size: 38px;
+  margin: 16px 0 24px;
+}
+.detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 30px;
+  align-items: start;
+}
+.task-payment-panel {
+  position: sticky;
+  top: 112px;
+}
+.task-payment-panel .button {
+  width: 100%;
+  margin: 8px 0;
+  text-align: center;
+}
+.task-price {
+  display: block;
+  font-size: 48px;
+  letter-spacing: -0.04em;
+  margin: 8px 0 20px;
+}
+.task-description {
+  white-space: pre-wrap;
+}
+.task-attachment {
+  border-radius: 12px;
+  max-height: 400px;
+  object-fit: contain;
+  margin: 16px 0;
+}
+.tab-row {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+}
+.tab-row button {
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+.tab-row button[aria-pressed='true'] {
+  background: #eee5d8;
+}
+.status-pill {
+  display: inline-block;
+  border: 1px solid var(--line);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f0ece5;
+}
+.offer-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--line);
+  padding: 24px 0;
+}
+.offer-card p {
+  margin: 12px 0;
+}
+.offer-card > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.conversation-log {
+  max-height: 400px;
+  overflow: auto;
+  margin-bottom: 20px;
+}
+.conversation-log article {
+  background: #f0ece5;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 10px 0;
+  max-width: 85%;
+}
+.conversation-log .message-own {
+  margin-left: auto;
+  background: #eee1ce;
+}
+.conversation-log p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.balance-card {
+  background: #090907;
+  color: #faf8f4;
+  padding: 32px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+}
+.balance-card strong {
+  display: block;
+  font-size: 48px;
+  margin: 12px 0;
+}
+.balance-card p {
+  color: #d9cfbf;
+}
+.account-tasks > a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.table-scroll {
+  overflow: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+}
+th,
+td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th {
+  font-weight: 600;
+}
+td small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+}
+.admin-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.admin-totals > div {
+  background: #f0ece5;
+  padding: 16px;
+  border-radius: 12px;
+  min-width: 130px;
+}
+.admin-totals span,
+.admin-totals strong {
+  display: block;
+}
+.admin-totals strong {
+  font-size: 24px;
+}
+.site-footer {
+  background: #090907;
+  color: #d9cfbf;
+}
+.site-footer h2,
+.site-footer h3,
+.site-footer .brand {
+  color: #faf8f4;
+}
+.site-footer .eyebrow {
+  color: #b89973;
+}
+.site-footer .button {
+  background: #b89973;
+  color: #090907;
+}
+.site-footer a:hover {
+  color: #b89973;
+}
+@media (max-width: 900px) {
+  .tasker-panel {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 32px;
+  }
+  .detail-layout {
+    grid-template-columns: 1fr;
+  }
+  .task-payment-panel {
+    position: static;
+  }
+  .tasker-panel h2 {
+    font-size: 34px;
+  }
+}
+@media (max-width: 600px) {
+  .hero-centered {
+    padding: 56px 0;
+  }
+  .hero-centered > p {
+    font-size: 17px;
+  }
+  .hero-centered .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-centered .hero-footnote {
+    gap: 12px;
+    font-size: 12px;
+  }
+  .surface {
+    padding: 20px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .account-tasks > a {
+    flex-wrap: wrap;
+  }
+  .steps-grid article {
+    padding: 22px;
+  }
+  .offer-card {
+    flex-direction: column;
+  }
+  .tasker-panel {
+    padding: 24px;
+  }
+  .hero-centered h1 {
+    font-size: 44px;
+  }
+  .notice {
+    font-size: 14px;
+  }
+}
+
+.category-card:nth-child(n) .category-icon {
+  background: #eee5d8;
+  color: #6c5636;
+}
+.steps-grid .eyebrow,
+.how-section .eyebrow,
+.auth-story .eyebrow {
+  color: #6c5636;
 }

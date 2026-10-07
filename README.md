@@ -1,131 +1,158 @@
-# 🛠️ Get It Done — A Little Help. A Lot More Done.
+# 🛠️ Get It Done — Your To-Do List. A Little Lighter.
 
 <div align="center">
 
 [![Checks](https://github.com/ranaumarbilal31/Get-It-Done/actions/workflows/ci.yml/badge.svg)](https://github.com/ranaumarbilal31/Get-It-Done/actions/workflows/ci.yml)
-[![React](https://img.shields.io/badge/React-18-24221e?logo=react)](https://react.dev)
-[![Rendering](https://img.shields.io/badge/Rendering-SSR%20%2B%20Prerender-ba4214)](#-rendering--seo)
-[![License](https://img.shields.io/badge/License-MIT-819d79)](LICENSE)
+[![React](https://img.shields.io/badge/React-18-090907?logo=react)](https://react.dev)
+[![Rendering](https://img.shields.io/badge/Rendering-SSR%20%2B%20Prerender-6C5636)](#-rendering--seo)
+[![License](https://img.shields.io/badge/License-MIT-B89973)](LICENSE)
 
 **A local services marketplace for posting tasks, comparing offers, and collaborating through real-time chat.**
 
-Warm cream. Charcoal type. Orange accents. Practical tools for everyday jobs and remote projects.
+Charcoal. Earth brown. Amber. Cream. Self-hosted Fira Sans and a consistent, accessible marketplace experience.
 
-[🌐 Website](https://get-it-done-steel.vercel.app) · [📡 API health](https://taskconnect-api.onrender.com/api/health) · [🧪 Verification](SEO_AUDIT.md) · [🛡️ Security](SECURITY_REPORT.md)
-
-**Demonstration marketplace:** payment holds, commissions, payouts, and wallets are simulated. No real money is charged or transferred. Identity badges reflect admin-reviewed submissions, not background checks or trade credentials.
+[🌐 Website](https://get-it-done-steel.vercel.app) · [📡 API health](https://taskconnect-api.onrender.com/api/health) · [🔎 Audit](SEO_AUDIT.md) · [🛡️ Security](SECURITY_REPORT.md)
 
 </div>
 
-![Desktop homepage preview using local demonstration data](docs/homepage-desktop.png)
+![Homepage — local verification data](docs/homepage-desktop.png)
 
----
+## ✨ The Marketplace
 
-## ✨ What You Can Do
+| Jobbers                              | Taskers                                        | Administrators                                    |
+| ------------------------------------ | ---------------------------------------------- | ------------------------------------------------- |
+| Describe, price and fund a task      | Find local or remote work                      | Review held payments and transaction history      |
+| Compare offers and choose a tasker   | Send a price and proposal                      | Review both parties’ dispute evidence             |
+| Coordinate through private task chat | Deliver notes and HTTPS links                  | Release, refund or split with a written decision  |
+| Approve delivery or raise a dispute  | Follow account credits and completed history   | Review identity submissions and support inquiries |
+| Review completed work                | Build a profile from recorded work and reviews | Manage account permissions                        |
 
-| For posters                               | For taskers                                  | For administrators                             |
-| ----------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
-| Describe a task and set a USD budget      | Search local or remote work                  | Review identity sample submissions             |
-| Choose a category, location, and due date | Filter tasks by category, budget, and status | Inspect documents through authorized endpoints |
-| Compare proposals and hire a tasker       | Send a price and proposal                    | Approve/reject submissions and manage roles    |
-| Chat privately after hiring               | Coordinate with the poster in real time      | View marketplace activity and demo balances    |
-| Confirm completion and leave feedback     | Receive a simulated wallet credit            | Monitor the demonstration workflow             |
+The homepage includes **“Get it done today”**, **“Turn your skills into cash”** and **“Post your first task in seconds.”** Categories and recent tasks come from the database. No invented testimonials or activity statistics are published. Public pages have a full footer; repository links and development banners are absent from the application.
 
-The complete interface shares a responsive visual system: accessible fields, keyboard focus, dialogs, clear errors, retries, and honest demo labels. Informational pages explain the product without invented testimonials, rankings, or safety guarantees.
+## 💳 Funding, Delivery & Settlement
+
+```text
+DRAFT → funding → OPEN → jobber chooses offer → ASSIGNED
+  → tasker delivery → DELIVERED → jobber approval → COMPLETED
+                         │
+                   dispute → DISPUTED → admin release / refund / split
+```
+
+All amounts are integer USD cents. Minimum task and offer price: **$2**. Maximum: **$50,000**. The jobber pays the agreed price plus $1. The tasker pays $1, then a percentage on the remaining amount. The original agreed task price determines the percentage, and each agreement stores its fee version and breakdown.
+
+| Task price | Rate | Jobber total | Tasker net | Platform total |
+| ---------- | ---- | ------------ | ---------- | -------------- |
+| $10        | 2%   | $11          | $8.82      | $2.18          |
+| $15        | 2%   | $16          | $13.72     | $2.28          |
+| $50        | 4%   | $51          | $47.04     | $3.96          |
+| $100       | 5%   | $101         | $94.05     | $6.95          |
+
+Below $50: 2%; $50–$99.99: 4%; from $100: 5%. Percentage deductions round to the nearest cent. Offer-price differences are settled before hiring, without charging the connection fee twice.
+
+Disputes freeze held payments. Only an administrator can decide release, refund or partial settlement, with a recorded reason. Full refunds return all held charges and waive fees. Partial settlements return the unused task price and cap the tasker connection fee to prevent a negative payout. Before hiring, the jobber can cancel for a full refund; after hiring, use platform review.
+
+**Implementation boundary:** the current payment provider is a simulation behind an adapter. The transaction dialog explicitly says no actual charge occurs. No real card credentials are collected, no bank custody or withdrawals are implemented, and account credits do not transfer money. Connect and verify a real payment provider before handling actual customer funds. Financial mutations use database transactions, status/revision checks and unique operation ledger keys to prevent repeated settlement. Legacy payment snapshots and wallet amounts are reconciled without re-crediting past payouts.
 
 ## 🏗️ Architecture
 
 ```text
-Vercel: React + Vite
+Vercel: React + Vite + Tailwind
   ├── Prerendered informational pages
-  ├── Node functions: public page SSR + sitemap
-  └── Hydrated interactions + lazy Leaflet maps
-            │ REST proxy / authenticated Socket.IO
+  ├── Node functions: public SSR and sitemap
+  └── Signed account-email relay → Gmail SMTP
+               │ REST proxy / authenticated Socket.IO
 Render: Express + Prisma + Socket.IO
-            │
-SQLite for isolated local evaluation / PostgreSQL deployment schema
+               │
+Persistent PostgreSQL in deployment / SQLite for isolated local work
 ```
 
-- **UI:** React 18, React Router 7, Tailwind 3, Lucide, Leaflet/OpenStreetMap.
-- **API:** Express, Prisma, Zod, JWT authentication, Socket.IO.
-- **Uploads:** Multer 2; Sharp converts new task/avatar raster uploads to bounded WebP. Identity submissions remain private data in the database.
-- **Email:** Nodemailer; SMTP is optional. Unconfigured delivery is explicitly reported as demo mode.
-- **Payments:** simulated records only. The presence of a Stripe dependency does not establish a live integration.
+- Public HTML contains headings, categories, task links and descriptions before JavaScript runs.
+- Maps and administrative modules load separately; private account state stays client-side.
+- Public profiles use a narrow field selection and remain `noindex`.
+- Socket identities come from JWTs, with participant checks for joins, reads and sends. Session revocation also disconnects sockets.
+- New task/avatar images are bounded WebP; identity submissions are private. Configure persistent public image storage for deployment.
+- Account activation uses hashed, single-use 24-hour tokens; password reset uses 30-minute tokens. Reset/change revokes existing sessions.
+- Marketplace notifications stay inside the application. Contact forms persist inquiries for administrators.
 
 ## 🚀 Local Setup
 
-Use **Node.js 22.19+** and npm. Commands below are run from the repository root.
+Use **Node.js 22.19+** and npm. From the repository root:
 
 ```bash
 npm ci --prefix server
 npm ci --prefix client
 ```
 
-Create `server/.env` from `server/.env.example` and set a local SQLite URL and development JWT secret. Then initialize a **new local evaluation database**:
+Copy `server/.env.example` to `server/.env`. Set a local SQLite `DATABASE_URL` and a strong development `JWT_SECRET`. Initialize an empty local database and start each service in its own terminal:
 
 ```bash
 npm --prefix server run prisma:generate
 npm --prefix server run prisma:push
-npm --prefix server run seed
-```
-
-**The seed script resets its configured database. Use it only with your disposable local database.** Automated tests create their own isolated databases; they do not use your application database.
-
-Start the API and frontend in separate terminals:
-
-```bash
 npm --prefix server run dev
+# Second terminal
 npm --prefix client run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The frontend defaults to the local API at port 5000. Do not copy a production `VITE_API_URL` into your local environment unless you intend to use that API.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The API uses port 5000. `npm start` in `server` selects the schema by database URL, applies compatible additions without accepting destructive changes, reconciles legacy money fields, then starts Express. Back up production data before deployment. The old seed command is destructive and now requires an explicit disposable-data guard; it is unnecessary for normal startup.
 
 ```bash
 npm run build
 npm --prefix client run preview
 ```
 
-The preview serves the production SSR build. Set `API_ORIGIN` to change its server-side API origin.
+`API_ORIGIN` controls server-side API reads; `VITE_API_URL` controls browser API configuration. Do not point private staging at production.
 
-## 👥 Sample Accounts
+## 👥 Private Marketplace Verification
 
-The login screen fills these credentials for evaluation; you still click **Log in** to submit them. Accounts exist only after seeding or when the deployment operator provisions them.
+```bash
+npm run staging:populate
+npm run staging:serve
+# Separate terminal, after building
+npm --prefix client run preview
+```
 
-| Role   | Email                 | Password       |
-| ------ | --------------------- | -------------- |
-| Admin  | `admin@getitdone.com` | `Password123!` |
-| Poster | `sarah@example.com`   | `Password123!` |
-| Tasker | `alex@example.com`    | `Password123!` |
+The population command uses a fixed local `.private-staging/marketplace.db`, refuses production targets, exercises application APIs and reuses an existing completed dataset without duplication.
 
-Public demo passwords are unsuitable for commercial deployment. Use clearly labelled sample documents to evaluate verification; do not upload sensitive real identity records.
+| Accounts / activity              | Count                  |
+| -------------------------------- | ---------------------- |
+| Tech taskers                     | 15                     |
+| Jobbers                          | 10, with 12 tasks each |
+| Tasks                            | 120                    |
+| Open / assigned / delivered      | 50 / 20 / 10           |
+| Disputed / completed / cancelled | 4 / 30 / 6             |
+| Reviews on completed tasks       | 28                     |
 
-## 🧪 Verified Results
+A separate administrator supports local review. Balances, completed history and reviews come from funding, hiring, delivery and settlement operations. **These are generated private fixtures, not genuine customer experiences.** They are never uploaded to production. Names, emails, passwords, roles, specialties, profile links and activity counts are in `.private-staging/accounts.md`; it and the database are Git-ignored. Keep that credential table private.
 
-October 7, 2026: **75 backend tests, 5 SEO tests and 14 production browser tests passed**. Responsive routes were checked at 375, 768 and 1440 pixels, including task details, public profiles, account and admin screens.
+## ✉️ Activation & Password Recovery
 
-Local Lighthouse mobile simulation: **99 performance / 100 accessibility / 100 best practices / 100 SEO**; LCP **1.6s**, CLS **0**, TBT **32ms**. These are lab observations, not field Core Web Vitals or ranking claims. See [full audit](SEO_AUDIT.md) and [measurement summary](docs/lighthouse-summary.json).
+Sender and live verification inbox: **phalanx.getitdone@gmail.com**.
 
-Both production dependency audits reported zero vulnerabilities. Five high findings remain in the frontend Tailwind 3 build-only dependency chain; details and limits are recorded in [security verification](SECURITY_REPORT.md).
+| Host   | Server-side variables                                                                |
+| ------ | ------------------------------------------------------------------------------------ |
+| Vercel | `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_RELAY_SECRET`, optional `PUBLIC_SITE_URL` |
+| Render | `EMAIL_RELAY_URL`, the same `EMAIL_RELAY_SECRET`, `PUBLIC_SITE_URL`                  |
+
+Set `EMAIL_RELAY_URL` to `https://get-it-done-steel.vercel.app/api/account-email`. Never use `VITE_` prefixes for secrets. Enable Gmail 2-Step Verification and create an app password yourself, then save it only in Vercel’s secret settings. [Google’s app-password instructions](https://support.google.com/accounts/answer/185833).
+
+The API signs timestamped requests with HMAC-SHA256. The relay validates the signature, timestamp, recipient, allowed template and link origin before awaiting Gmail SMTP on port 465. Replay suppression is per warm function instance; timestamp validation is enforced across instances. [Vercel SMTP guidance](https://vercel.com/kb/guide/serverless-functions-and-smtp).
+
+**Live delivery requires the owner’s secrets and has not yet been verified.** Registration reports a delivery failure truthfully; recovery responses avoid disclosing whether an account exists. Local tests capture messages without sending external emails. Once configured and redeployed, register the owner inbox, follow the activation link, request a reset, verify its link and confirm old sessions are rejected. An owned domain and a transactional email provider such as Resend can replace this adapter later.
 
 ## 🔎 Rendering & SEO
 
-Public informational pages are prerendered. The homepage, listings, and task details receive public content and links in their initial HTML, then hydrate. Maps and account interactions remain client-side.
-
-- Absolute, route-specific canonicals and unique titles/descriptions.
-- One H1 with descriptive content and a logical heading hierarchy.
-- Visible breadcrumbs with matching `BreadcrumbList` JSON-LD; factual `WebSite` markup.
-- Search/filter variants, private accounts, public profiles, and utility screens deliberately use `noindex`.
-- Open tasks and public informational routes populate a generated sitemap. Closed tasks and utility routes are excluded. The generator splits at 50,000 entries or before 50 MB.
-- Missing routes/tasks return 404; catalog outages return 503. Errors do not masquerade as empty results.
-- Prerendered preview deployments use `noindex`; SSR previews also send an `X-Robots-Tag` header.
-
-Example generated metadata:
+Canonical origin: `https://get-it-done-steel.vercel.app`.
 
 ```html
 <title>Browse tasks | Get It Done</title>
-<meta name="robots" content="index,follow" />
+<meta
+  name="description"
+  content="Find local and remote tasks, compare clear budgets and send your offer. Browse opportunities by category and choose work that fits your skills."
+/>
 <link rel="canonical" href="https://get-it-done-steel.vercel.app/tasks" />
 ```
+
+Visible breadcrumbs have matching structured data:
 
 ```json
 {
@@ -154,84 +181,49 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 Disallow: /template.html
-
 Sitemap: https://get-it-done-steel.vercel.app/sitemap.xml
 ```
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://get-it-done-steel.vercel.app/</loc></url>
   <url><loc>https://get-it-done-steel.vercel.app/tasks</loc></url>
 </urlset>
 ```
 
-The examples illustrate the generated output; the live sitemap also includes eligible informational pages and existing open task URLs. Meta descriptions help communicate relevance and can influence click-through; they are not a direct ranking factor. No FAQ rich-result eligibility is claimed; FAQ markup is intentionally omitted.
+The live sitemap also lists canonical informational pages and existing open task details, splitting at protocol limits. It excludes drafts, utility/account routes, public profiles and search variants. Search variants canonicalize to the clean listing and use `noindex,follow`. Missing resources return 404; upstream failures return 503. Robots rules do not replace authentication. Metadata descriptions support click-through; no ranking claims or fabricated authors/ratings are made.
 
-## 🧪 Verification
+## 🧪 Verified Checks
 
 ```bash
-npm test                         # frontend SEO + isolated backend suites
-npm --prefix client exec playwright install chromium
-npm run test:e2e                  # isolated browser and accessibility tests
-npm --prefix client run lighthouse # production-build mobile lab measurement
+npm --prefix server test
+npm --prefix client test
+npm --prefix client run build
+# PowerShell production browser mode:
+$env:E2E_PRODUCTION='1'; npm --prefix client run test:e2e
+npm --prefix client run lighthouse
+# From client/, after deployment:
+node scripts/smoke.js
 ```
 
-The browser suite covers 375px, 768px, and 1440px layouts, raw HTML without JavaScript, profile identity, filter/history synchronization, retries, duplicate submissions, the task lifecycle, and verification/admin inspection. CI installs dependencies from explicit lockfiles and retains browser diagnostics.
+| Check                        | Recorded result                                                       |
+| ---------------------------- | --------------------------------------------------------------------- |
+| Backend integration/security | **106 passed**, disposable SQLite, external effects disabled          |
+| Metadata/sitemap             | **5 passed**                                                          |
+| Production Chromium flows    | **17 passed**                                                         |
+| Public/account/admin layouts | **375px, 768px, 1440px**, no detected overflow                        |
+| Automated accessibility      | Representative public routes passed axe checks                        |
+| Lighthouse mobile lab        | **93 performance / 100 accessibility / 100 best practices / 100 SEO** |
+| Lab LCP / CLS / TBT          | **2.22s / 0 / 238ms**                                                 |
 
-See [SEO_AUDIT.md](SEO_AUDIT.md) for measured results and [SECURITY_REPORT.md](SECURITY_REPORT.md) for limitations. Test coverage is evidence for the tested scenarios, not certification or proof of immunity.
+[Measured Lighthouse summary](docs/lighthouse-summary.json). These local lab results do not establish field INP or a real-user Core Web Vitals pass. Production cold starts, device/network variation and real traffic require separate measurement. See the [prioritized audit](SEO_AUDIT.md) and [security boundaries](SECURITY_REPORT.md). CI installs isolated dependencies, runs these checks, builds SSR and retains browser diagnostics.
 
-## 📡 Selected API Interfaces
+## ✅ Owner Next Steps
 
-| Method     | Route                                       | Purpose                                           |
-| ---------- | ------------------------------------------- | ------------------------------------------------- |
-| GET        | `/api/health`                               | Minimal availability check                        |
-| POST       | `/api/auth/register`, `/api/auth/login`     | Account access                                    |
-| GET        | `/api/users/:id`                            | Requested public profile; excludes private fields |
-| GET / POST | `/api/tasks`                                | Discovery and task creation                       |
-| GET        | `/api/tasks/:id`                            | Task details with viewer-appropriate privacy      |
-| POST       | `/api/offers/task/:id`                      | Submit/update a proposal                          |
-| POST       | `/api/offers/:id/accept`                    | Hire and record a simulated payment hold          |
-| PATCH      | `/api/tasks/:id/complete`                   | Complete and record simulated payout              |
-| GET / POST | `/api/messages/task/:id`                    | Authorized participant conversations              |
-| POST       | `/api/reviews/task/:id`                     | Post-completion feedback                          |
-| POST       | `/api/auth/verify-id`                       | Submit an identity sample                         |
-| GET        | `/api/admin/verifications/:userId/document` | Admin-only document inspection                    |
-| POST       | `/api/contact`                              | Send an inquiry or report demo delivery           |
+- Configure the Gmail app password and shared relay secret; verify live activation and reset links.
+- Review payment/dispute terms and public copy with a human editor before commercial use.
+- Integrate and verify a real provider before collecting actual funds; confirm database backup/retention and persistent image storage.
+- Verify Search Console ownership, submit `/sitemap.xml`, inspect representative URLs and validate schema in Google’s Rich Results Test.
+- Review field LCP ≤2.5s, INP ≤200ms and CLS ≤0.1 at the 75th percentile when data is available.
 
-Sockets authenticate with `auth.token`. The server derives message identity and authorizes task rooms; client-supplied sender IDs do not grant access.
-
-## ☁️ Deployment
-
-Vercel project root: **`client`**. Build: `npm run build`. Output: `dist/client`. Keep Node functions enabled; this is not a static SPA deployment.
-
-- `API_ORIGIN`: server-only backend origin, normally `https://taskconnect-api.onrender.com`.
-- `VITE_API_URL`: optional direct browser API/socket origin; leaving it empty uses the REST proxy and the production socket default.
-- `CLIENT_URL`: backend CORS origin; configure the production URL explicitly.
-- Deploy the backend using its **PostgreSQL schema** and the operator's established deployment process. Do not run the local SQLite seed on production data.
-- Set a unique production JWT secret, SMTP if needed, and appropriate storage configuration.
-
-Cloudinary/Unsplash assets receive responsive WebP source sets where supported. Local uploads are WebP; the database data-URI fallback has no responsive CDN delivery and needs replacement with an appropriate storage configuration before larger deployments.
-
-## 📬 Contact & Documentation
-
-[ranaumarbilal31@gmail.com](mailto:ranaumarbilal31@gmail.com) · [About](https://get-it-done-steel.vercel.app/about) · [Questions](https://get-it-done-steel.vercel.app/faq)
-
-[Security model](SECURITY.md) · [Security report](SECURITY_REPORT.md) · [SEO audit](SEO_AUDIT.md) · [Architecture decisions](DECISIONS.md) · [Project state](PROJECT_STATE.md) · [Terms](TERMS.md) · [Privacy](PRIVACY.md)
-
-No response-time SLA, legal compliance certification, ranking, or field Core Web Vitals result is claimed.
-
-## ✅ Next Steps — Operator Checklist
-
-- [ ] Complete a human factual/editorial review of public copy, identity wording, and legal pages before commercial launch.
-- [ ] Verify ownership of the production URL in Google Search Console, open **Sitemaps**, and submit `sitemap.xml`.
-- [ ] Use **URL Inspection → Test live URL** for the homepage, `/tasks`, and an open task.
-- [ ] Validate representative breadcrumb markup with [Google's Rich Results Test](https://search.google.com/test/rich-results).
-- [ ] Review CrUX/Search Console field data against LCP ≤ 2.5s, INP ≤ 200ms, and CLS ≤ 0.1 at the 75th percentile. Local lab results do not establish these outcomes.
-- [ ] Replace demo credentials/payment behavior and review legacy identity-document storage before handling real users or money.
-
----
-
-**#GetItDone #LocalServices #Marketplace #React #Vite #TailwindCSS #Express #Prisma #SocketIO #TechnicalSEO**
-
-<div align="center">Good skills. Everyday possibilities.</div>
+#react #vite #tailwindcss #express #prisma #socketio #marketplace #local-services #technical-seo

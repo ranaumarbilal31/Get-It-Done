@@ -2,9 +2,28 @@ import React, { createContext, useContext } from 'react';
 export const RouteDataContext = createContext({});
 export const useRouteData = () => useContext(RouteDataContext);
 export const SITE_URL = 'https://get-it-done-steel.vercel.app';
-export const staticRoutes = ['/about', '/trust-safety', '/faq', '/contact', '/terms', '/privacy'];
+export const staticRoutes = [
+  '/about',
+  '/trust-safety',
+  '/faq',
+  '/contact',
+  '/terms',
+  '/privacy',
+  '/payments',
+  '/dispute-policy',
+  '/how-it-works',
+];
 export const routeLabels = {
-  '/': 'Local help, made simple',
+  '/': 'Get everyday tasks done',
+  '/payments': 'Task payments',
+  '/dispute-policy': 'Dispute resolution',
+  '/how-it-works': 'How it works',
+  '/account': 'Your account',
+  '/verify-email': 'Activate your account',
+  '/resend-verification': 'Activation email',
+  '/forgot-password': 'Recover your account',
+  '/reset-password': 'Reset password',
+  '/change-password': 'Change password',
   '/tasks': 'Browse tasks',
   '/post-task': 'Post a task',
   '/profile': 'Your profile',
@@ -93,16 +112,22 @@ export function metadata(rawUrl, data = {}) {
     '/': 'Find help with cleaning, repairs, moving and digital projects. Post a task, compare offers and connect with local taskers on Get It Done.',
     '/tasks':
       'Browse local and remote tasks on Get It Done. Filter by category, budget and location, explore available work and send a tailored offer.',
+    '/payments':
+      'Understand Get It Done task payments, connection charges, delivery approval and refunds. Review your fee breakdown before funding or accepting work.',
+    '/dispute-policy':
+      'Learn how Get It Done reviews task disputes, considers evidence from both participants and decides whether held payments are released, refunded or split.',
+    '/how-it-works':
+      'Learn how to post and fund a task, compare offers, choose a tasker and approve delivery on Get It Done, for local help and remote projects.',
     '/about':
       'Meet Get It Done, a community services marketplace connecting people who need everyday help with taskers offering local and remote skills.',
     '/trust-safety':
-      'Understand identity badges, private task conversations and demo payment flows on Get It Done, with practical tips for choosing local help.',
+      'Understand identity badges, private task conversations and task payment approval on Get It Done, with practical tips for choosing local help.',
     '/faq':
-      'Find answers about posting tasks, comparing offers, messaging hired taskers and using the Get It Done community marketplace demonstration.',
+      'Find answers about posting tasks, comparing offers, messaging hired taskers and using the Get It Done local and remote services marketplace.',
     '/contact':
       'Contact Get It Done with marketplace questions, feedback or technical issues. Share the details of your request through our contact form.',
     '/terms':
-      'Read the Get It Done terms of service covering marketplace use, user responsibilities, task agreements and simulated payment functionality.',
+      'Read the Get It Done terms of service covering marketplace use, user responsibilities, task agreements and payment fees and dispute resolution.',
     '/privacy':
       'Learn how Get It Done handles account information, task listings, messages and identity submissions, and how to contact us about your data.',
   };

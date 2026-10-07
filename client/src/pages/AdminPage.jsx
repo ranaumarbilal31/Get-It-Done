@@ -1,3 +1,5 @@
+import SupportAdmin from '../components/SupportAdmin';
+import PaymentAdmin from '../components/PaymentAdmin';
 import { Dialog } from '../components/UI';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -158,7 +160,7 @@ export default function AdminPage() {
             The marketplace, at a glance.
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage user identity verification reviews, moderate listings, and oversee simulated
+            Manage user identity verification reviews, moderate listings, and oversee recorded
             payment records.
           </p>
         </div>
@@ -176,6 +178,8 @@ export default function AdminPage() {
         </div>
       )}
 
+      <PaymentAdmin />
+      <SupportAdmin />
       {/* KPI Metrics Cards */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -202,7 +206,7 @@ export default function AdminPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">
-                Simulated payment volume
+                Recorded payment volume
               </span>
               <DollarSign className="w-4 h-4 text-emerald-600" />
             </div>
@@ -210,7 +214,7 @@ export default function AdminPage() {
               ${(stats.escrowHeld + stats.totalReleased).toFixed(2)}
             </div>
             <span className="text-[11px] text-emerald-600 font-semibold">
-              ${stats.escrowHeld.toFixed(2)} in demo holds
+              ${stats.escrowHeld.toFixed(2)} held for tasks
             </span>
           </div>
 
@@ -225,17 +229,17 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* SECTION 1: Pending Identity Verification Queue (Mock KYC) */}
+      {/* SECTION 1: Pending Identity Verification Queue */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              <span>Identity Verification Queue (Mock KYC Review)</span>
+              <span>Identity Verification Queue</span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Review identity samples submitted by users. Approval records an administrative review;
-              it is not a background check.
+              Review identity documents submitted by users. Approval records an administrative
+              review; it is not a background check.
             </p>
           </div>
           <span className="px-3 py-1 bg-amber-50 text-amber-800 text-xs font-bold rounded-full border border-amber-200">

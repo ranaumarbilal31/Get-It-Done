@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   ArrowUpRight,
-  ArrowRight,
-  Search,
-  Sparkles,
-  Wrench,
-  Hammer,
-  Truck,
-  Trees,
-  Laptop,
-  Check,
-  MessageCircle,
   ClipboardList,
+  CreditCard,
+  Users,
+  Laptop,
+  Wrench,
+  Truck,
+  Hammer,
+  Trees,
+  Sparkles,
+  Check,
 } from 'lucide-react';
 import api from '../api/client';
 import TaskCard from '../components/TaskCard';
@@ -27,21 +26,19 @@ const icons = {
   'tech-support': Laptop,
 };
 export default function HomePage() {
-  const initial = useRouteData();
-  const [data, setData] = useState(initial.path === '/' ? initial : {});
-  const [loading, setLoading] = useState(!initial.categories && !initial.error);
-  const [query, setQuery] = useState('');
-  const navigate = useNavigate();
+  const initial = useRouteData(),
+    [data, setData] = useState(initial.path === '/' ? initial : {}),
+    [loading, setLoading] = useState(!initial.categories && !initial.error);
   const load = async () => {
     setLoading(true);
     try {
-      const [cats, tasks] = await Promise.all([
+      const [c, t] = await Promise.all([
         api.get('/categories'),
         api.get('/tasks?limit=6&status=OPEN'),
       ]);
-      setData({ ...cats.data, ...tasks.data });
+      setData({ ...c.data, ...t.data });
     } catch {
-      setData({ error: 'We could not load the marketplace. Please try again.' });
+      setData({ error: 'The marketplace could not be loaded. Please retry.' });
     } finally {
       setLoading(false);
     }
@@ -51,112 +48,109 @@ export default function HomePage() {
   }, []);
   return (
     <div className="home-page">
-      <section className="hero page-container">
-        <div className="hero-copy">
-          <span className="eyebrow">
-            <span className="tiny-dot" />
-            EVERYDAY TASKS. EXTRAORDINARY HELP.
-          </span>
-          <h1>
-            A little help.
-            <br />
-            <em>A lot more</em>
-            <br />
-            done.
-          </h1>
-          <p>
-            From the shelf that needs fixing to the move you've been putting off. Find the right
-            skills, right here.
-          </p>
-          <div className="hero-actions">
-            <Link to="/post-task" className="button">
-              Post a task <ArrowUpRight size={20} />
-            </Link>
-            <Link to="/tasks" className="text-link">
-              Find work <ArrowRight size={18} />
-            </Link>
-          </div>
-          <div className="hero-footnote">
-            <Check size={16} />
-            Set your budget <span>·</span>Compare offers <span>·</span>Choose your tasker
-          </div>
+      <section className="hero-centered page-container">
+        <span className="eyebrow">MORE TIME FOR WHAT MATTERS</span>
+        <h1>
+          Big ideas. Small errands.
+          <br />
+          <em>Get it done.</em>
+        </h1>
+        <p>
+          From everyday to-dos to your next big project, connect with people who have the skills to
+          make it happen.
+        </p>
+        <div className="hero-actions">
+          <Link className="button" to="/post-task">
+            Get it done today <ArrowUpRight size={20} />
+          </Link>
+          <Link className="button secondary" to="/register">
+            Turn your skills into cash <ArrowUpRight size={20} />
+          </Link>
         </div>
-        <div className="hero-art">
-          <img
-            src="/hero-home.svg"
-            alt="Illustrated home representing everyday local services"
-            width="580"
-            height="500"
-            fetchpriority="high"
-          />
-          <div className="floating-note note-one">
-            <span className="note-icon">
-              <Wrench size={21} />
-            </span>
-            <div>
-              <strong>That thing on your list?</strong>
-              <span>There's a tasker for that.</span>
-            </div>
-          </div>
-          <div className="floating-note note-two">
-            <span className="note-icon green">
-              <Check size={22} />
-            </span>
-            <div>
-              <strong>Make time for your life.</strong>
-              <span>We'll help with the to-dos.</span>
-            </div>
-          </div>
-          <span className="art-caption">A home, a project, a fresh start.</span>
+        <div className="hero-footnote">
+          <span>
+            <Check size={16} />
+            Your budget
+          </span>
+          <span>
+            <Check size={16} />
+            Your choice of tasker
+          </span>
+          <span>
+            <Check size={16} />
+            Your approval before release
+          </span>
         </div>
       </section>
-      <section className="search-band">
-        <form
-          className="page-container search-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            navigate(
-              '/tasks' + (query.trim() ? '?search=' + encodeURIComponent(query.trim()) : ''),
-            );
-          }}
-        >
-          <label htmlFor="home-search">What needs doing?</label>
-          <div className="search-input">
-            <Search size={21} />
-            <input
-              id="home-search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Try furniture assembly or moving help"
-            />
+      <section className="how-section" id="how-it-works">
+        <div className="page-container">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">A CLEAR BRIEF. A GREAT START.</span>
+              <h2>Post your first task in seconds</h2>
+            </div>
+            <Link className="text-link" to="/how-it-works">
+              How it works <ArrowUpRight size={18} />
+            </Link>
           </div>
-          <button className="button" type="submit">
-            Explore tasks <ArrowRight size={18} />
-          </button>
-        </form>
+          <div className="steps-grid">
+            {[
+              [
+                ClipboardList,
+                '01',
+                'Tell us what you need',
+                'Describe the result, choose a category and set your budget.',
+              ],
+              [
+                CreditCard,
+                '02',
+                'Fund your task',
+                'Review your payment and publish your task for interested taskers.',
+              ],
+              [
+                Users,
+                '03',
+                'Choose the right person',
+                'Compare offers, agree on delivery and approve the work when it’s done.',
+              ],
+            ].map(([Icon, n, title, text]) => (
+              <article key={n}>
+                <div className="step-top">
+                  <Icon size={30} />
+                  <span>{n}</span>
+                </div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+          <Link className="button" to="/post-task">
+            Post your task <ArrowUpRight size={18} />
+          </Link>
+        </div>
       </section>
       <section className="page-container home-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">BIG JOBS. SMALL JOBS. YOUR JOBS.</span>
-            <h2>A skill for every situation.</h2>
+            <span className="eyebrow">THERE’S A SKILL FOR THAT</span>
+            <h2>What’s on your list?</h2>
           </div>
-          <Link to="/tasks" className="text-link">
-            Explore all tasks <ArrowUpRight size={18} />
+          <Link className="text-link" to="/tasks">
+            Browse all tasks <ArrowUpRight size={18} />
           </Link>
         </div>
         {data.error ? (
           <Alert onRetry={load}>{data.error}</Alert>
         ) : loading ? (
-          <Loading>Finding your next possibility…</Loading>
+          <Loading>Opening the marketplace…</Loading>
         ) : (
           <div className="category-grid">
             {data.categories?.map((c) => {
-              const Icon = icons[c.slug] || Wrench;
+              const Icon = icons[c.slug] || Laptop;
               return (
                 <Link key={c.id} to={'/tasks?category=' + c.slug} className="category-card">
                   <span className="category-icon">
-                    <Icon size={27} strokeWidth={1.5} />
+                    <Icon size={28} />
                   </span>
                   <h3>{c.name}</h3>
                   <ArrowUpRight size={18} />
@@ -166,60 +160,14 @@ export default function HomePage() {
           </div>
         )}
       </section>
-      <section className="how-section" id="how-it-works">
-        <div className="page-container">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">LESS HASSLE. MORE POSSIBILITY.</span>
-              <h2>From to-do to ta-da.</h2>
-            </div>
-            <p>
-              Good help starts with a clear conversation.
-              <br />
-              Here's how to make it happen.
-            </p>
-          </div>
-          <div className="steps-grid">
-            {[
-              [
-                ClipboardList,
-                '01',
-                'Tell us what you need',
-                'Describe your task, choose a location and set a budget that works for you.',
-              ],
-              [
-                MessageCircle,
-                '02',
-                'Find your kind of help',
-                'Compare offers and profiles. Choose a tasker, then agree on the details in chat.',
-              ],
-              [
-                Check,
-                '03',
-                'Get it done, together',
-                'Confirm completion and share an honest review. Demo payments simulate the process.',
-              ],
-            ].map(([Icon, n, title, description]) => (
-              <article key={n}>
-                <div className="step-top">
-                  <Icon size={30} strokeWidth={1.5} />
-                  <span>{n}</span>
-                </div>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
       <section className="page-container home-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">YOUR NEXT OPPORTUNITY</span>
-            <h2>Someone could use your skills.</h2>
+            <span className="eyebrow">YOUR SKILLS. THEIR NEXT STEP.</span>
+            <h2>Find your next opportunity.</h2>
           </div>
           <Link to="/tasks" className="text-link">
-            See all available tasks <ArrowUpRight size={18} />
+            See available work <ArrowUpRight size={18} />
           </Link>
         </div>
         {!loading &&
@@ -232,32 +180,62 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="empty-state">
-              <h3>A fresh start.</h3>
-              <p>No open tasks right now. Post one to get the conversation going.</p>
+              <h3>Make the first move.</h3>
+              <p>Have a project in mind? Post a task and start receiving offers.</p>
               <Link to="/post-task" className="button">
                 Post a task
               </Link>
             </div>
           ))}
       </section>
+      <section className="page-container home-section">
+        <div className="tasker-panel">
+          <div>
+            <span className="eyebrow">WORK THAT FITS YOUR SKILLS</span>
+            <h2>
+              Make your next move.
+              <br />
+              On your terms.
+            </h2>
+            <p>
+              Find local and remote tasks, send a thoughtful offer and build a profile through
+              completed work.
+            </p>
+            <Link to="/register" className="button">
+              Become a tasker <ArrowUpRight size={18} />
+            </Link>
+          </div>
+          <div className="skill-stack">
+            {['Build something brilliant', 'Solve an everyday problem', 'Help a business grow'].map(
+              (s, i) => (
+                <div key={s}>
+                  <span>0{i + 1}</span>
+                  <strong>{s}</strong>
+                  <ArrowUpRight />
+                </div>
+              ),
+            )}
+          </div>
+        </div>
+      </section>
       <section className="page-container">
         <div className="trust-panel">
           <div>
-            <span className="eyebrow">CLEAR EXPECTATIONS. BETTER CONNECTIONS.</span>
+            <span className="eyebrow">CLEAR EXPECTATIONS, BETTER CONNECTIONS</span>
             <h2>
-              Good help starts
+              Good work starts
               <br />
               with good information.
             </h2>
           </div>
           <div>
             <p>
-              Review tasker profiles and feedback, agree on the scope, and keep your conversation in
-              the app. An identity badge reflects an admin-reviewed submission, not a background
-              check.
+              Compare profiles and feedback, keep agreements in your task chat and review delivery
+              before approving payment. If something goes wrong, both sides can request platform
+              review.
             </p>
             <Link to="/trust-safety" className="text-link">
-              Get to know our safety tools <ArrowUpRight size={18} />
+              Explore our safety tools <ArrowUpRight size={18} />
             </Link>
           </div>
         </div>

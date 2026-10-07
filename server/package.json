@@ -4,14 +4,16 @@
   "description": "Get It Done API server with Express, Prisma, and Socket.IO",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node scripts/start.cjs",
     "dev": "node --watch src/server.js",
     "test": "node scripts/test.cjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "seed": "node prisma/seed.js",
-    "test:raw": "vitest run --no-file-parallelism"
+    "test:raw": "vitest run --no-file-parallelism",
+    "staging:populate": "node scripts/private-marketplace.cjs",
+    "staging:serve": "node scripts/private-marketplace.cjs --serve"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",

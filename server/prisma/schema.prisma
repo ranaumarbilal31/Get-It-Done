@@ -24,6 +24,9 @@ model User {
   verificationStatus   String         @default("NONE") // "NONE", "PENDING", "APPROVED", "REJECTED"
   idDocument           String?
   verificationNotes    String?
+  walletBalanceCents   Int            @default(0)
+  sessionVersion       Int            @default(0)
+  emailVerifyExpires   DateTime?
   walletBalance        Float          @default(0.0)
   ratingAvg            Float          @default(0.0)
   ratingCount          Int            @default(0)
@@ -78,6 +81,9 @@ model Task {
   offers         Offer[]
   messages       Message[]
   payment        Payment?
+  deliveries     Delivery[]
+  dispute        Dispute?
+  ledger         LedgerEntry[]
   review         Review?
 }
 
@@ -99,7 +105,15 @@ model Offer {
 model Payment {
   id                    String   @id @default(uuid())
   amount                Float
-  platformFee           Float    @default(0.0) // 10% platform fee simulation
+  amountCents           Int      @default(0)
+  posterTotalCents      Int      @default(0)
+  taskerNetCents        Int      @default(0)
+  platformFeeCents      Int      @default(0)
+  feeRate               Int      @default(0)
+  feeVersion            String   @default("v1")
+  provider              String   @default("preview")
+  revision              Int      @default(0)
+  platformFee           Float    @default(0.0) // Legacy dollars retained for compatibility; cents are authoritative
   status                String   @default("HELD_IN_ESCROW") // "PENDING", "HELD_IN_ESCROW", "RELEASED", "REFUNDED"
   stripePaymentIntentId String?
   createdAt             DateTime @default(now())
@@ -152,4 +166,62 @@ model Notification {
 
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Delivery {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id])
+  authorId    String
+  notes       String
+  attachments String   @default("[]")
+  createdAt   DateTime @default(now())
+}
+
+model Dispute {
+  id          String   @id @default(uuid())
+  taskId      String   @unique
+  task        Task     @relation(fields: [taskId], references: [id])
+  openedBy    String
+  reason      String
+  status      String   @default("OPEN")
+  outcome     String?
+  decision    String?
+  decidedBy   String?
+  awardCents  Int?
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  evidence    DisputeEvidence[]
+}
+
+model DisputeEvidence {
+  id          String   @id @default(uuid())
+  disputeId   String
+  dispute     Dispute  @relation(fields: [disputeId], references: [id])
+  authorId    String
+  content     String
+  createdAt   DateTime @default(now())
+}
+
+model LedgerEntry {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id])
+  userId      String?
+  actorId     String
+  kind        String
+  amountCents Int
+  key         String   @unique
+  createdAt   DateTime @default(now())
+  @@index([userId, createdAt])
+}
+
+model SupportInquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  category  String?
+  message   String
+  createdAt DateTime @default(now())
 }

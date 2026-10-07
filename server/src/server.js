@@ -99,6 +99,10 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api', apiLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
+app.use('/api/auth/resend-verification', authLimiter);
+app.use('/api/auth/verify-email', authLimiter);
+app.use('/api/auth/reset-password', authLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
@@ -135,7 +139,7 @@ const isOriginAllowed = (origin) => {
   if (!origin) return true; // server-to-server, mobile, curl, Supertest
   if (baseAllowedOrigins.includes(origin)) return true;
   // Allow all project Vercel deployments (production, branch, preview)
-  if (/^https:\/\/get-it-done[a-z0-9-]*\.vercel\.app$/.test(origin)) return true;
+
   return false;
 };
 
@@ -248,6 +252,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Mount API Routes
+app.use('/api/payments', require('./routes/paymentRoutes'));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/categories', categoryRoutes);

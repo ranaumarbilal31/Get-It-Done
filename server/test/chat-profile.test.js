@@ -82,7 +82,17 @@ describe('Public profiles and private conversations', () => {
     expect(res.status).toBe(200);
     expect(res.body.user.id).toBe(tasker.user.id);
     expect(Object.keys(res.body.user).sort()).toEqual(
-      ['id', 'name', 'avatar', 'bio', 'isVerified', 'ratingAvg', 'ratingCount', 'createdAt'].sort(),
+      [
+        'id',
+        'name',
+        'avatar',
+        'bio',
+        'isVerified',
+        'ratingAvg',
+        'ratingCount',
+        'createdAt',
+        'completedCount',
+      ].sort(),
     );
   });
   it('returns 404 for a missing public profile', async () => {

@@ -1,148 +1,221 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Wrench, MessageCircle, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, ShieldCheck } from 'lucide-react';
 const content = {
   about: {
     kicker: 'PEOPLE HELPING PEOPLE',
     title: 'Life is busy. Help is here.',
     intro:
-      'Get It Done connects everyday needs with practical skills. A repair, a fresh coat of paint, a digital project — start with a task and find someone who can help.',
+      'Connect everyday needs with practical skills. Start with a clear task and find someone who can help.',
     sections: [
       [
         'A marketplace with two sides',
-        'Posters describe the work and set a budget. Taskers browse available tasks and submit offers. The poster chooses who to hire.',
+        'Jobbers describe work and fund a task. Taskers submit offers. The jobber chooses who to hire.',
       ],
       [
-        'Better decisions start with details',
-        'Profiles, reviews and identity submission badges provide context. They are useful signals, not guarantees of skill, credentials or safety.',
+        'Choose with confidence',
+        'Read profiles, compare proposals and review feedback from completed tasks. Agree on qualifications and scope before hiring.',
       ],
       [
-        'Built to explore',
-        'This is a demonstration marketplace. Payment authorization, release and wallet balances are simulated; no real money is transferred.',
+        'From brief to delivery',
+        'Keep your conversation and delivery evidence in the task. Review the result before approving payment.',
+      ],
+    ],
+  },
+  how: {
+    kicker: 'LESS HASSLE. MORE POSSIBILITY.',
+    title: 'From your list to done.',
+    intro: 'One place to describe the work, choose your tasker and follow delivery.',
+    sections: [
+      [
+        'Describe and fund',
+        'Create a task with a clear description, category, location and budget. Review the total before funding and publishing.',
+      ],
+      [
+        'Compare and choose',
+        'Read proposals and profiles. If the chosen offer changes the price, review and settle the difference before hiring.',
+      ],
+      [
+        'Deliver and approve',
+        'Your tasker submits the work. Approve delivery to release payment and credit their account.',
+      ],
+      [
+        'If something goes wrong',
+        'Open a dispute and share evidence. Funds stay held while the platform reviews both sides and decides the outcome.',
       ],
     ],
   },
   safety: {
     kicker: 'BE INFORMED. STAY IN CONTROL.',
-    title: 'Good connections need clear expectations.',
-    intro:
-      'Know what a badge means, understand the payment demonstration, and agree on the work before you begin.',
+    title: 'Clear expectations make better connections.',
+    intro: 'Agree on scope, understand profile signals and keep a record of your work.',
     sections: [
       [
         'Identity badges',
-        'An administrator reviews an uploaded identity submission before approving a badge. A badge is not a criminal background check, trade license or quality guarantee.',
+        'A badge means an administrator approved an identity submission. It does not establish a criminal background check, professional license or guarantee of quality.',
       ],
       [
         'Private conversations',
-        'Task conversations are available to the poster and hired tasker. Keep sensitive information out of public descriptions and agree on the scope in your private chat.',
+        'Task conversations are restricted to the jobber and hired tasker. Keep passwords, access codes and private contact details out of public descriptions.',
       ],
       [
         'Location privacy',
-        'Public listings use approximate coordinates and masked street numbers. Do not place private addresses, phone numbers or access codes in public task descriptions.',
+        'Public listings show approximate coordinates and mask street numbers. Only authorized participants can see the task’s full location.',
       ],
       [
-        'Demo payments',
-        'Accepting an offer records a simulated payment hold. Completion records a simulated payout with a 10% platform fee. Balances are demo values and cannot be withdrawn.',
+        'Review and resolution',
+        'Review delivered work before approval. If you disagree, open a dispute and submit evidence so the platform can decide how to settle the held payment.',
+      ],
+    ],
+  },
+  payments: {
+    kicker: 'KNOW YOUR TASK PAYMENT',
+    title: 'Clear payments. Clear next steps.',
+    intro:
+      'Review your payment breakdown before committing, and follow every recorded movement in your account.',
+    sections: [
+      [
+        'Fund before publication',
+        'The jobber funds the agreed task price plus a $1 connection fee. A task is published after funding succeeds.',
       ],
       [
-        'Choose thoughtfully',
-        'Review the tasker’s profile, feedback and proposal. Confirm qualifications directly when needed. Report concerns through our contact form.',
+        'Tasker charges',
+        'A $1 tasker connection fee is deducted first. The service fee applies to the remaining amount: 2% for task prices below $50, 4% for $50–$99.99, and 5% for $100 or more. The original agreed price determines the tier.',
+      ],
+      [
+        'An example',
+        'For a $10 task, the jobber total is $11. The tasker receives $8.82 after the $1 connection fee and 2% of the remaining $9. Prices and fees are in USD.',
+      ],
+      [
+        'Approval and account history',
+        'After delivery, the jobber approves the work and the tasker’s net payment appears in their account. No disputed payment is automatically released.',
+      ],
+      [
+        'Cancellations and refunds',
+        'Before hiring, cancellation returns all held funds and waives fees. After hiring, request platform review. A full refund waives all fees; partial settlement refunds the unused task price and applies tasker charges to the awarded amount.',
+      ],
+    ],
+  },
+  disputes: {
+    kicker: 'BOTH SIDES DESERVE TO BE HEARD',
+    title: 'Dispute resolution.',
+    intro:
+      'When the tasker says the work is complete and the jobber disagrees, the platform reviews the evidence and decides the outcome.',
+    sections: [
+      [
+        'Raise the concern',
+        'Either hired participant can open a dispute before payment is released. Explain the disagreement and what resolution you are requesting.',
+      ],
+      [
+        'Funds remain held',
+        'Opening a dispute freezes payment. Neither participant can release or refund it while review is open.',
+      ],
+      [
+        'Share your evidence',
+        'Both participants may provide delivery details, links, messages and a written response. Include relevant evidence and avoid sensitive information that is unrelated to the task.',
+      ],
+      [
+        'Platform decision',
+        'An authorized administrator reviews the task agreement and both sides’ evidence. The platform may release the full payment, refund all held funds, or split the task amount. A written decision is recorded with the settlement.',
+      ],
+      [
+        'Partial settlements',
+        'The unused task amount is returned to the jobber. The tasker connection fee is applied once, capped to the award, and the snapshotted percentage applies after that deduction. No negative tasker payout is created.',
       ],
     ],
   },
   faq: {
     kicker: 'A LITTLE CLARITY GOES A LONG WAY',
     title: 'Questions? Let’s get them done.',
-    intro:
-      'The essentials for posting tasks, finding work and using this marketplace demonstration.',
+    intro: 'The essentials for posting tasks, finding work and receiving delivery.',
     sections: [
       [
         'How do I post a task?',
-        'Open Post a task, describe the work, choose a category and budget, and select remote or in-person work. Sign in to publish your draft.',
+        'Describe your task, set a budget and fund it to publish. Compare offers and choose your tasker.',
       ],
       [
         'How do I find work?',
-        'Browse tasks and filter by category, location or budget. Open a task to review its details and submit an offer while it is open.',
+        'Browse available tasks, filter by category or budget and send an offer with your approach.',
+      ],
+      ['When can I message someone?', 'Private task chat opens after the jobber accepts an offer.'],
+      [
+        'How does payment release work?',
+        'The tasker delivers work, then the jobber reviews and approves it. The net amount appears in the tasker’s account.',
       ],
       [
-        'When can I message someone?',
-        'Private task chat becomes available to the poster and the hired tasker after an offer is accepted.',
+        'What if we disagree?',
+        'Open a dispute and share evidence. Funds remain held until the platform decides whether to release, refund or split them.',
       ],
       [
-        'Are payments real?',
-        'No. Payment holds, payouts and wallet balances simulate a task payment workflow. The demonstration does not charge or transfer real money.',
-      ],
-      [
-        'What does a verified badge mean?',
-        'It means an administrator approved an identity submission. It does not establish professional licensing, background checks or a guarantee of quality.',
+        'How do I activate my account?',
+        'Follow the activation email. If the link expires, request a replacement from the login page.',
       ],
       [
         'Can I leave a review?',
-        'The poster and hired tasker can submit feedback once their task is completed. Reviews reflect user submissions.',
+        'The jobber can review their hired tasker after the task is completed.',
       ],
       [
-        'How do I ask for help?',
-        'Use our contact page to describe a technical problem or marketplace question. Do not send passwords or identity documents through the contact form.',
+        'How do I get help?',
+        'Use the contact form. Never send passwords or identity documents in a support inquiry.',
       ],
     ],
   },
   terms: {
     kicker: 'THE DETAILS THAT MATTER',
     title: 'Terms of service.',
-    intro:
-      'These terms describe use of the Get It Done demonstration marketplace. Review them before creating an account or publishing a task.',
+    intro: 'Review these terms before creating an account, publishing a task or accepting work.',
     sections: [
       [
-        'Using the marketplace',
-        'Provide accurate account and task information. Do not publish unlawful, harmful or deceptive content, impersonate another person, or attempt to access another user’s private information.',
+        'Marketplace use',
+        'Provide accurate information. Do not publish unlawful or deceptive content, impersonate others or access private information without authorization.',
       ],
       [
-        'Tasks and agreements',
-        'Posters and taskers are responsible for agreeing on scope, timing, qualifications and safety requirements. Listings and badges do not constitute a guarantee from the platform.',
+        'Task agreements',
+        'Jobbers and taskers agree on scope, timing, qualifications and safety requirements. Listings and identity badges do not guarantee professional licensing or work quality.',
       ],
       [
-        'Simulated transactions',
-        'All payment holds, releases, commissions and wallet balances are demonstration records. They have no cash value and do not transfer real funds.',
+        'Payment charges',
+        'The jobber pays the agreed task price plus $1. The tasker pays $1 plus a percentage of the remaining amount: 2% below $50, 4% for $50–$99.99 and 5% from $100. The original price determines the tier. Review the transaction breakdown before committing.',
+      ],
+      [
+        'Delivery and disputes',
+        'Payment release requires jobber approval after delivery. Disputes freeze funds for platform review. The administrator may release, refund or split the payment, with a recorded reason. Read the dispute policy for settlement details.',
       ],
       [
         'Accounts and moderation',
-        'Administrators may review identity submissions and moderate account access. Keep your credentials private and contact support if you believe your account has been misused.',
+        'Keep credentials private. Administrators review identity submissions and may moderate inappropriate content and account access.',
       ],
-      [
-        'Availability and questions',
-        'The demonstration may be unavailable or change. For questions about these terms, contact ranaumarbilal31@gmail.com. These terms require human legal review before commercial operation.',
-      ],
+      ['Contact', 'Send questions through the contact page or email phalanx.getitdone@gmail.com.'],
     ],
   },
   privacy: {
     kicker: 'YOUR INFORMATION, EXPLAINED',
     title: 'Privacy policy.',
-    intro:
-      'A practical explanation of the information used by this demonstration marketplace. Contact us with questions about your data.',
+    intro: 'How account information, task content and marketplace records are used.',
     sections: [
       [
         'Account information',
-        'The application stores account details, a password hash, profile information, and authentication information needed to operate your account. Do not reuse sensitive passwords on a demonstration service.',
+        'We store account details, password hashes and profile information needed to operate your account. Activation and password recovery use single-use, expiring links.',
       ],
       [
         'Public and private content',
-        'Task listings and public profile fields are visible to other visitors. Messages are restricted to task participants. Public task coordinates are approximate and street numbers are masked; avoid entering sensitive details in descriptions.',
+        'Task listings and public profile fields are visible to visitors. Task messages and delivery records are restricted to authorized participants; disputes are also accessible to authorized administrators.',
       ],
       [
         'Identity submissions',
-        'Identity documents submitted for verification are intended for administrative review. Do not upload real sensitive documents when evaluating the demo; use a clearly labelled sample.',
+        'Identity documents are restricted to administrative review. Do not include documents in task descriptions or support inquiries.',
       ],
       [
         'Service providers',
-        'Hosting, database, optional storage and email services process information required by their configured integrations. Map tiles are requested from OpenStreetMap. Deployment-specific provider arrangements require operator review.',
+        'Hosting, databases, configured storage and account-email services process information needed to provide the application. Map tiles are requested from OpenStreetMap.',
       ],
       [
-        'Your choices and requests',
-        'You can update your profile in the app. Contact ranaumarbilal31@gmail.com for data access, correction or deletion requests. Do not include passwords or identity documents in an email inquiry.',
+        'Financial records',
+        'Task agreements, fee breakdowns, payment activity and dispute decisions are recorded to maintain account history and prevent repeated settlement.',
       ],
       [
-        'Production review',
-        'Retention periods, legal bases and jurisdiction-specific rights must be reviewed and documented by the operator before commercial launch. This page does not claim GDPR or CCPA certification.',
+        'Your choices',
+        'Update your profile in your account. Contact phalanx.getitdone@gmail.com for access, correction or deletion requests. Never include passwords or identity documents in an email inquiry.',
       ],
     ],
   },

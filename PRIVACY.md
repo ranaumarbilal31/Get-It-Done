@@ -1,11 +1,11 @@
-# Privacy Explanation — Demonstration Marketplace
+# Privacy Policy — Get It Done
 
-The app stores account details, password hashes, profile information, task listings, messages, reviews and identity submissions needed for its configured features.
+Account details, password hashes and profile information support account operation. Activation and recovery links use hashed, expiring, single-use tokens. Password reset/change revokes existing sessions.
 
-Public task information and selected profile fields are visible to visitors. Task conversations are restricted to the poster and hired tasker. Public coordinates are approximate, and street numbers are masked; keep sensitive information out of public descriptions.
+Task listings and selected profile fields are public. Full locations, task messages and delivery records are available to authorized participants. Dispute evidence and decisions are also available to authorized administrators. Identity submissions are private and available only for authorized administrative review.
 
-Identity sample documents are accessed through administrative inspection. Do not use real sensitive documents to evaluate the demonstration. Previously uploaded external cloud objects require operator review because changing the app cannot revoke their public URLs.
+Hosting, database, configured image storage and account-email providers process information needed to deliver the application. Map tiles come from OpenStreetMap. Gmail is configured through a signed server-side relay for activation and password reset; marketplace notifications remain inside the application. Contact inquiries are stored for admin review.
 
-Configured hosting, database, asset storage, email providers and OpenStreetMap process requests associated with their services. Exact provider arrangements, data retention, legal bases and jurisdiction-specific rights require operator review before commercial launch. No GDPR or CCPA certification is claimed.
+Task agreements, fee snapshots, recorded payment activity and dispute decisions maintain account history and prevent duplicate settlement. Public profiles do not expose passwords, tokens, contact details, wallet amounts or identity documents.
 
-Update your profile in the app. Email ranaumarbilal31@gmail.com for data access, correction or deletion requests; do not include passwords or identity documents.
+Update your profile in your account. Contact phalanx.getitdone@gmail.com for access, correction or deletion inquiries. Never send passwords or identity documents through a support inquiry. Owner review must confirm operational retention, deletion, backups and applicable legal obligations before commercial use.

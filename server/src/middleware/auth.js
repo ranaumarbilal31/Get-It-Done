@@ -36,15 +36,17 @@ const authenticate = async (req, res, next) => {
         ratingAvg: true,
         ratingCount: true,
         isEmailVerified: true,
+        sessionVersion: true,
         createdAt: true,
       },
     });
 
-    if (!user) {
+    if (!user || !user.isEmailVerified || user.sessionVersion !== (decoded.sessionVersion || 0)) {
       return res.status(401).json({ message: 'User belonging to this token no longer exists.' });
     }
 
     req.user = user;
+    res.set('Cache-Control', 'private, no-store');
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
@@ -69,10 +71,19 @@ const optionalAuth = async (req, res, next) => {
       );
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
-        select: { id: true, name: true, email: true, role: true, avatar: true },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          avatar: true,
+          sessionVersion: true,
+          isEmailVerified: true,
+        },
       });
-      if (user) {
+      if (user && user.isEmailVerified && user.sessionVersion === (decoded.sessionVersion || 0)) {
         req.user = user;
+        res.set('Cache-Control', 'private, no-store');
       }
     }
     next();

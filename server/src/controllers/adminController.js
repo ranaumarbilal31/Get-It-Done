@@ -19,20 +19,28 @@ const getStats = async (req, res, next) => {
       prisma.task.count({ where: { status: 'ASSIGNED' } }),
       prisma.task.count({ where: { status: 'OPEN' } }),
       prisma.user.count({ where: { verificationStatus: 'PENDING' } }),
-      prisma.payment.findMany({ select: { amount: true, status: true, platformFee: true } }),
+      prisma.payment.findMany({
+        select: {
+          amountCents: true,
+          posterTotalCents: true,
+          taskerNetCents: true,
+          status: true,
+          platformFeeCents: true,
+        },
+      }),
     ]);
 
     const escrowHeld = payments
-      .filter((p) => p.status === 'HELD_IN_ESCROW')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .filter((p) => ['HELD_IN_ESCROW', 'DISPUTED'].includes(p.status))
+      .reduce((sum, p) => sum + p.posterTotalCents / 100, 0);
 
     const totalReleased = payments
-      .filter((p) => p.status === 'RELEASED')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .filter((p) => ['RELEASED', 'PARTIALLY_SETTLED'].includes(p.status))
+      .reduce((sum, p) => sum + p.taskerNetCents / 100, 0);
 
     const totalPlatformFees = payments
-      .filter((p) => p.status === 'RELEASED')
-      .reduce((sum, p) => sum + p.platformFee, 0);
+      .filter((p) => ['RELEASED', 'PARTIALLY_SETTLED'].includes(p.status))
+      .reduce((sum, p) => sum + p.platformFeeCents / 100, 0);
 
     res.json({
       stats: {

@@ -1,5 +1,5 @@
 const prisma = require('../config/prisma');
-const { captureEscrowPayment } = require('../services/paymentService');
+const marketplace = require('../services/marketplaceService');
 const { uploadToStorage } = require('../services/storageService');
 
 const maskAddress = (address) => {
@@ -20,7 +20,7 @@ const sanitizeTaskForViewer = (task, viewerId, viewerRole) => {
   const isAdmin = viewerRole === 'ADMIN';
 
   let isAssignedTasker = false;
-  if (viewerId && (task.status === 'ASSIGNED' || task.status === 'COMPLETED')) {
+  if (viewerId && ['ASSIGNED', 'DELIVERED', 'DISPUTED', 'COMPLETED'].includes(task.status)) {
     if (task.offers && Array.isArray(task.offers)) {
       isAssignedTasker = task.offers.some(
         (o) =>
@@ -48,6 +48,9 @@ const sanitizeTaskForViewer = (task, viewerId, viewerRole) => {
   delete sanitized.assignedOfferId;
   delete sanitized.categoryId;
   delete sanitized.payment;
+  delete sanitized.deliveries;
+  delete sanitized.dispute;
+  delete sanitized.ledger;
 
   // Format dueDate to date-only to avoid leaking exact microsecond timing
   if (sanitized.dueDate instanceof Date) {
@@ -107,10 +110,18 @@ const getTasks = async (req, res, next) => {
       }
     }
 
-    const where = {};
+    const where = { status: { not: 'DRAFT' } };
 
     // 2. Strict Filter Validations
-    const validStatuses = ['ALL', 'OPEN', 'ASSIGNED', 'COMPLETED', 'CANCELLED'];
+    const validStatuses = [
+      'ALL',
+      'OPEN',
+      'ASSIGNED',
+      'DELIVERED',
+      'DISPUTED',
+      'COMPLETED',
+      'CANCELLED',
+    ];
     if (status !== undefined && status !== '') {
       if (typeof status !== 'string') {
         return res.status(400).json({
@@ -330,6 +341,8 @@ const getTaskById = async (req, res, next) => {
           orderBy: { createdAt: 'desc' },
         },
         payment: true,
+        deliveries: { orderBy: { createdAt: 'desc' } },
+        dispute: { include: { evidence: true } },
         review: {
           include: {
             reviewer: {
@@ -340,7 +353,10 @@ const getTaskById = async (req, res, next) => {
       },
     });
 
-    if (!task) {
+    if (
+      !task ||
+      (task.status === 'DRAFT' && task.posterId !== req.user?.id && req.user?.role !== 'ADMIN')
+    ) {
       return res.status(404).json({ message: 'Task not found.' });
     }
 
@@ -381,6 +397,7 @@ const createTask = async (req, res, next) => {
     const task = await prisma.task.create({
       data: {
         title,
+        status: 'DRAFT',
         description,
         budget: parseFloat(budget),
         categoryId,
@@ -425,13 +442,17 @@ const updateTask = async (req, res, next) => {
       return res.status(403).json({ message: 'You are not authorized to edit this task.' });
     }
 
-    if (task.status !== 'OPEN' && req.user.role !== 'ADMIN') {
+    if (!['DRAFT', 'OPEN'].includes(task.status)) {
       return res
         .status(400)
         .json({ message: 'Cannot modify a task that is already assigned or completed.' });
     }
 
     const { title, description, budget, categoryId, location, isRemote, dueDate } = req.body;
+    if (budget !== undefined && task.status !== 'DRAFT')
+      return res
+        .status(409)
+        .json({ message: 'A funded price can only change through offer acceptance.' });
 
     const updatedTask = await prisma.task.update({
       where: { id },
@@ -458,85 +479,12 @@ const updateTask = async (req, res, next) => {
 
 const completeTask = async (req, res, next) => {
   try {
-    const { id } = req.params;
-
-    const task = await prisma.task.findUnique({
-      where: { id },
-      include: {
-        payment: true,
-        offers: {
-          where: { status: 'ACCEPTED' },
-          include: { tasker: true },
-        },
-      },
-    });
-
-    if (!task) {
-      return res.status(404).json({ message: 'Task not found.' });
-    }
-
-    if (task.posterId !== req.user.id && req.user.role !== 'ADMIN') {
-      return res
-        .status(403)
-        .json({
-          message:
-            'Only the poster or an administrator can mark this task complete and release funds.',
-        });
-    }
-
-    if (task.status !== 'ASSIGNED') {
-      return res
-        .status(400)
-        .json({
-          message: `Cannot complete task with status: ${task.status}. Task must be ASSIGNED.`,
-        });
-    }
-
-    const acceptedOffer = task.offers[0];
-    if (!acceptedOffer) {
-      return res.status(400).json({ message: 'No accepted offer found for this task.' });
-    }
-
-    const payoutAmount = task.payment
-      ? task.payment.amount - task.payment.platformFee
-      : acceptedOffer.amount;
-
-    await prisma.$transaction([
-      prisma.task.update({
-        where: { id },
-        data: { status: 'COMPLETED' },
-      }),
-      ...(task.payment
-        ? [
-            prisma.payment.update({
-              where: { taskId: id },
-              data: { status: 'RELEASED' },
-            }),
-          ]
-        : []),
-      prisma.user.update({
-        where: { id: acceptedOffer.taskerId },
-        data: {
-          walletBalance: { increment: payoutAmount },
-        },
-      }),
-      prisma.notification.create({
-        data: {
-          userId: acceptedOffer.taskerId,
-          type: 'TASK_COMPLETED',
-          title: 'Payment Released!',
-          message: `Your work on "${task.title}" was completed! $${payoutAmount.toFixed(2)} has been credited to your wallet balance.`,
-          link: `/tasks/${task.id}`,
-        },
-      }),
-    ]);
-
     res.json({
-      message: 'Task completed successfully! Funds released from escrow.',
-      payoutAmount,
+      message: 'Delivery approved and payment released.',
+      ...(await marketplace.release(req.params.id, req.user)),
     });
-  } catch (error) {
-    next(error);
+  } catch (e) {
+    next(e);
   }
 };
 
@@ -553,7 +501,7 @@ const deleteTask = async (req, res, next) => {
       return res.status(403).json({ message: 'You are not authorized to delete this task.' });
     }
 
-    await prisma.task.delete({ where: { id } });
+    await marketplace.cancel(id, req.user);
 
     res.json({ message: 'Task deleted successfully.' });
   } catch (error) {

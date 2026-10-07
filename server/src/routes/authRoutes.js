@@ -5,18 +5,30 @@ const { authenticate, requireKYCEligible } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { validate, authSchemas } = require('../middleware/validate');
 
+const security = require('../controllers/accountSecurityController');
+router.post('/verify-email', security.verify);
+router.post('/resend-verification', security.resend);
+router.post('/forgot-password', security.forgot);
+router.post('/reset-password', security.reset);
+router.post('/change-password', authenticate, security.change);
 router.post('/register', validate(authSchemas.register), authController.register);
 router.post('/login', validate(authSchemas.login), authController.login);
 router.post('/logout', authController.logout);
 router.get('/me', authenticate, authController.getMe);
-router.put('/profile', authenticate, upload.handleUploadSingle('avatar'), validate(authSchemas.updateProfile), authController.updateProfile);
+router.put(
+  '/profile',
+  authenticate,
+  upload.handleUploadSingle('avatar'),
+  validate(authSchemas.updateProfile),
+  authController.updateProfile,
+);
 router.post(
   '/verify-id',
   authenticate,
   requireKYCEligible,
   upload.handleUploadSingle('idDocument'),
   validate(authSchemas.verifyId),
-  authController.submitVerification
+  authController.submitVerification,
 );
 
 module.exports = router;

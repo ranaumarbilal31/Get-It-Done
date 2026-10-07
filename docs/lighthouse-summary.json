@@ -1,17 +1,14 @@
 {
-  "date": "2026-10-07T11:11:10.991Z",
-  "environment": "Local production build; simulated mobile throttling; disposable SQLite dataset",
-  "lighthouseVersion": "13.5.0",
+  "checkedAt": "2026-10-07T15:00:41.191Z",
+  "mode": "Local production build; Lighthouse mobile throttling; isolated SQLite fixtures",
   "scores": {
-    "performance": 99,
+    "performance": 93,
     "accessibility": 100,
     "best-practices": 100,
     "seo": 100
   },
-  "metrics": {
-    "LCP_ms": 1593.7985,
-    "CLS": 0,
-    "TBT_ms": 32
-  },
-  "fieldData": "Unavailable"
+  "LCP_ms": 2224.618,
+  "CLS": 0,
+  "TBT_ms": 238,
+  "fieldData": "Not available; no INP or field Core Web Vitals pass claimed"
 }

@@ -26,6 +26,10 @@ jobs:
       - run: npm ci --prefix client
       - name: Isolated backend integration and security tests
         run: npm --prefix server test
+      - name: Validate production PostgreSQL schema
+        run: node server/node_modules/prisma/build/index.js validate --schema server/prisma/schema.postgresql.prisma
+        env:
+          DATABASE_URL: postgresql://validation:validation@localhost:5432/validation
       - name: Metadata and sitemap tests
         run: npm --prefix client test
       - name: Client, SSR, and prerender build
