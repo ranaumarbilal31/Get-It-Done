@@ -37,6 +37,10 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/api/render"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap?path=sitemap.xml"
     },
